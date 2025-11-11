@@ -14,11 +14,7 @@ function App() {
   return (
     <Router>
       <Routes>
-        {/* Login and SignUp routes without Layout (full screen, no header/footer) */}
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<SignUp />} />
-        
-        {/* All other routes with Layout (with header and footer) */}
+        {/* All routes with Layout (header on all pages, footer hidden on login/signup) */}
         <Route element={<Layout />}>
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<About />} />
@@ -27,6 +23,8 @@ function App() {
           <Route path="/my-esim" element={<MyeSIM />} />
           <Route path="/shop" element={<ShopPlans />} />
           <Route path="/checkout" element={<Checkout />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<SignUp />} />
         </Route>
       </Routes>
     </Router>

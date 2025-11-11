@@ -47,18 +47,18 @@ const Home = () => {
 
   // Journey destinations - Popular travel destinations
   const destinations = [
-    { name: 'Rome, Italy', price: '0.98', image: '/IMAGES/1.jpg' },
-    { name: 'London, UK', price: '0.90', image: '/IMAGES/2.jpg' },
-    { name: 'Paris, France', price: '0.85', image: '/IMAGES/3.jpg' },
-    { name: 'Tokyo, Japan', price: '1.25', image: '/IMAGES/1.jpg' },
-    { name: 'New York, USA', price: '1.10', image: '/IMAGES/2.jpg' },
-    { name: 'Barcelona, Spain', price: '0.75', image: '/IMAGES/3.jpg' },
-    { name: 'Dubai, UAE', price: '0.95', image: '/IMAGES/1.jpg' },
-    { name: 'Singapore', price: '0.78', image: '/IMAGES/2.jpg' },
-    { name: 'Sydney, Australia', price: '1.05', image: '/IMAGES/3.jpg' },
-    { name: 'Bangkok, Thailand', price: '0.65', image: '/IMAGES/1.jpg' },
-    { name: 'Amsterdam, Netherlands', price: '0.88', image: '/IMAGES/2.jpg' },
-    { name: 'Istanbul, Turkey', price: '0.72', image: '/IMAGES/3.jpg' },
+    { name: 'Rome, Italy', price: '0.98', image: '/IMAGES/Cities/Rome.jpg' },
+    { name: 'London, UK', price: '0.90', image: '/IMAGES/Cities/London.jpg' },
+    { name: 'Paris, France', price: '0.85', image: '/IMAGES/Cities/Paris.jpg' },
+    { name: 'Tokyo, Japan', price: '1.25', image: '/IMAGES/Cities/Korea.jpg' },
+    { name: 'New York, USA', price: '1.10', image: '/IMAGES/Cities/NewYork.jpg' },
+    { name: 'Barcelona, Spain', price: '0.75', image: '/IMAGES/Cities/Barcelona.jpg' },
+    { name: 'Dubai, UAE', price: '0.95', image: '/IMAGES/Cities/Dubai.jpg' },
+    { name: 'Singapore', price: '0.78', image: '/IMAGES/Cities/Singapore.jpg' },
+    { name: 'Sydney, Australia', price: '1.05', image: '/IMAGES/Cities/Sydney.jpg' },
+    { name: 'Bangkok, Thailand', price: '0.65', image: '/IMAGES/Cities/Thailand.jpg' },
+    { name: 'Amsterdam, Netherlands', price: '0.88', image: '/IMAGES/Cities/Amsterdam.jpg' },
+    { name: 'Istanbul, Turkey', price: '0.72', image: '/IMAGES/Cities/Istabul.jpg' },
   ]
 
   // Local eSIMs - keeping same for now

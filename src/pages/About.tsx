@@ -18,7 +18,7 @@ const HeroBackground = () => {
 
 const About = () => {
   const [email, setEmail] = useState('')
-  const [teamIndex, setTeamIndex] = useState(0)
+  const [, setTeamIndex] = useState(0)
 
   const teamMembers = [
     {

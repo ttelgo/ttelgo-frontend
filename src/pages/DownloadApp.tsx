@@ -99,7 +99,7 @@ const DownloadApp = () => {
                 onLoad={() => {
                   // Image loaded successfully
                 }}
-                onError={(e) => {
+                onError={() => {
                   console.error('Failed to load MockUp.png');
                 }}
               />
@@ -174,7 +174,7 @@ const DownloadApp = () => {
                     src="/IMAGES/Playstore.png" 
                     alt="Google Play" 
                     className="w-9 h-9 object-contain"
-                    onError={(e) => {
+                    onError={() => {
                       console.error('Failed to load Playstore.png');
                     }}
                   />
@@ -206,7 +206,7 @@ const DownloadApp = () => {
                     src="/IMAGES/apple.png" 
                     alt="App Store" 
                     className="w-9 h-9 object-contain"
-                    onError={(e) => {
+                    onError={() => {
                       console.error('Failed to load apple.png');
                     }}
                   />

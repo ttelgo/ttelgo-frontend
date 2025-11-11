@@ -187,7 +187,6 @@ const SignUp = () => {
                   placeholder="Email"
                   value={formData.email}
                   onChange={handleChange}
-                  onBlur={handleBlur}
                   className={`w-full px-4 py-2.5 rounded-lg bg-white focus:outline-none transition-all placeholder-gray-400 text-gray-900 text-sm ${
                     touched.email && errors.email ? 'focus:ring-2 focus:ring-red-500' : 'focus:ring-2 focus:ring-telgo-red'
                   }`}
@@ -224,7 +223,6 @@ const SignUp = () => {
                   placeholder="Password"
                   value={formData.password}
                   onChange={handleChange}
-                  onBlur={handleBlur}
                   className={`w-full px-4 py-2.5 pr-12 rounded-lg bg-white focus:outline-none transition-all placeholder-gray-400 text-gray-900 text-sm ${
                     touched.password && errors.password ? 'focus:ring-2 focus:ring-red-500' : 'focus:ring-2 focus:ring-telgo-red'
                   }`}
@@ -275,7 +273,6 @@ const SignUp = () => {
                   placeholder="Confirm Password"
                   value={formData.confirmPassword}
                   onChange={handleChange}
-                  onBlur={handleBlur}
                   className={`w-full px-4 py-2.5 pr-12 rounded-lg bg-white focus:outline-none transition-all placeholder-gray-400 text-gray-900 text-sm ${
                     touched.confirmPassword && errors.confirmPassword ? 'focus:ring-2 focus:ring-red-500' : 'focus:ring-2 focus:ring-telgo-red'
                   }`}

@@ -1,5 +1,5 @@
 import { useState, useRef, useMemo, useEffect } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { useLocation } from 'react-router-dom'
 import { motion } from 'framer-motion'
 
 // Generate random price between 0.50 and 2.00
@@ -554,7 +554,7 @@ const Home = () => {
                   onLoad={() => {
                     // Image loaded successfully
                   }}
-                  onError={(e) => {
+                  onError={() => {
                     console.error('Failed to load FemaleTeam.jpg');
                   }}
                 />
@@ -962,7 +962,7 @@ const Home = () => {
                   boxShadow: 'none'
                 }}
                 loading="eager"
-                onError={(e) => {
+                onError={() => {
                   console.warn('MockUp image not found at /IMAGES/MockUp.png')
                 }}
               />

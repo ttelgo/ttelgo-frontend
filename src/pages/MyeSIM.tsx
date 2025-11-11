@@ -130,7 +130,7 @@ const MyeSIM = () => {
                 onLoad={() => {
                   // Image loaded successfully
                 }}
-                onError={(e) => {
+                onError={() => {
                   console.error('Failed to load Smart.jpg');
                 }}
               />

@@ -13,19 +13,22 @@ import Checkout from './pages/Checkout'
 function App() {
   return (
     <Router>
-      <Layout>
-        <Routes>
+      <Routes>
+        {/* Login and SignUp routes without Layout (full screen, no header/footer) */}
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<SignUp />} />
+        
+        {/* All other routes with Layout (with header and footer) */}
+        <Route element={<Layout />}>
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<About />} />
           <Route path="/download" element={<DownloadApp />} />
           <Route path="/help" element={<HelpCentre />} />
           <Route path="/my-esim" element={<MyeSIM />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<SignUp />} />
           <Route path="/shop" element={<ShopPlans />} />
           <Route path="/checkout" element={<Checkout />} />
-        </Routes>
-      </Layout>
+        </Route>
+      </Routes>
     </Router>
   )
 }

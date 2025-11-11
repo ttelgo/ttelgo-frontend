@@ -1,29 +1,44 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { motion } from 'framer-motion'
-
-interface PlanData {
-  id: string
-  name: string
-  price: string
-  currency: string
-  data: string
-  validity: string
-}
+import { eSIMPlan } from '@/types'
 
 const Checkout = () => {
   const navigate = useNavigate()
   const location = useLocation()
-  const plan = (location.state as { plan?: PlanData })?.plan || {
+  
+  // Get plan from location state or create a default one
+  const planFromState = (location.state as { plan?: eSIMPlan | any })?.plan
+  const defaultPlan: eSIMPlan = {
     id: '1',
     name: 'Global eSIM Plan',
-    price: '29.99',
-    currency: '$',
+    description: 'Global coverage plan',
+    price: 29.99,
+    currency: 'USD',
     data: '10GB',
     validity: '30 days',
+    regions: ['Global'],
+    features: ['Global Coverage', '24/7 Support'],
   }
+  
+  const plan: eSIMPlan = planFromState 
+    ? {
+        id: planFromState.id || defaultPlan.id,
+        name: planFromState.name || defaultPlan.name,
+        description: planFromState.description || defaultPlan.description,
+        price: typeof planFromState.price === 'string' 
+          ? parseFloat(planFromState.price) 
+          : (planFromState.price || defaultPlan.price),
+        currency: planFromState.currency || defaultPlan.currency,
+        data: planFromState.data || defaultPlan.data,
+        validity: planFromState.validity || defaultPlan.validity,
+        regions: planFromState.regions || defaultPlan.regions,
+        features: planFromState.features || defaultPlan.features,
+        popular: planFromState.popular || false,
+      }
+    : defaultPlan
 
-  const [paymentMethod, setPaymentMethod] = useState<'card' | 'paypal' | 'bank'>('card')
+  const [paymentMethod, setPaymentMethod] = useState<'stripe' | 'paypal' | 'bank'>('stripe')
   const [cardData, setCardData] = useState({
     cardNumber: '',
     expiryDate: '',
@@ -32,12 +47,29 @@ const Checkout = () => {
   })
   const [billingData, setBillingData] = useState({
     email: '',
+    firstName: '',
+    lastName: '',
     country: '',
     address: '',
     city: '',
+    state: '',
     zipCode: '',
+    phone: '',
   })
+  const [errors, setErrors] = useState<Record<string, string>>({})
   const [isProcessing, setIsProcessing] = useState(false)
+  const [showSuccess, setShowSuccess] = useState(false)
+
+  // Format currency symbol
+  const getCurrencySymbol = (currency: string) => {
+    const symbols: Record<string, string> = {
+      'USD': '$',
+      'EUR': '€',
+      'GBP': '£',
+      'JPY': '¥',
+    }
+    return symbols[currency] || currency
+  }
 
   const formatCardNumber = (value: string) => {
     const v = value.replace(/\s+/g, '').replace(/[^0-9]/gi, '')
@@ -62,31 +94,132 @@ const Checkout = () => {
     return v
   }
 
+  const validateCard = () => {
+    const newErrors: Record<string, string> = {}
+    
+    if (!cardData.cardholderName.trim()) {
+      newErrors.cardholderName = 'Cardholder name is required'
+    }
+    
+    if (!cardData.cardNumber.replace(/\s/g, '')) {
+      newErrors.cardNumber = 'Card number is required'
+    } else if (cardData.cardNumber.replace(/\s/g, '').length < 13) {
+      newErrors.cardNumber = 'Invalid card number'
+    }
+    
+    if (!cardData.expiryDate) {
+      newErrors.expiryDate = 'Expiry date is required'
+    } else {
+      const [month, year] = cardData.expiryDate.split('/')
+      if (!month || !year || month.length !== 2 || year.length !== 2) {
+        newErrors.expiryDate = 'Invalid expiry date'
+      }
+    }
+    
+    if (!cardData.cvv) {
+      newErrors.cvv = 'CVV is required'
+    } else if (cardData.cvv.length < 3) {
+      newErrors.cvv = 'Invalid CVV'
+    }
+    
+    return newErrors
+  }
+
+  const validateBilling = () => {
+    const newErrors: Record<string, string> = {}
+    
+    if (!billingData.email.trim()) {
+      newErrors.email = 'Email is required'
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(billingData.email)) {
+      newErrors.email = 'Invalid email address'
+    }
+    
+    if (!billingData.firstName.trim()) {
+      newErrors.firstName = 'First name is required'
+    }
+    
+    if (!billingData.lastName.trim()) {
+      newErrors.lastName = 'Last name is required'
+    }
+    
+    if (!billingData.country.trim()) {
+      newErrors.country = 'Country is required'
+    }
+    
+    if (!billingData.address.trim()) {
+      newErrors.address = 'Address is required'
+    }
+    
+    if (!billingData.city.trim()) {
+      newErrors.city = 'City is required'
+    }
+    
+    if (!billingData.zipCode.trim()) {
+      newErrors.zipCode = 'ZIP code is required'
+    }
+    
+    return newErrors
+  }
+
   const handleCardNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const formatted = formatCardNumber(e.target.value)
     setCardData({ ...cardData, cardNumber: formatted })
+    if (errors.cardNumber) {
+      setErrors({ ...errors, cardNumber: '' })
+    }
   }
 
   const handleExpiryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const formatted = formatExpiryDate(e.target.value)
     setCardData({ ...cardData, expiryDate: formatted })
+    if (errors.expiryDate) {
+      setErrors({ ...errors, expiryDate: '' })
+    }
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    
+    // Validate billing information
+    const billingErrors = validateBilling()
+    if (Object.keys(billingErrors).length > 0) {
+      setErrors(billingErrors)
+      return
+    }
+    
+    // Validate payment method specific fields
+    if (paymentMethod === 'stripe') {
+      const cardErrors = validateCard()
+      if (Object.keys(cardErrors).length > 0) {
+        setErrors({ ...errors, ...cardErrors })
+        return
+      }
+    }
+    
     setIsProcessing(true)
+    setErrors({})
 
     // Simulate payment processing
     setTimeout(() => {
       setIsProcessing(false)
-      alert('Payment processed successfully! (Demo)')
-      navigate('/my-esim')
+      setShowSuccess(true)
+      
+      // Redirect after 2 seconds
+      setTimeout(() => {
+        navigate('/my-esim', { state: { plan, success: true } })
+      }, 2000)
     }, 2000)
   }
 
+  // Calculate totals
+  const subtotal = plan.price
+  const tax = 0 // No tax for demo
+  const processingFee = 0 // No fee for demo
+  const total = subtotal + tax + processingFee
+
   return (
-    <div className="w-full bg-white min-h-screen py-12">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="w-full bg-white min-h-screen py-8 md:py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -94,9 +227,29 @@ const Checkout = () => {
           transition={{ duration: 0.6 }}
           className="mb-8"
         >
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">Checkout</h1>
+          <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-2">
+            Checkout
+          </h1>
           <p className="text-gray-600">Complete your purchase securely</p>
         </motion.div>
+
+        {showSuccess && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="mb-6 bg-green-50 border border-green-200 rounded-lg p-4"
+          >
+            <div className="flex items-center">
+              <svg className="w-6 h-6 text-green-600 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+              </svg>
+              <div>
+                <p className="text-green-800 font-semibold">Payment successful!</p>
+                <p className="text-green-700 text-sm">Redirecting to your eSIM dashboard...</p>
+              </div>
+            </div>
+          </motion.div>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Column - Payment Form */}
@@ -105,7 +258,7 @@ const Checkout = () => {
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6, delay: 0.1 }}
-              className="bg-white rounded-lg p-6 md:p-8"
+              className="bg-white rounded-lg p-6 md:p-8 mb-6"
               style={{
                 boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
               }}
@@ -114,115 +267,130 @@ const Checkout = () => {
 
               {/* Payment Method Selection */}
               <div className="mb-6 space-y-3">
-                {/* Credit/Debit Card */}
-                <label className="flex items-center p-4 border-2 rounded-lg cursor-pointer transition-colors hover:bg-gray-50"
-                  style={{
-                    borderColor: paymentMethod === 'card' ? '#cc0000' : '#e5e7eb',
-                    backgroundColor: paymentMethod === 'card' ? '#fef2f2' : 'white'
-                  }}
+                {/* Stripe/Credit Card */}
+                <label 
+                  className={`flex items-center p-4 border-2 rounded-lg cursor-pointer transition-all ${
+                    paymentMethod === 'stripe' ? 'border-telgo-red bg-red-50' : 'border-gray-200 hover:border-gray-300 bg-white'
+                  }`}
                 >
                   <input
                     type="radio"
                     name="paymentMethod"
-                    value="card"
-                    checked={paymentMethod === 'card'}
-                    onChange={(e) => setPaymentMethod(e.target.value as 'card')}
+                    value="stripe"
+                    checked={paymentMethod === 'stripe'}
+                    onChange={() => setPaymentMethod('stripe')}
                     className="sr-only"
                   />
                   <div className="flex items-center flex-1">
-                    <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center mr-4"
+                    <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center mr-4 border border-gray-200"
                       style={{
                         boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
                       }}
                     >
-                      <img src="/IMAGES/Credit.png" alt="Credit Card" className="w-8 h-8 object-contain" onError={(e) => {
-                        const target = e.target as HTMLImageElement
-                        target.style.display = 'none'
-                      }} />
+                      <img 
+                        src="/IMAGES/Credit.png" 
+                        alt="Credit Card" 
+                        className="w-8 h-8 object-contain"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement
+                          target.style.display = 'none'
+                        }} 
+                      />
                     </div>
-                    <div>
+                    <div className="flex-1">
                       <div className="font-semibold text-gray-900">Credit/Debit Card</div>
-                      <div className="text-sm text-gray-600">Visa, Mastercard, Amex</div>
+                      <div className="text-sm text-gray-600">Visa, Mastercard, Amex, Discover</div>
+                      {paymentMethod === 'stripe' && (
+                        <div className="text-xs text-gray-500 mt-1">Secured by Stripe</div>
+                      )}
                     </div>
                   </div>
-                  {paymentMethod === 'card' && (
-                    <svg className="w-6 h-6" style={{ color: '#cc0000' }} fill="currentColor" viewBox="0 0 20 20">
+                  {paymentMethod === 'stripe' && (
+                    <svg className="w-6 h-6 text-telgo-red" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                     </svg>
                   )}
                 </label>
 
                 {/* PayPal */}
-                <label className="flex items-center p-4 border-2 rounded-lg cursor-pointer transition-colors hover:bg-gray-50"
-                  style={{
-                    borderColor: paymentMethod === 'paypal' ? '#cc0000' : '#e5e7eb',
-                    backgroundColor: paymentMethod === 'paypal' ? '#fef2f2' : 'white'
-                  }}
+                <label 
+                  className={`flex items-center p-4 border-2 rounded-lg cursor-pointer transition-all ${
+                    paymentMethod === 'paypal' ? 'border-telgo-red bg-red-50' : 'border-gray-200 hover:border-gray-300 bg-white'
+                  }`}
                 >
                   <input
                     type="radio"
                     name="paymentMethod"
                     value="paypal"
                     checked={paymentMethod === 'paypal'}
-                    onChange={(e) => setPaymentMethod(e.target.value as 'paypal')}
+                    onChange={() => setPaymentMethod('paypal')}
                     className="sr-only"
                   />
                   <div className="flex items-center flex-1">
-                    <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center mr-4"
+                    <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center mr-4 border border-gray-200"
                       style={{
                         boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
                       }}
                     >
-                      <img src="/IMAGES/Paypal.png" alt="PayPal" className="w-8 h-8 object-contain" onError={(e) => {
-                        const target = e.target as HTMLImageElement
-                        target.style.display = 'none'
-                      }} />
+                      <img 
+                        src="/IMAGES/Paypal.png" 
+                        alt="PayPal" 
+                        className="w-8 h-8 object-contain"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement
+                          target.style.display = 'none'
+                        }} 
+                      />
                     </div>
-                    <div>
+                    <div className="flex-1">
                       <div className="font-semibold text-gray-900">PayPal</div>
                       <div className="text-sm text-gray-600">Pay with your PayPal account</div>
                     </div>
                   </div>
                   {paymentMethod === 'paypal' && (
-                    <svg className="w-6 h-6" style={{ color: '#cc0000' }} fill="currentColor" viewBox="0 0 20 20">
+                    <svg className="w-6 h-6 text-telgo-red" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                     </svg>
                   )}
                 </label>
 
                 {/* Bank Account */}
-                <label className="flex items-center p-4 border-2 rounded-lg cursor-pointer transition-colors hover:bg-gray-50"
-                  style={{
-                    borderColor: paymentMethod === 'bank' ? '#cc0000' : '#e5e7eb',
-                    backgroundColor: paymentMethod === 'bank' ? '#fef2f2' : 'white'
-                  }}
+                <label 
+                  className={`flex items-center p-4 border-2 rounded-lg cursor-pointer transition-all ${
+                    paymentMethod === 'bank' ? 'border-telgo-red bg-red-50' : 'border-gray-200 hover:border-gray-300 bg-white'
+                  }`}
                 >
                   <input
                     type="radio"
                     name="paymentMethod"
                     value="bank"
                     checked={paymentMethod === 'bank'}
-                    onChange={(e) => setPaymentMethod(e.target.value as 'bank')}
+                    onChange={() => setPaymentMethod('bank')}
                     className="sr-only"
                   />
                   <div className="flex items-center flex-1">
-                    <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center mr-4"
+                    <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center mr-4 border border-gray-200"
                       style={{
                         boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
                       }}
                     >
-                      <img src="/IMAGES/Bank.png" alt="Bank" className="w-8 h-8 object-contain" onError={(e) => {
-                        const target = e.target as HTMLImageElement
-                        target.style.display = 'none'
-                      }} />
+                      <img 
+                        src="/IMAGES/Bank.png" 
+                        alt="Bank Transfer" 
+                        className="w-8 h-8 object-contain"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement
+                          target.style.display = 'none'
+                        }} 
+                      />
                     </div>
-                    <div>
-                      <div className="font-semibold text-gray-900">Bank Account</div>
-                      <div className="text-sm text-gray-600">Direct bank transfer</div>
+                    <div className="flex-1">
+                      <div className="font-semibold text-gray-900">Bank Transfer</div>
+                      <div className="text-sm text-gray-600">Direct bank transfer (1-3 business days)</div>
                     </div>
                   </div>
                   {paymentMethod === 'bank' && (
-                    <svg className="w-6 h-6" style={{ color: '#cc0000' }} fill="currentColor" viewBox="0 0 20 20">
+                    <svg className="w-6 h-6 text-telgo-red" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                     </svg>
                   )}
@@ -231,9 +399,17 @@ const Checkout = () => {
 
               {/* Payment Forms */}
               <form onSubmit={handleSubmit} className="space-y-6">
-                {/* Credit Card Form */}
-                {paymentMethod === 'card' && (
-                  <div className="space-y-4">
+                {/* Stripe Card Form */}
+                {paymentMethod === 'stripe' && (
+                  <div className="space-y-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-lg font-semibold text-gray-900">Card Details</h3>
+                      <div className="flex gap-2">
+                        <div className="text-xs text-gray-500">Secured by</div>
+                        <div className="font-bold text-blue-600">Stripe</div>
+                      </div>
+                    </div>
+                    
                     <div>
                       <label htmlFor="cardholderName" className="block text-sm font-medium text-gray-700 mb-2">
                         Cardholder Name
@@ -242,14 +418,25 @@ const Checkout = () => {
                         type="text"
                         id="cardholderName"
                         value={cardData.cardholderName}
-                        onChange={(e) => setCardData({ ...cardData, cardholderName: e.target.value })}
+                        onChange={(e) => {
+                          setCardData({ ...cardData, cardholderName: e.target.value })
+                          if (errors.cardholderName) {
+                            setErrors({ ...errors, cardholderName: '' })
+                          }
+                        }}
                         placeholder="John Doe"
-                        required
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-telgo-red focus:border-transparent text-gray-900 bg-white"
+                        className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 ${
+                          errors.cardholderName 
+                            ? 'border-red-500 focus:ring-red-500' 
+                            : 'border-gray-300 focus:ring-telgo-red focus:border-transparent'
+                        } text-gray-900 bg-white`}
                         style={{
                           boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)'
                         }}
                       />
+                      {errors.cardholderName && (
+                        <p className="mt-1 text-sm text-red-600">{errors.cardholderName}</p>
+                      )}
                     </div>
 
                     <div>
@@ -263,12 +450,18 @@ const Checkout = () => {
                         onChange={handleCardNumberChange}
                         placeholder="1234 5678 9012 3456"
                         maxLength={19}
-                        required
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-telgo-red focus:border-transparent text-gray-900 bg-white"
+                        className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 ${
+                          errors.cardNumber 
+                            ? 'border-red-500 focus:ring-red-500' 
+                            : 'border-gray-300 focus:ring-telgo-red focus:border-transparent'
+                        } text-gray-900 bg-white`}
                         style={{
                           boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)'
                         }}
                       />
+                      {errors.cardNumber && (
+                        <p className="mt-1 text-sm text-red-600">{errors.cardNumber}</p>
+                      )}
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
@@ -283,12 +476,18 @@ const Checkout = () => {
                           onChange={handleExpiryChange}
                           placeholder="MM/YY"
                           maxLength={5}
-                          required
-                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-telgo-red focus:border-transparent text-gray-900 bg-white"
+                          className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 ${
+                            errors.expiryDate 
+                              ? 'border-red-500 focus:ring-red-500' 
+                              : 'border-gray-300 focus:ring-telgo-red focus:border-transparent'
+                          } text-gray-900 bg-white`}
                           style={{
                             boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)'
                           }}
                         />
+                        {errors.expiryDate && (
+                          <p className="mt-1 text-sm text-red-600">{errors.expiryDate}</p>
+                        )}
                       </div>
                       <div>
                         <label htmlFor="cvv" className="block text-sm font-medium text-gray-700 mb-2">
@@ -298,15 +497,26 @@ const Checkout = () => {
                           type="text"
                           id="cvv"
                           value={cardData.cvv}
-                          onChange={(e) => setCardData({ ...cardData, cvv: e.target.value.replace(/\D/g, '').slice(0, 4) })}
+                          onChange={(e) => {
+                            setCardData({ ...cardData, cvv: e.target.value.replace(/\D/g, '').slice(0, 4) })
+                            if (errors.cvv) {
+                              setErrors({ ...errors, cvv: '' })
+                            }
+                          }}
                           placeholder="123"
                           maxLength={4}
-                          required
-                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-telgo-red focus:border-transparent text-gray-900 bg-white"
+                          className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 ${
+                            errors.cvv 
+                              ? 'border-red-500 focus:ring-red-500' 
+                              : 'border-gray-300 focus:ring-telgo-red focus:border-transparent'
+                          } text-gray-900 bg-white`}
                           style={{
                             boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)'
                           }}
                         />
+                        {errors.cvv && (
+                          <p className="mt-1 text-sm text-red-600">{errors.cvv}</p>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -314,64 +524,54 @@ const Checkout = () => {
 
                 {/* PayPal Form */}
                 {paymentMethod === 'paypal' && (
-                  <div className="space-y-4">
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                      <p className="text-sm text-blue-800">
-                        You will be redirected to PayPal to complete your payment securely.
-                      </p>
-                    </div>
-                    <div>
-                      <label htmlFor="paypalEmail" className="block text-sm font-medium text-gray-700 mb-2">
-                        PayPal Email
-                      </label>
-                      <input
-                        type="email"
-                        id="paypalEmail"
-                        value={billingData.email}
-                        onChange={(e) => setBillingData({ ...billingData, email: e.target.value })}
-                        placeholder="your.email@example.com"
-                        required
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-telgo-red focus:border-transparent text-gray-900 bg-white"
-                        style={{
-                          boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)'
+                  <div className="space-y-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                    <div className="flex items-center mb-4">
+                      <img 
+                        src="/IMAGES/Paypal.png" 
+                        alt="PayPal" 
+                        className="h-8 mr-3"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement
+                          target.style.display = 'none'
                         }}
                       />
+                      <div>
+                        <h3 className="text-lg font-semibold text-gray-900">PayPal Checkout</h3>
+                        <p className="text-sm text-gray-600">You will be redirected to PayPal to complete your payment securely.</p>
+                      </div>
+                    </div>
+                    <div className="bg-blue-100 border border-blue-300 rounded-lg p-4">
+                      <p className="text-sm text-blue-800">
+                        <strong>Note:</strong> After clicking "Pay with PayPal", you'll be redirected to PayPal's secure payment page. 
+                        Once payment is confirmed, you'll be redirected back to complete your order.
+                      </p>
                     </div>
                   </div>
                 )}
 
-                {/* Bank Account Form */}
+                {/* Bank Transfer Form */}
                 {paymentMethod === 'bank' && (
-                  <div className="space-y-4">
-                    <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-                      <p className="text-sm text-gray-700 mb-2">
-                        Bank transfers may take 1-3 business days to process.
+                  <div className="space-y-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                    <div className="mb-4">
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2">Bank Transfer Details</h3>
+                      <p className="text-sm text-gray-600 mb-4">
+                        Bank transfers may take 1-3 business days to process. Your eSIM will be activated once payment is confirmed.
+                      </p>
+                    </div>
+                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+                      <p className="text-sm text-yellow-800">
+                        <strong>Important:</strong> Please include your order reference in the transfer description. 
+                        Bank details will be provided after order confirmation.
                       </p>
                     </div>
                     <div>
                       <label htmlFor="bankAccount" className="block text-sm font-medium text-gray-700 mb-2">
-                        Account Number
+                        Account Holder Name
                       </label>
                       <input
                         type="text"
                         id="bankAccount"
-                        placeholder="Enter your bank account number"
-                        required
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-telgo-red focus:border-transparent text-gray-900 bg-white"
-                        style={{
-                          boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)'
-                        }}
-                      />
-                    </div>
-                    <div>
-                      <label htmlFor="routingNumber" className="block text-sm font-medium text-gray-700 mb-2">
-                        Routing Number
-                      </label>
-                      <input
-                        type="text"
-                        id="routingNumber"
-                        placeholder="Enter your routing number"
-                        required
+                        placeholder="Enter account holder name"
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-telgo-red focus:border-transparent text-gray-900 bg-white"
                         style={{
                           boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)'
@@ -383,93 +583,227 @@ const Checkout = () => {
 
                 {/* Billing Information */}
                 <div className="border-t pt-6 mt-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Billing Information</h3>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-4">Billing Information</h3>
                   <div className="space-y-4">
                     <div>
                       <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                        Email Address
+                        Email Address <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="email"
                         id="email"
                         value={billingData.email}
-                        onChange={(e) => setBillingData({ ...billingData, email: e.target.value })}
+                        onChange={(e) => {
+                          setBillingData({ ...billingData, email: e.target.value })
+                          if (errors.email) {
+                            setErrors({ ...errors, email: '' })
+                          }
+                        }}
                         placeholder="your.email@example.com"
-                        required
+                        className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 ${
+                          errors.email 
+                            ? 'border-red-500 focus:ring-red-500' 
+                            : 'border-gray-300 focus:ring-telgo-red focus:border-transparent'
+                        } text-gray-900 bg-white`}
+                        style={{
+                          boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)'
+                        }}
+                      />
+                      {errors.email && (
+                        <p className="mt-1 text-sm text-red-600">{errors.email}</p>
+                      )}
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-2">
+                          First Name <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          id="firstName"
+                          value={billingData.firstName}
+                          onChange={(e) => {
+                            setBillingData({ ...billingData, firstName: e.target.value })
+                            if (errors.firstName) {
+                              setErrors({ ...errors, firstName: '' })
+                            }
+                          }}
+                          placeholder="John"
+                          className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 ${
+                            errors.firstName 
+                              ? 'border-red-500 focus:ring-red-500' 
+                              : 'border-gray-300 focus:ring-telgo-red focus:border-transparent'
+                          } text-gray-900 bg-white`}
+                          style={{
+                            boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)'
+                          }}
+                        />
+                        {errors.firstName && (
+                          <p className="mt-1 text-sm text-red-600">{errors.firstName}</p>
+                        )}
+                      </div>
+                      <div>
+                        <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-2">
+                          Last Name <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          id="lastName"
+                          value={billingData.lastName}
+                          onChange={(e) => {
+                            setBillingData({ ...billingData, lastName: e.target.value })
+                            if (errors.lastName) {
+                              setErrors({ ...errors, lastName: '' })
+                            }
+                          }}
+                          placeholder="Doe"
+                          className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 ${
+                            errors.lastName 
+                              ? 'border-red-500 focus:ring-red-500' 
+                              : 'border-gray-300 focus:ring-telgo-red focus:border-transparent'
+                          } text-gray-900 bg-white`}
+                          style={{
+                            boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)'
+                          }}
+                        />
+                        {errors.lastName && (
+                          <p className="mt-1 text-sm text-red-600">{errors.lastName}</p>
+                        )}
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
+                        Phone Number
+                      </label>
+                      <input
+                        type="tel"
+                        id="phone"
+                        value={billingData.phone}
+                        onChange={(e) => setBillingData({ ...billingData, phone: e.target.value })}
+                        placeholder="+1 234 567 8900"
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-telgo-red focus:border-transparent text-gray-900 bg-white"
                         style={{
                           boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)'
                         }}
                       />
                     </div>
+                    
                     <div>
                       <label htmlFor="country" className="block text-sm font-medium text-gray-700 mb-2">
-                        Country
+                        Country <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="text"
                         id="country"
                         value={billingData.country}
-                        onChange={(e) => setBillingData({ ...billingData, country: e.target.value })}
+                        onChange={(e) => {
+                          setBillingData({ ...billingData, country: e.target.value })
+                          if (errors.country) {
+                            setErrors({ ...errors, country: '' })
+                          }
+                        }}
                         placeholder="United States"
-                        required
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-telgo-red focus:border-transparent text-gray-900 bg-white"
+                        className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 ${
+                          errors.country 
+                            ? 'border-red-500 focus:ring-red-500' 
+                            : 'border-gray-300 focus:ring-telgo-red focus:border-transparent'
+                        } text-gray-900 bg-white`}
                         style={{
                           boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)'
                         }}
                       />
+                      {errors.country && (
+                        <p className="mt-1 text-sm text-red-600">{errors.country}</p>
+                      )}
                     </div>
+                    
                     <div>
                       <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-2">
-                        Address
+                        Street Address <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="text"
                         id="address"
                         value={billingData.address}
-                        onChange={(e) => setBillingData({ ...billingData, address: e.target.value })}
+                        onChange={(e) => {
+                          setBillingData({ ...billingData, address: e.target.value })
+                          if (errors.address) {
+                            setErrors({ ...errors, address: '' })
+                          }
+                        }}
                         placeholder="123 Main Street"
-                        required
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-telgo-red focus:border-transparent text-gray-900 bg-white"
+                        className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 ${
+                          errors.address 
+                            ? 'border-red-500 focus:ring-red-500' 
+                            : 'border-gray-300 focus:ring-telgo-red focus:border-transparent'
+                        } text-gray-900 bg-white`}
                         style={{
                           boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)'
                         }}
                       />
+                      {errors.address && (
+                        <p className="mt-1 text-sm text-red-600">{errors.address}</p>
+                      )}
                     </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
+                    
+                    <div className="grid grid-cols-3 gap-4">
+                      <div className="col-span-2">
                         <label htmlFor="city" className="block text-sm font-medium text-gray-700 mb-2">
-                          City
+                          City <span className="text-red-500">*</span>
                         </label>
                         <input
                           type="text"
                           id="city"
                           value={billingData.city}
-                          onChange={(e) => setBillingData({ ...billingData, city: e.target.value })}
+                          onChange={(e) => {
+                            setBillingData({ ...billingData, city: e.target.value })
+                            if (errors.city) {
+                              setErrors({ ...errors, city: '' })
+                            }
+                          }}
                           placeholder="New York"
-                          required
-                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-telgo-red focus:border-transparent text-gray-900 bg-white"
+                          className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 ${
+                            errors.city 
+                              ? 'border-red-500 focus:ring-red-500' 
+                              : 'border-gray-300 focus:ring-telgo-red focus:border-transparent'
+                          } text-gray-900 bg-white`}
                           style={{
                             boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)'
                           }}
                         />
+                        {errors.city && (
+                          <p className="mt-1 text-sm text-red-600">{errors.city}</p>
+                        )}
                       </div>
                       <div>
                         <label htmlFor="zipCode" className="block text-sm font-medium text-gray-700 mb-2">
-                          ZIP Code
+                          ZIP Code <span className="text-red-500">*</span>
                         </label>
                         <input
                           type="text"
                           id="zipCode"
                           value={billingData.zipCode}
-                          onChange={(e) => setBillingData({ ...billingData, zipCode: e.target.value })}
+                          onChange={(e) => {
+                            setBillingData({ ...billingData, zipCode: e.target.value })
+                            if (errors.zipCode) {
+                              setErrors({ ...errors, zipCode: '' })
+                            }
+                          }}
                           placeholder="10001"
-                          required
-                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-telgo-red focus:border-transparent text-gray-900 bg-white"
+                          className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 ${
+                            errors.zipCode 
+                              ? 'border-red-500 focus:ring-red-500' 
+                              : 'border-gray-300 focus:ring-telgo-red focus:border-transparent'
+                          } text-gray-900 bg-white`}
                           style={{
                             boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)'
                           }}
                         />
+                        {errors.zipCode && (
+                          <p className="mt-1 text-sm text-red-600">{errors.zipCode}</p>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -478,14 +812,31 @@ const Checkout = () => {
                 {/* Submit Button */}
                 <button
                   type="submit"
-                  disabled={isProcessing}
-                  className="w-full py-4 bg-telgo-red text-white rounded-lg font-semibold hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-lg"
+                  disabled={isProcessing || showSuccess}
+                  className="w-full py-4 bg-telgo-red text-white rounded-lg font-semibold hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-lg mt-6"
                   style={{
                     boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
                   }}
                 >
-                  {isProcessing ? 'Processing...' : `Pay ${plan.currency}${plan.price}`}
+                  {isProcessing 
+                    ? 'Processing Payment...' 
+                    : showSuccess
+                    ? 'Payment Successful!'
+                    : paymentMethod === 'paypal'
+                    ? `Pay ${getCurrencySymbol(plan.currency)}${total.toFixed(2)} with PayPal`
+                    : paymentMethod === 'bank'
+                    ? `Continue with Bank Transfer`
+                    : `Pay ${getCurrencySymbol(plan.currency)}${total.toFixed(2)}`
+                  }
                 </button>
+
+                {/* Security Notice */}
+                <div className="flex items-center justify-center gap-2 text-sm text-gray-500 mt-4">
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+                  </svg>
+                  <span>Your payment is secure and encrypted</span>
+                </div>
               </form>
             </motion.div>
           </div>
@@ -504,38 +855,66 @@ const Checkout = () => {
               <h2 className="text-xl font-bold text-gray-900 mb-6">Order Summary</h2>
               
               <div className="space-y-4 mb-6">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <div className="font-semibold text-gray-900">{plan.name}</div>
+                <div className="flex justify-between items-start pb-4 border-b">
+                  <div className="flex-1">
+                    <div className="font-semibold text-gray-900 mb-1">{plan.name}</div>
+                    <div className="text-sm text-gray-600 mb-2">{plan.description}</div>
+                    <div className="flex flex-wrap gap-2 mb-2">
+                      {plan.regions.map((region, idx) => (
+                        <span key={idx} className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded">
+                          {region}
+                        </span>
+                      ))}
+                    </div>
                     <div className="text-sm text-gray-600">{plan.data} • {plan.validity}</div>
                   </div>
-                  <div className="font-bold text-gray-900">{plan.currency}{plan.price}</div>
                 </div>
               </div>
 
-              <div className="border-t pt-4 space-y-2 mb-6">
+              <div className="border-t pt-4 space-y-3 mb-6">
                 <div className="flex justify-between text-gray-600">
                   <span>Subtotal</span>
-                  <span>{plan.currency}{plan.price}</span>
+                  <span>{getCurrencySymbol(plan.currency)}{subtotal.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-gray-600">
                   <span>Tax</span>
-                  <span>{plan.currency}0.00</span>
+                  <span>{getCurrencySymbol(plan.currency)}{tax.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-gray-600">
                   <span>Processing Fee</span>
-                  <span>{plan.currency}0.00</span>
+                  <span>{getCurrencySymbol(plan.currency)}{processingFee.toFixed(2)}</span>
                 </div>
-                <div className="flex justify-between font-bold text-lg text-gray-900 pt-2 border-t">
+                <div className="flex justify-between font-bold text-xl text-gray-900 pt-3 border-t-2">
                   <span>Total</span>
-                  <span>{plan.currency}{plan.price}</span>
+                  <span className="text-telgo-red">{getCurrencySymbol(plan.currency)}{total.toFixed(2)}</span>
                 </div>
               </div>
 
-              <div className="text-xs text-gray-500 space-y-2">
-                <p>🔒 Your payment is secure and encrypted</p>
-                <p>✓ Instant eSIM activation upon payment</p>
-                <p>✓ 24/7 customer support included</p>
+              <div className="bg-gray-50 rounded-lg p-4 space-y-3 text-sm">
+                <div className="flex items-start gap-2">
+                  <svg className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  <span className="text-gray-700">Instant eSIM activation upon payment</span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <svg className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  <span className="text-gray-700">24/7 customer support included</span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <svg className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  <span className="text-gray-700">30-day money-back guarantee</span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <svg className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+                  </svg>
+                  <span className="text-gray-700">Secure payment processing</span>
+                </div>
               </div>
             </motion.div>
           </div>
@@ -546,4 +925,3 @@ const Checkout = () => {
 }
 
 export default Checkout
-

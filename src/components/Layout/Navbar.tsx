@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 
 const Logo = () => {
@@ -27,23 +27,9 @@ const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
   const location = useLocation()
-  const navigate = useNavigate()
 
   const isActive = (path: string) => location.pathname === path
 
-  const scrollToPopularDestinations = () => {
-    if (location.pathname !== '/') {
-      navigate('/#popular-destinations')
-    } else {
-      const element = document.getElementById('popular-destinations')
-      if (element) {
-        element.scrollIntoView({ behavior: 'smooth', block: 'start' })
-      } else {
-        // If element not found, navigate with hash and let Home component handle it
-        navigate('/#popular-destinations')
-      }
-    }
-  }
 
   useEffect(() => {
     const handleScroll = () => {
@@ -57,6 +43,7 @@ const Navbar = () => {
 
   const navLinks = [
     { path: '/', label: 'Home' },
+    { path: '/shop', label: 'Shop Plans' },
     { path: '/download', label: 'Download App' },
     { path: '/help', label: 'Help Center' },
     { path: '/my-esim', label: 'My eSIM' },
@@ -96,23 +83,9 @@ const Navbar = () => {
             ))}
           </div>
 
-          {/* Right side - Shop Plans Button */}
+          {/* Right side - CTA Button (optional - can be removed or kept for other purposes) */}
           <div className="hidden md:flex items-center space-x-4">
-            {/* Shop Plans Button - Links to popular destinations section */}
-            <button
-              onClick={(e) => {
-                e.preventDefault()
-                scrollToPopularDestinations()
-              }}
-              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-telgo-red rounded-lg hover:bg-red-700 transition-colors"
-            >
-              <img 
-                src="/IMAGES/CART.png" 
-                alt="Cart" 
-                className="w-4 h-4 object-contain brightness-0 invert"
-              />
-              Shop Plans
-            </button>
+            {/* You can add other buttons here if needed */}
           </div>
 
           {/* Mobile menu button */}
@@ -160,23 +133,6 @@ const Navbar = () => {
                   {link.label}
                 </Link>
               ))}
-              <div className="pt-4 border-t border-gray-200 space-y-2">
-                <button
-                  onClick={(e) => {
-                    e.preventDefault()
-                    setIsOpen(false)
-                    scrollToPopularDestinations()
-                  }}
-                  className="flex items-center justify-center gap-2 px-3 py-2 rounded-md text-base font-medium text-white bg-telgo-red hover:bg-red-700"
-                >
-                  <img 
-                    src="/IMAGES/CART.png" 
-                    alt="Cart" 
-                    className="w-4 h-4 object-contain brightness-0 invert"
-                  />
-                  Shop Plans
-                </button>
-              </div>
             </div>
           </motion.div>
         )}

@@ -1,5 +1,5 @@
 import { useState, useRef, useMemo, useEffect } from 'react'
-import { useLocation } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 
 // Generate random price between 0.50 and 2.00
@@ -23,6 +23,7 @@ const HeroBackground = () => {
 }
 
 const Home = () => {
+  const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState('local')
   const [testimonialIndex, setTestimonialIndex] = useState(0)
   const [email, setEmail] = useState('')
@@ -719,14 +720,9 @@ const Home = () => {
               </button>
               <button
                 onClick={() => {
-                  setActiveTab('regional')
-                  setSelectedRegion(null)
+                  navigate('/shop?tab=regional')
                 }}
-                className={`px-6 py-2 rounded-lg font-medium transition-colors ${
-                  activeTab === 'regional'
-                    ? 'bg-telgo-red text-white'
-                    : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
-                }`}
+                className="px-6 py-2 rounded-lg font-medium transition-colors bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 hover:bg-telgo-red hover:text-white hover:border-telgo-red"
               >
                 Regional eSIMs
               </button>

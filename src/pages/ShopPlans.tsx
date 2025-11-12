@@ -220,7 +220,45 @@ const ShopPlans = () => {
           {/* Global eSIM View - Plan Cards */}
           {esimType === 'global' && (
             <div className="space-y-6">
-              {/* Global 106 Countries Plan */}
+              {/* Global - 54 and 82 Countries Plan */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+                className="bg-white rounded-lg border border-gray-200 hover:shadow-lg transition-shadow overflow-hidden"
+              >
+                <div className="p-6">
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex-1">
+                      <h3 className="text-2xl font-bold text-gray-900 mb-1">Global</h3>
+                      <p className="text-sm text-gray-600 mb-3">Start from USD 2.17/GB</p>
+                      <div className="flex flex-wrap gap-2 mb-3">
+                        <span className="px-3 py-1 bg-pink-100 text-pink-700 rounded-full text-xs font-medium">
+                          10GB - 50GB
+                        </span>
+                        <span className="px-3 py-1 bg-pink-100 text-pink-700 rounded-full text-xs font-medium">
+                          30DAY - 365DAY
+                        </span>
+                      </div>
+                      <p className="text-sm text-gray-600">Available in 54 / 82 Countries</p>
+                    </div>
+                    <button
+                      onClick={() => navigate('/global-esim')}
+                      className="px-6 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-colors"
+                    >
+                      Shop Now
+                    </button>
+                  </div>
+                  <button
+                    onClick={() => navigate('/global-esim')}
+                    className="text-blue-600 text-sm font-medium hover:text-blue-700 transition-colors"
+                  >
+                    View All →
+                  </button>
+                </div>
+              </motion.div>
+
+              {/* Global-EX - 106 and 112 Countries Plan */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -230,7 +268,7 @@ const ShopPlans = () => {
                 <div className="p-6">
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex-1">
-                      <h3 className="text-2xl font-bold text-gray-900 mb-1">Global</h3>
+                      <h3 className="text-2xl font-bold text-gray-900 mb-1">Global-EX</h3>
                       <p className="text-sm text-gray-600 mb-3">Start from USD 7.20/GB</p>
                       <div className="flex flex-wrap gap-2 mb-3">
                         <span className="px-3 py-1 bg-pink-100 text-pink-700 rounded-full text-xs font-medium">

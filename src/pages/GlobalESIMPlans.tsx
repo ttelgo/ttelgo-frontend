@@ -61,7 +61,7 @@ const countries112 = [
 // Plan configurations
 const planConfigs = {
   54: {
-    name: 'Global-EX',
+    name: 'Global',
     countries: countries54,
     plans: [
       { data: '10GB', validity: '180 days', price: 30 },
@@ -72,7 +72,7 @@ const planConfigs = {
     pricePerGB: 2.17,
   },
   82: {
-    name: 'Global-EX',
+    name: 'Global',
     countries: countries82,
     plans: [
       { data: '10GB', validity: '180 days', price: 35 },
@@ -83,7 +83,7 @@ const planConfigs = {
     pricePerGB: 2.50,
   },
   106: {
-    name: 'Global',
+    name: 'Global-EX',
     countries: countries106,
     plans: [
       { data: '1GB', validity: '7 days', price: 8 },
@@ -93,7 +93,7 @@ const planConfigs = {
     pricePerGB: 7.20,
   },
   112: {
-    name: 'Global',
+    name: 'Global-EX',
     countries: countries112,
     plans: [
       { data: '1GB', validity: '7 days', price: 9 },
@@ -108,15 +108,18 @@ const GlobalESIMPlans = () => {
   const navigate = useNavigate()
   const [selectedPlanType, setSelectedPlanType] = useState<54 | 82 | 106 | 112>(54)
   const [selectedPlan, setSelectedPlan] = useState<number>(0)
+  
+  // Determine which plan group we're in (Global or Global-EX)
+  const isGlobalEX = selectedPlanType === 106 || selectedPlanType === 112
 
   const currentConfig = planConfigs[selectedPlanType]
   const selectedPlanData = currentConfig.plans[selectedPlan]
 
   const handleCheckout = () => {
     const plan = {
-      id: `global-${selectedPlanType}-${selectedPlanData.data}`,
+      id: `${currentConfig.name.toLowerCase()}-${selectedPlanType}-${selectedPlanData.data}`,
       name: `${currentConfig.name} - ${selectedPlanType} Countries`,
-      description: `${selectedPlanData.data} Global eSIM plan covering ${selectedPlanType} countries`,
+      description: `${selectedPlanData.data} ${currentConfig.name} eSIM plan covering ${selectedPlanType} countries`,
       price: selectedPlanData.price,
       currency: 'USD',
       data: selectedPlanData.data,
@@ -208,6 +211,37 @@ const GlobalESIMPlans = () => {
                 <span className="text-gray-600 text-sm">23,300 reviews on Trustpilot</span>
                 <div className="w-20 h-5 bg-green-100 rounded"></div>
               </div>
+              {/* Plan Group Selector */}
+              <div className="mb-4">
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => {
+                      setSelectedPlanType(54)
+                      setSelectedPlan(0)
+                    }}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      !isGlobalEX
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    Global (54/82 Countries)
+                  </button>
+                  <button
+                    onClick={() => {
+                      setSelectedPlanType(106)
+                      setSelectedPlan(0)
+                    }}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      isGlobalEX
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    Global-EX (106/112 Countries)
+                  </button>
+                </div>
+              </div>
             </motion.div>
 
             {/* Plan Type Tabs */}
@@ -218,46 +252,53 @@ const GlobalESIMPlans = () => {
               className="mb-6"
             >
               <div className="flex gap-2 border-b border-gray-200">
-                <button
-                  onClick={() => setSelectedPlanType(54)}
-                  className={`px-4 py-2 font-medium transition-colors border-b-2 ${
-                    selectedPlanType === 54
-                      ? 'border-blue-600 text-blue-600'
-                      : 'border-transparent text-gray-600 hover:text-gray-900'
-                  }`}
-                >
-                  54 Countries Plan
-                </button>
-                <button
-                  onClick={() => setSelectedPlanType(82)}
-                  className={`px-4 py-2 font-medium transition-colors border-b-2 ${
-                    selectedPlanType === 82
-                      ? 'border-blue-600 text-blue-600'
-                      : 'border-transparent text-gray-600 hover:text-gray-900'
-                  }`}
-                >
-                  82 Countries Plan
-                </button>
-                <button
-                  onClick={() => setSelectedPlanType(106)}
-                  className={`px-4 py-2 font-medium transition-colors border-b-2 ${
-                    selectedPlanType === 106
-                      ? 'border-blue-600 text-blue-600'
-                      : 'border-transparent text-gray-600 hover:text-gray-900'
-                  }`}
-                >
-                  106 Countries Plan
-                </button>
-                <button
-                  onClick={() => setSelectedPlanType(112)}
-                  className={`px-4 py-2 font-medium transition-colors border-b-2 ${
-                    selectedPlanType === 112
-                      ? 'border-blue-600 text-blue-600'
-                      : 'border-transparent text-gray-600 hover:text-gray-900'
-                  }`}
-                >
-                  112 Countries Plan
-                </button>
+                {!isGlobalEX ? (
+                  <>
+                    <button
+                      onClick={() => setSelectedPlanType(54)}
+                      className={`px-4 py-2 font-medium transition-colors border-b-2 ${
+                        selectedPlanType === 54
+                          ? 'border-blue-600 text-blue-600'
+                          : 'border-transparent text-gray-600 hover:text-gray-900'
+                      }`}
+                    >
+                      54 Countries Plan
+                    </button>
+                    <button
+                      onClick={() => setSelectedPlanType(82)}
+                      className={`px-4 py-2 font-medium transition-colors border-b-2 ${
+                        selectedPlanType === 82
+                          ? 'border-blue-600 text-blue-600'
+                          : 'border-transparent text-gray-600 hover:text-gray-900'
+                      }`}
+                    >
+                      82 Countries Plan
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button
+                      onClick={() => setSelectedPlanType(106)}
+                      className={`px-4 py-2 font-medium transition-colors border-b-2 ${
+                        selectedPlanType === 106
+                          ? 'border-blue-600 text-blue-600'
+                          : 'border-transparent text-gray-600 hover:text-gray-900'
+                      }`}
+                    >
+                      106 Countries Plan
+                    </button>
+                    <button
+                      onClick={() => setSelectedPlanType(112)}
+                      className={`px-4 py-2 font-medium transition-colors border-b-2 ${
+                        selectedPlanType === 112
+                          ? 'border-blue-600 text-blue-600'
+                          : 'border-transparent text-gray-600 hover:text-gray-900'
+                      }`}
+                    >
+                      112 Countries Plan
+                    </button>
+                  </>
+                )}
               </div>
             </motion.div>
 

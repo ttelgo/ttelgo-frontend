@@ -32,8 +32,12 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
-# Upload dist folder
-Write-Host "Uploading dist folder..." -ForegroundColor Yellow
+# Create upload directory on server and upload dist folder
+Write-Host "Preparing server and uploading dist folder..." -ForegroundColor Yellow
+$prepareCommand = "mkdir -p ~/TTelGoWeb2/dist-upload && rm -rf ~/TTelGoWeb2/dist-upload/*"
+& ssh.exe -i $PemKeyPath -o StrictHostKeyChecking=no "$ServerUser@$ServerIP" $prepareCommand
+
+Write-Host "Uploading files..." -ForegroundColor Yellow
 & scp.exe -i $PemKeyPath -r -o StrictHostKeyChecking=no "$ProjectPath\dist\*" "${ServerUser}@${ServerIP}:~/TTelGoWeb2/dist-upload/"
 
 # Deploy

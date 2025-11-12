@@ -235,23 +235,7 @@ const GlobalESIMPlans = () => {
                 className="w-full h-64 object-cover rounded-lg hover:scale-105 transition-transform duration-300"
                 onError={(e) => {
                   const target = e.target as HTMLImageElement
-                  target.src = '/IMAGES/Cities/Sydney.jpg'
-                }}
-              />
-            </motion.div>
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.5 }}
-              className="rounded-lg overflow-hidden shadow-md"
-            >
-              <img
-                src="/IMAGES/Cities/Sydney.jpg"
-                alt="Sydney, Australia"
-                className="w-full h-64 object-cover rounded-lg hover:scale-105 transition-transform duration-300"
-                onError={(e) => {
-                  const target = e.target as HTMLImageElement
-                  target.src = '/IMAGES/Cities/Amsterdam.jpg'
+                  target.src = '/IMAGES/Cities/London.jpg'
                 }}
               />
             </motion.div>

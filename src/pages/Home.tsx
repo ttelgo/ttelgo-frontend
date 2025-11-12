@@ -8,15 +8,26 @@ const getRandomPrice = () => {
   return (Math.random() * 1.5 + 0.5).toFixed(2)
 }
 
-// Hero Background Component - White background
+// Hero Background Component - HeroStyle.png background
 const HeroBackground = () => {
   return (
     <>
-      {/* White Background */}
+      {/* Hero Background Image */}
       <div 
-        className="absolute inset-0 w-full h-full bg-white"
+        className="absolute inset-0 w-full h-full"
         style={{
-          zIndex: 0
+          zIndex: 0,
+          backgroundImage: 'url(/IMAGES/HeroStyle.png)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat'
+        }}
+      />
+      {/* Overlay for better text readability */}
+      <div 
+        className="absolute inset-0 w-full h-full bg-white/50"
+        style={{
+          zIndex: 1
         }}
       />
     </>
@@ -91,7 +102,7 @@ const Home = () => {
     { name: 'Istanbul, Turkey', price: '0.72', image: '/IMAGES/Cities/Istabul.jpg' },
   ]
 
-  // Local eSIMs - All 200+ countries
+  // Local eSIMs - All 200+ countries (Open Now only for display)
   const localDestinations = useMemo(() => {
     return countriesData
       .filter(country => country.status === 'Open Now')
@@ -103,16 +114,30 @@ const Home = () => {
       }))
   }, [])
 
-  // Filter countries for hero search
+  // All countries for search (including Coming Soon)
+  const allCountriesForSearch = useMemo(() => {
+    return countriesData.map(country => ({
+      name: country.name,
+      flag: country.flag,
+      price: country.prices?.['1GB']?.toFixed(2) || 'N/A', // Price per GB from 1GB plan, or N/A if no prices
+      country: country, // Keep full country object for navigation
+      status: country.status,
+    }))
+  }, [])
+
+  // Filter countries for hero search (includes all countries)
   const heroSearchResults = useMemo(() => {
     if (!heroSearchQuery.trim()) {
       return []
     }
     const query = heroSearchQuery.toLowerCase()
-    return localDestinations
-      .filter(dest => dest.name.toLowerCase().includes(query))
-      .slice(0, 8) // Limit to 8 results
-  }, [heroSearchQuery, localDestinations])
+    return allCountriesForSearch
+      .filter(dest => 
+        dest.name.toLowerCase().includes(query) ||
+        dest.country.region?.toLowerCase().includes(query)
+      )
+      .slice(0, 10) // Show up to 10 results in dropdown
+  }, [heroSearchQuery, allCountriesForSearch])
 
   // Handle country click from search
   const handleCountryClick = (countryName: string) => {
@@ -528,7 +553,7 @@ const Home = () => {
   return (
     <div className="w-full bg-white">
       {/* Hero Section */}
-      <section className="relative py-12 md:py-20 overflow-hidden">
+      <section className="relative py-12 md:py-20 overflow-visible">
         {/* Background Image - Covering entire section */}
         <HeroBackground />
         
@@ -540,7 +565,7 @@ const Home = () => {
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6 }}
-              className="max-w-[600px] lg:max-w-none relative z-20"
+              className="max-w-[600px] lg:max-w-none relative z-20 pl-8 lg:pl-16 xl:pl-24"
             >
               {/* Redeem Banner Button */}
               <motion.div 
@@ -618,7 +643,7 @@ const Home = () => {
               </p>
               
               {/* Search Bar */}
-              <div className="relative max-w-md search-container" style={{ zIndex: 1000 }}>
+              <div className="relative max-w-md search-container" style={{ zIndex: 9999 }}>
                 <div className="absolute left-4 top-1/2 transform -translate-y-1/2 pointer-events-none z-10">
                   <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -636,8 +661,8 @@ const Home = () => {
                 {heroSearchQuery.trim() && heroSearchResults.length > 0 && (
                   <div
                     ref={searchResultsRef}
-                    className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-xl max-h-96 overflow-y-auto"
-                    style={{ zIndex: 1001 }}
+                    className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-2xl max-h-96 overflow-y-auto"
+                    style={{ zIndex: 10000, position: 'absolute' }}
                   >
                     {heroSearchResults.map((result) => (
                       <div
@@ -648,7 +673,11 @@ const Home = () => {
                         <div className="text-2xl">{result.flag}</div>
                         <div className="flex-1">
                           <div className="text-gray-900 font-medium">{result.name}</div>
-                          <div className="text-sm text-gray-500">From ${result.price}/GB</div>
+                          {result.status === 'Coming Soon' || result.price === 'N/A' || result.price === '0.00' ? (
+                            <div className="text-sm text-orange-600 font-medium">Coming Soon</div>
+                          ) : (
+                            <div className="text-sm text-gray-500">From ${result.price}/GB</div>
+                          )}
                         </div>
                         <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -660,31 +689,40 @@ const Home = () => {
                 
                 {/* No Results Message */}
                 {heroSearchQuery.trim() && heroSearchResults.length === 0 && (
-                  <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-xl p-4" style={{ zIndex: 1001 }}>
+                  <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-2xl p-4" style={{ zIndex: 10000, position: 'absolute' }}>
                     <p className="text-gray-500 text-center">No countries found. Try a different search.</p>
                   </div>
                 )}
               </div>
             </motion.div>
 
-            {/* Right Hero Background */}
+            {/* Right Hero Image */}
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className="hidden lg:flex relative w-full items-center justify-center"
-              style={{ 
-                zIndex: 15,
-                backgroundImage: 'url(/IMAGES/HeroStyle.jpg)',
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-                backgroundRepeat: 'no-repeat',
-                minHeight: '600px',
-                borderRadius: '0.5rem'
-              }}
+              className="hidden lg:flex relative w-full items-center justify-end pr-8 lg:pr-16 xl:pr-24"
+              style={{ zIndex: 15 }}
             >
-              {/* Decorative overlay if needed */}
-              <div className="absolute inset-0 bg-gradient-to-l from-transparent to-white/10 rounded-lg" />
+              <div className="relative w-full flex items-center justify-end">
+                <img
+                  src="/IMAGES/Hero Right.png"
+                  alt="Hero Right"
+                  className="w-full h-auto object-cover rounded-lg"
+                  style={{ 
+                    display: 'block',
+                    maxHeight: '700px',
+                    width: '100%',
+                    height: 'auto'
+                  }}
+                  onLoad={() => {
+                    // Image loaded successfully
+                  }}
+                  onError={() => {
+                    console.error('Failed to load Hero Right.png');
+                  }}
+                />
+              </div>
             </motion.div>
           </div>
         </div>

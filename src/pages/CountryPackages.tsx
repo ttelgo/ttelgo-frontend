@@ -84,13 +84,31 @@ const CountryPackages = () => {
   return (
     <div className="w-full bg-white min-h-screen">
       {/* Hero Section */}
-      <section className="bg-white py-8 md:py-12 border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="relative py-8 md:py-12 border-b border-gray-200 overflow-hidden">
+        {/* Background Image */}
+        <div 
+          className="absolute inset-0 w-full h-full"
+          style={{
+            zIndex: 0,
+            backgroundImage: 'url(/IMAGES/HeroStyle.png)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat'
+          }}
+        />
+        {/* Overlay for better text readability */}
+        <div 
+          className="absolute inset-0 w-full h-full bg-white/50"
+          style={{
+            zIndex: 1
+          }}
+        />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="mb-8"
+            className="mb-8 pl-8 lg:pl-16 xl:pl-24"
           >
             <button
               onClick={() => {

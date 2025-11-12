@@ -1,15 +1,26 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 
-// Hero Background Component - White background
+// Hero Background Component - HeroStyle.png background
 const HeroBackground = () => {
   return (
     <>
-      {/* White Background */}
+      {/* Hero Background Image */}
       <div 
-        className="absolute inset-0 w-full h-full bg-white"
+        className="absolute inset-0 w-full h-full"
         style={{
-          zIndex: 0
+          zIndex: 0,
+          backgroundImage: 'url(/IMAGES/HeroStyle.png)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat'
+        }}
+      />
+      {/* Overlay for better text readability */}
+      <div 
+        className="absolute inset-0 w-full h-full bg-white/50"
+        style={{
+          zIndex: 1
         }}
       />
     </>
@@ -47,7 +58,7 @@ const MyeSIM = () => {
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6 }}
-              className="max-w-[600px] lg:max-w-none"
+              className="max-w-[600px] lg:max-w-none pl-8 lg:pl-16 xl:pl-24"
             >
               {/* Subtitle */}
               <div className="mb-4">
@@ -89,18 +100,24 @@ const MyeSIM = () => {
               </div>
             </motion.div>
 
-            {/* Right - 5G Image */}
+            {/* Right - eSIM Image */}
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className="hidden lg:flex relative w-full items-center justify-center"
+              className="hidden lg:flex relative w-full items-center justify-end pr-8 lg:pr-16 xl:pr-24"
               style={{ zIndex: 15 }}
             >
               <img
-                src="/IMAGES/5G.jpg"
-                alt="5G Technology"
+                src="/IMAGES/eSIM.png"
+                alt="eSIM Technology"
                 className="w-full max-w-lg h-auto object-contain"
+                onLoad={() => {
+                  // Image loaded successfully
+                }}
+                onError={() => {
+                  console.error('Failed to load eSIM.png');
+                }}
               />
             </motion.div>
           </div>
@@ -120,8 +137,8 @@ const MyeSIM = () => {
               className="hidden lg:flex relative w-full items-center justify-center"
             >
               <img
-                src="/IMAGES/Smart.jpg?v=2"
-                alt="Manage eSIM"
+                src="/IMAGES/CCID.png"
+                alt="CCID eSIM"
                 className="relative w-full max-w-lg h-auto object-contain"
                 style={{ 
                   position: 'relative',
@@ -131,7 +148,7 @@ const MyeSIM = () => {
                   // Image loaded successfully
                 }}
                 onError={() => {
-                  console.error('Failed to load Smart.jpg');
+                  console.error('Failed to load CCID.png');
                 }}
               />
             </motion.div>

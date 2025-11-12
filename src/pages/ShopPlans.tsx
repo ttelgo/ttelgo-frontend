@@ -1,4 +1,5 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef, useCallback } from 'react'
+import { createPortal } from 'react-dom'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { regionalPlans } from '@/utils/regionalPlansData'
@@ -9,6 +10,9 @@ const ShopPlans = () => {
   const [searchParams, setSearchParams] = useSearchParams()
   const [searchQuery, setSearchQuery] = useState('')
   const [esimType, setEsimType] = useState<'local' | 'regional' | 'global'>('global')
+  const shopSearchResultsRef = useRef<HTMLDivElement>(null)
+  const searchInputRef = useRef<HTMLInputElement>(null)
+  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 })
 
   // Get tab from URL query parameter
   useEffect(() => {
@@ -28,7 +32,7 @@ const ShopPlans = () => {
     setSearchParams({ tab: type })
   }
 
-  // Local eSIMs - All 200+ countries
+  // Local eSIMs - All 200+ countries (Open Now only for display)
   const localDestinations = useMemo(() => {
     return countriesData
       .filter(country => country.status === 'Open Now')
@@ -38,6 +42,17 @@ const ShopPlans = () => {
         price: country.prices['1GB'].toFixed(2), // Price per GB from 1GB plan
         country: country, // Keep full country object for navigation
       }))
+  }, [])
+
+  // All countries for search (including Coming Soon)
+  const allCountriesForSearch = useMemo(() => {
+    return countriesData.map(country => ({
+      name: country.name,
+      flag: country.flag,
+      price: country.prices?.['1GB']?.toFixed(2) || 'N/A', // Price per GB from 1GB plan, or N/A if no prices
+      country: country, // Keep full country object for navigation
+      status: country.status,
+    }))
   }, [])
 
   // Filter local destinations by search query
@@ -52,16 +67,104 @@ const ShopPlans = () => {
     )
   }, [localDestinations, searchQuery])
 
+  // Filter countries for shop hero search dropdown (includes all countries)
+  const shopSearchResults = useMemo(() => {
+    if (!searchQuery.trim()) {
+      return []
+    }
+    const query = searchQuery.toLowerCase()
+    return allCountriesForSearch
+      .filter(dest => 
+        dest.name.toLowerCase().includes(query) ||
+        dest.country.region?.toLowerCase().includes(query)
+      )
+      .slice(0, 10) // Show up to 10 results in dropdown
+  }, [searchQuery, allCountriesForSearch])
+
+  // Handle country click from shop search
+  const handleShopCountryClick = (countryName: string) => {
+    navigate(`/country/${encodeURIComponent(countryName)}`)
+    setSearchQuery('') // Clear search after navigation
+  }
+
+  // Update dropdown position when search query changes or window scrolls/resizes
+  const updateDropdownPosition = useCallback(() => {
+    if (searchQuery.trim() && searchInputRef.current) {
+      const inputRect = searchInputRef.current.getBoundingClientRect()
+      setDropdownPosition({
+        top: inputRect.bottom + window.scrollY + 8, // 8px for mt-2
+        left: inputRect.left + window.scrollX,
+        width: inputRect.width
+      })
+    }
+  }, [searchQuery])
+
+  useEffect(() => {
+    updateDropdownPosition()
+    
+    if (searchQuery.trim()) {
+      window.addEventListener('scroll', updateDropdownPosition, true)
+      window.addEventListener('resize', updateDropdownPosition)
+      
+      return () => {
+        window.removeEventListener('scroll', updateDropdownPosition, true)
+        window.removeEventListener('resize', updateDropdownPosition)
+      }
+    }
+  }, [searchQuery, updateDropdownPosition])
+
+  // Close shop search dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement
+      const searchContainer = target.closest('.shop-search-container')
+      const searchResults = shopSearchResultsRef.current
+      
+      if (!searchContainer && !(searchResults && searchResults.contains(target)) && searchQuery.trim()) {
+        // Don't clear search, just close dropdown - user might want to see filtered results
+      }
+    }
+
+    if (searchQuery.trim()) {
+      const timeoutId = setTimeout(() => {
+        document.addEventListener('mousedown', handleClickOutside)
+      }, 100)
+
+      return () => {
+        clearTimeout(timeoutId)
+        document.removeEventListener('mousedown', handleClickOutside)
+      }
+    }
+  }, [searchQuery])
+
   return (
     <div className="w-full bg-white min-h-screen">
       {/* Hero Section */}
-      <section className="bg-white py-8 md:py-12 border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="relative py-8 md:py-12 border-b border-gray-200 overflow-visible">
+        {/* Background Image */}
+        <div 
+          className="absolute inset-0 w-full h-full"
+          style={{
+            zIndex: 0,
+            backgroundImage: 'url(/IMAGES/HeroStyle.png)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat'
+          }}
+        />
+        {/* Overlay for better text readability */}
+        <div 
+          className="absolute inset-0 w-full h-full bg-white/50"
+          style={{
+            zIndex: 1
+          }}
+        />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="text-center mb-8"
+            className="text-center mb-8 pl-8 lg:pl-16 xl:pl-24"
           >
             <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
               Stay connected in over 200+ destinations worldwide
@@ -71,31 +174,84 @@ const ShopPlans = () => {
             </p>
             
             {/* Search Bar */}
-            <div className="max-w-2xl mx-auto">
+            <div className="max-w-2xl mx-auto shop-search-container" style={{ zIndex: 9999 }}>
               <div className="relative">
-                <div className="absolute left-4 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                <div className="absolute left-4 top-1/2 transform -translate-y-1/2 pointer-events-none z-10">
                   <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                   </svg>
                 </div>
                 <input
+                  ref={searchInputRef}
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search for your destination in over 200+ countries and regions"
-                  className="w-full pl-12 pr-4 py-4 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-telgo-red focus:border-transparent text-gray-900 bg-white text-lg"
+                  className="w-full pl-12 pr-4 py-4 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-telgo-red focus:border-transparent text-gray-900 bg-white text-lg relative z-0"
                   style={{
                     boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
                   }}
                 />
               </div>
             </div>
+            
+            {/* Search Results Dropdown - Rendered via Portal */}
+            {searchQuery.trim() && shopSearchResults.length > 0 && typeof window !== 'undefined' && createPortal(
+              <div
+                ref={shopSearchResultsRef}
+                className="fixed bg-white border border-gray-200 rounded-lg shadow-2xl max-h-96 overflow-y-auto"
+                style={{ 
+                  zIndex: 10000,
+                  top: `${dropdownPosition.top}px`,
+                  left: `${dropdownPosition.left}px`,
+                  width: `${dropdownPosition.width}px`
+                }}
+              >
+                {shopSearchResults.map((result) => (
+                  <div
+                    key={result.country.id}
+                    onClick={() => handleShopCountryClick(result.name)}
+                    className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 cursor-pointer transition-colors border-b border-gray-100 last:border-b-0"
+                  >
+                    <div className="text-2xl">{result.flag}</div>
+                    <div className="flex-1">
+                      <div className="text-gray-900 font-medium">{result.name}</div>
+                      {result.status === 'Coming Soon' || result.price === 'N/A' || result.price === '0.00' ? (
+                        <div className="text-sm text-orange-600 font-medium">Coming Soon</div>
+                      ) : (
+                        <div className="text-sm text-gray-500">From ${result.price}/GB</div>
+                      )}
+                    </div>
+                    <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </div>
+                ))}
+              </div>,
+              document.body
+            )}
+            
+            {/* No Results Message - Rendered via Portal */}
+            {searchQuery.trim() && shopSearchResults.length === 0 && typeof window !== 'undefined' && createPortal(
+              <div 
+                className="fixed bg-white border border-gray-200 rounded-lg shadow-2xl p-4"
+                style={{ 
+                  zIndex: 10000,
+                  top: `${dropdownPosition.top}px`,
+                  left: `${dropdownPosition.left}px`,
+                  width: `${dropdownPosition.width}px`
+                }}
+              >
+                <p className="text-gray-500 text-center">No countries found. Try a different search.</p>
+              </div>,
+              document.body
+            )}
           </motion.div>
         </div>
       </section>
 
       {/* eSIM Type Tabs */}
-      <section className="bg-white border-b border-gray-200 sticky top-0 z-40 shadow-sm">
+      <section className="bg-white border-b border-gray-200 sticky top-0 z-10 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex gap-3 mb-6">
             <button

@@ -1,15 +1,26 @@
 import { motion } from 'framer-motion'
 import { useState } from 'react'
 
-// Hero Background Component - White background
+// Hero Background Component - HeroStyle.png background
 const HeroBackground = () => {
   return (
     <>
-      {/* White Background */}
+      {/* Hero Background Image */}
       <div 
-        className="absolute inset-0 w-full h-full bg-white"
+        className="absolute inset-0 w-full h-full"
         style={{
-          zIndex: 0
+          zIndex: 0,
+          backgroundImage: 'url(/IMAGES/HeroStyle.png)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat'
+        }}
+      />
+      {/* Overlay for better text readability */}
+      <div 
+        className="absolute inset-0 w-full h-full bg-white/50"
+        style={{
+          zIndex: 1
         }}
       />
     </>
@@ -50,7 +61,7 @@ const About = () => {
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6 }}
-              className="max-w-3xl lg:max-w-none"
+              className="max-w-3xl lg:max-w-none pl-8 lg:pl-16 xl:pl-24"
             >
               {/* Subtitle */}
               <div className="mb-4 text-center lg:text-left">
@@ -92,10 +103,10 @@ const About = () => {
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className="flex items-center justify-center lg:justify-end"
+              className="flex items-center justify-center lg:justify-end pr-8 lg:pr-16 xl:pr-24"
             >
               <img
-                src="/IMAGES/About.jpg"
+                src="/IMAGES/ABouttt.png"
                 alt="About Us"
                 className="w-full max-w-xl h-auto object-contain rounded-lg"
                 style={{ 
@@ -104,6 +115,9 @@ const About = () => {
                 }}
                 onLoad={() => {
                   // Image loaded successfully
+                }}
+                onError={() => {
+                  console.error('Failed to load ABouttt.png');
                 }}
               />
             </motion.div>
@@ -176,15 +190,19 @@ const About = () => {
               className="hidden lg:flex relative w-full items-center justify-center"
             >
               <img
-                src="/IMAGES/TTelGoMission.jpg?v=3"
-                alt="TTelGo Mission"
-                className="relative w-full max-w-xl h-auto object-contain"
+                src="/IMAGES/6G.png"
+                alt="6G Technology"
+                className="relative w-full max-w-md h-auto object-contain"
                 style={{ 
                   position: 'relative',
-                  zIndex: 10
+                  zIndex: 10,
+                  maxHeight: '400px'
                 }}
                 onLoad={() => {
                   // Image loaded successfully
+                }}
+                onError={() => {
+                  console.error('Failed to load 6G.png');
                 }}
               />
             </motion.div>
@@ -205,15 +223,19 @@ const About = () => {
               className="hidden lg:flex relative w-full items-center justify-center lg:order-1"
             >
               <img
-                src="/IMAGES/FemaleTeam.jpg?v=2"
-                alt="TikTel Ltd. Team"
-                className="relative w-full max-w-xl h-auto object-contain"
+                src="/IMAGES/TikTel.png"
+                alt="TikTel Ltd."
+                className="relative w-full max-w-md h-auto object-contain"
                 style={{ 
                   position: 'relative',
-                  zIndex: 10
+                  zIndex: 10,
+                  maxHeight: '400px'
                 }}
                 onLoad={() => {
                   // Image loaded successfully
+                }}
+                onError={() => {
+                  console.error('Failed to load TikTel.png');
                 }}
               />
             </motion.div>

@@ -1,15 +1,26 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 
-// Hero Background Component - White background
+// Hero Background Component - HeroStyle.png background
 const HeroBackground = () => {
   return (
     <>
-      {/* White Background */}
+      {/* Hero Background Image */}
       <div 
-        className="absolute inset-0 w-full h-full bg-white"
+        className="absolute inset-0 w-full h-full"
         style={{
-          zIndex: 0
+          zIndex: 0,
+          backgroundImage: 'url(/IMAGES/HeroStyle.png)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat'
+        }}
+      />
+      {/* Overlay for better text readability */}
+      <div 
+        className="absolute inset-0 w-full h-full bg-white/50"
+        style={{
+          zIndex: 1
         }}
       />
     </>
@@ -77,7 +88,7 @@ const HelpCentre = () => {
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6 }}
-              className="max-w-[600px] lg:max-w-none"
+              className="max-w-[600px] lg:max-w-none pl-8 lg:pl-16 xl:pl-24"
             >
               {/* Subtitle */}
               <div className="mb-4">
@@ -130,7 +141,7 @@ const HelpCentre = () => {
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className="hidden lg:flex relative w-full items-center justify-center"
+              className="hidden lg:flex relative w-full items-center justify-end pr-8 lg:pr-16 xl:pr-24"
               style={{ zIndex: 15 }}
             >
               <img

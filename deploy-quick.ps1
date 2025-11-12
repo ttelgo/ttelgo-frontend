@@ -23,8 +23,9 @@ if (-not (Test-Path $PemKeyPath)) {
 Write-Host "Deploying to $ServerUser@$ServerIP..." -ForegroundColor Yellow
 Write-Host ""
 
-# Single-line deployment command
-$deployCommand = "cd ~/TTelGoWeb2 && git pull && npm install && npm run build && sudo rm -rf /var/www/ttelgo/* && sudo cp -r dist/* /var/www/ttelgo/ && sudo chown -R www-data:www-data /var/www/ttelgo && sudo chmod -R 755 /var/www/ttelgo && sudo systemctl reload nginx && echo '✅ SUCCESS: Deployment completed!'"
+# Optimized: Skip npm install if package.json hasn't changed (saves data!)
+# Only runs npm install if package.json or package-lock.json changed
+$deployCommand = "cd ~/TTelGoWeb2 && git pull && if [ package.json -nt node_modules/.package-lock.json ] || [ ! -f node_modules/.package-lock.json ]; then npm ci; fi && npm run build && sudo rm -rf /var/www/ttelgo/* && sudo cp -r dist/* /var/www/ttelgo/ && sudo chown -R www-data:www-data /var/www/ttelgo && sudo chmod -R 755 /var/www/ttelgo && sudo systemctl reload nginx && echo '✅ SUCCESS: Deployment completed!'"
 
 try {
     # Execute SSH command

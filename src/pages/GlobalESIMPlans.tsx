@@ -163,25 +163,97 @@ const GlobalESIMPlans = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
-              className="rounded-lg overflow-hidden"
+              className="rounded-lg overflow-hidden shadow-md"
             >
-              <div className="w-full h-64 bg-gradient-to-br from-yellow-400 via-red-500 to-orange-500 rounded-lg"></div>
+              <img
+                src="/IMAGES/Cities/Rome.jpg"
+                alt="Rome, Italy"
+                className="w-full h-64 object-cover rounded-lg hover:scale-105 transition-transform duration-300"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement
+                  target.src = '/IMAGES/Cities/London.jpg'
+                }}
+              />
             </motion.div>
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.1 }}
-              className="rounded-lg overflow-hidden"
+              className="rounded-lg overflow-hidden shadow-md"
             >
-              <div className="w-full h-64 bg-gradient-to-br from-green-400 via-blue-500 to-teal-500 rounded-lg"></div>
+              <img
+                src="/IMAGES/Cities/Paris.jpg"
+                alt="Paris, France"
+                className="w-full h-64 object-cover rounded-lg hover:scale-105 transition-transform duration-300"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement
+                  target.src = '/IMAGES/Cities/Barcelona.jpg'
+                }}
+              />
             </motion.div>
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className="rounded-lg overflow-hidden"
+              className="rounded-lg overflow-hidden shadow-md"
             >
-              <div className="w-full h-64 bg-gradient-to-br from-blue-300 via-cyan-400 to-teal-300 rounded-lg"></div>
+              <img
+                src="/IMAGES/Cities/Dubai.jpg"
+                alt="Dubai, UAE"
+                className="w-full h-64 object-cover rounded-lg hover:scale-105 transition-transform duration-300"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement
+                  target.src = '/IMAGES/Cities/Singapore.jpg'
+                }}
+              />
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+              className="rounded-lg overflow-hidden shadow-md"
+            >
+              <img
+                src="/IMAGES/Cities/London.jpg"
+                alt="London, UK"
+                className="w-full h-64 object-cover rounded-lg hover:scale-105 transition-transform duration-300"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement
+                  target.src = '/IMAGES/Cities/Sydney.jpg'
+                }}
+              />
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+              className="rounded-lg overflow-hidden shadow-md"
+            >
+              <img
+                src="/IMAGES/Cities/NewYork.jpg"
+                alt="New York, USA"
+                className="w-full h-64 object-cover rounded-lg hover:scale-105 transition-transform duration-300"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement
+                  target.src = '/IMAGES/Cities/Sydney.jpg'
+                }}
+              />
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.5 }}
+              className="rounded-lg overflow-hidden shadow-md"
+            >
+              <img
+                src="/IMAGES/Cities/Sydney.jpg"
+                alt="Sydney, Australia"
+                className="w-full h-64 object-cover rounded-lg hover:scale-105 transition-transform duration-300"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement
+                  target.src = '/IMAGES/Cities/Amsterdam.jpg'
+                }}
+              />
             </motion.div>
           </div>
 

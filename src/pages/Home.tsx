@@ -1,6 +1,7 @@
 import { useState, useRef, useMemo, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
+import { allCountries as countriesData } from '@/utils/countriesData'
 
 // Generate random price between 0.50 and 2.00
 const getRandomPrice = () => {
@@ -62,13 +63,17 @@ const Home = () => {
     { name: 'Istanbul, Turkey', price: '0.72', image: '/IMAGES/Cities/Istabul.jpg' },
   ]
 
-  // Local eSIMs - keeping same for now
-  const localDestinations = [
-    { name: 'Australia', price: '0.54', flag: '🇦🇺' },
-    { name: 'Italy', price: '0.90', flag: '🇮🇹' },
-    { name: 'Turkey', price: '0.90', flag: '🇹🇷' },
-    { name: 'Singapore', price: '0.78', flag: '🇸🇬' },
-  ]
+  // Local eSIMs - All 200+ countries
+  const localDestinations = useMemo(() => {
+    return countriesData
+      .filter(country => country.status === 'Open Now')
+      .map(country => ({
+        name: country.name,
+        flag: country.flag,
+        price: country.prices['1GB'].toFixed(2), // Price per GB from 1GB plan
+        country: country, // Keep full country object for navigation
+      }))
+  }, [])
 
   // All 200+ countries for Global eSIMs - Generated once with fixed prices
   const allCountries = useMemo(() => {
@@ -743,23 +748,31 @@ const Home = () => {
             
             {/* Local eSIMs */}
             {activeTab === 'local' && (
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                {localDestinations.map((dest, index) => (
-                  <motion.div
-                    key={index}
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    whileInView={{ opacity: 1, scale: 1 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.5, delay: index * 0.1 }}
-                    className="bg-white rounded-xl shadow-md p-6 text-center hover:shadow-xl transition-shadow cursor-pointer"
-                  >
-                    <div className="text-4xl mb-3">{dest.flag}</div>
-                    <div className="text-gray-900 font-semibold mb-2">{dest.name}</div>
-                    <div className="text-telgo-red text-sm font-medium">
-                      Starting from USD {dest.price}/GB
-                    </div>
-                  </motion.div>
-                ))}
+              <div className="mb-6">
+                <div className="mb-4">
+                  <p className="text-gray-600 text-sm">
+                    {localDestinations.length} countries available
+                  </p>
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 max-h-[600px] overflow-y-auto pr-2">
+                  {localDestinations.map((dest, index) => (
+                    <motion.div
+                      key={dest.country.id}
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      whileInView={{ opacity: 1, scale: 1 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.3, delay: Math.min(index * 0.02, 0.5) }}
+                      onClick={() => navigate(`/country/${encodeURIComponent(dest.name)}`)}
+                      className="bg-white rounded-xl shadow-md p-4 text-center hover:shadow-xl transition-all cursor-pointer hover:scale-105"
+                    >
+                      <div className="text-4xl mb-2">{dest.flag}</div>
+                      <div className="text-gray-900 font-semibold mb-1 text-sm">{dest.name}</div>
+                      <div className="text-telgo-red text-xs font-medium">
+                        From ${dest.price}/GB
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
               </div>
             )}
 

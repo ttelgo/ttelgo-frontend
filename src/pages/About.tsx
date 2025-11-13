@@ -50,7 +50,7 @@ const About = () => {
   ]
 
   return (
-    <div className="w-full bg-white">
+    <div className="w-full">
       {/* Hero Section */}
       <section className="relative py-12 md:py-20 overflow-hidden">
         <HeroBackground />

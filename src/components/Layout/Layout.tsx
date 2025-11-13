@@ -25,7 +25,13 @@ const Layout = () => {
   const hideFooter = location.pathname === '/login' || location.pathname === '/signup'
   
   return (
-    <div className="min-h-screen flex flex-col bg-white transition-colors duration-300">
+    <div 
+      className="min-h-screen flex flex-col"
+      style={{
+        background: 'linear-gradient(135deg, #fef2f2 0%, #fee2e2 50%, #fce7e7 100%)',
+        backgroundAttachment: 'fixed'
+      }}
+    >
       <Navbar />
       <main className="flex-grow">
         <Outlet />

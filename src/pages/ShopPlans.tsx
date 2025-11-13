@@ -138,7 +138,7 @@ const ShopPlans = () => {
   }, [searchQuery])
 
   return (
-    <div className="w-full bg-white min-h-screen">
+    <div className="w-full min-h-screen">
       {/* Hero Section */}
       <section className="relative py-8 md:py-12 border-b border-gray-200 overflow-visible">
         {/* Background Image */}

@@ -218,7 +218,7 @@ const Checkout = () => {
   const total = subtotal + tax + processingFee
 
   return (
-    <div className="w-full bg-white min-h-screen py-8 md:py-12">
+    <div className="w-full min-h-screen py-8 md:py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <motion.div

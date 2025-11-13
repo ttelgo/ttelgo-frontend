@@ -1,4 +1,5 @@
-import { useState, useRef, useMemo, useEffect } from 'react'
+import { useState, useRef, useMemo, useEffect, useCallback } from 'react'
+import { createPortal } from 'react-dom'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { allCountries as countriesData } from '@/utils/countriesData'
@@ -46,6 +47,8 @@ const Home = () => {
   const journeyScrollRef = useRef<HTMLDivElement>(null)
   const location = useLocation()
   const searchResultsRef = useRef<HTMLDivElement>(null)
+  const heroSearchInputRef = useRef<HTMLInputElement>(null)
+  const [heroDropdownPosition, setHeroDropdownPosition] = useState({ top: 0, left: 0, width: 0 })
 
   // Handle scrolling to popular destinations section when navigating from other pages
   useEffect(() => {
@@ -58,6 +61,32 @@ const Home = () => {
       }, 100)
     }
   }, [location.hash])
+
+  // Update dropdown position when search query changes or window scrolls/resizes
+  const updateHeroDropdownPosition = useCallback(() => {
+    if (heroSearchQuery.trim() && heroSearchInputRef.current) {
+      const inputRect = heroSearchInputRef.current.getBoundingClientRect()
+      setHeroDropdownPosition({
+        top: inputRect.bottom + window.scrollY + 8, // 8px for mt-2
+        left: inputRect.left + window.scrollX,
+        width: inputRect.width
+      })
+    }
+  }, [heroSearchQuery])
+
+  useEffect(() => {
+    updateHeroDropdownPosition()
+    
+    if (heroSearchQuery.trim()) {
+      window.addEventListener('scroll', updateHeroDropdownPosition, true)
+      window.addEventListener('resize', updateHeroDropdownPosition)
+      
+      return () => {
+        window.removeEventListener('scroll', updateHeroDropdownPosition, true)
+        window.removeEventListener('resize', updateHeroDropdownPosition)
+      }
+    }
+  }, [heroSearchQuery, updateHeroDropdownPosition])
 
   // Close search dropdown when clicking outside
   useEffect(() => {
@@ -551,7 +580,7 @@ const Home = () => {
   ]
 
   return (
-    <div className="w-full bg-white">
+    <div className="w-full">
       {/* Hero Section */}
       <section className="relative py-12 md:py-20 overflow-visible">
         {/* Background Image - Covering entire section */}
@@ -577,7 +606,7 @@ const Home = () => {
                 <motion.button
                   whileHover={{ scale: 1.05, boxShadow: '0 8px 16px rgba(204, 0, 0, 0.3)' }}
                   whileTap={{ scale: 0.95 }}
-                  className="relative overflow-hidden group"
+                  className="relative overflow-hidden group rounded-2xl"
                   onClick={() => {
                     // Handle redeem action - can navigate to a page or show modal
                     alert('Redeem 1GB - Feature coming soon!')
@@ -588,7 +617,7 @@ const Home = () => {
                     transition: 'all 0.3s ease'
                   }}
                 >
-                  <span className="relative z-10 text-white font-bold text-sm uppercase tracking-wide px-6 py-3 rounded-lg inline-flex items-center gap-2">
+                  <span className="relative z-10 text-white font-bold text-sm uppercase tracking-wide px-6 py-3 rounded-2xl inline-flex items-center gap-2">
                     <svg 
                       className="w-5 h-5 group-hover:rotate-12 transition-transform duration-300" 
                       fill="none" 
@@ -650,50 +679,66 @@ const Home = () => {
                   </svg>
                 </div>
                 <input
+                  ref={heroSearchInputRef}
                   type="text"
                   value={heroSearchQuery}
                   onChange={(e) => setHeroSearchQuery(e.target.value)}
                   placeholder="Search for your next destination"
                   className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-telgo-red focus:border-transparent text-gray-900 bg-white/95 backdrop-blur-sm relative z-0"
                 />
-                
-                {/* Search Results Dropdown */}
-                {heroSearchQuery.trim() && heroSearchResults.length > 0 && (
-                  <div
-                    ref={searchResultsRef}
-                    className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-2xl max-h-96 overflow-y-auto"
-                    style={{ zIndex: 10000, position: 'absolute' }}
-                  >
-                    {heroSearchResults.map((result) => (
-                      <div
-                        key={result.country.id}
-                        onClick={() => handleCountryClick(result.name)}
-                        className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 cursor-pointer transition-colors border-b border-gray-100 last:border-b-0"
-                      >
-                        <div className="text-2xl">{result.flag}</div>
-                        <div className="flex-1">
-                          <div className="text-gray-900 font-medium">{result.name}</div>
-                          {result.status === 'Coming Soon' || result.price === 'N/A' || result.price === '0.00' ? (
-                            <div className="text-sm text-orange-600 font-medium">Coming Soon</div>
-                          ) : (
-                            <div className="text-sm text-gray-500">From ${result.price}/GB</div>
-                          )}
-                        </div>
-                        <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        </svg>
-                      </div>
-                    ))}
-                  </div>
-                )}
-                
-                {/* No Results Message */}
-                {heroSearchQuery.trim() && heroSearchResults.length === 0 && (
-                  <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-2xl p-4" style={{ zIndex: 10000, position: 'absolute' }}>
-                    <p className="text-gray-500 text-center">No countries found. Try a different search.</p>
-                  </div>
-                )}
               </div>
+            
+            {/* Search Results Dropdown - Rendered via Portal */}
+            {heroSearchQuery.trim() && heroSearchResults.length > 0 && typeof window !== 'undefined' && createPortal(
+              <div
+                ref={searchResultsRef}
+                className="fixed bg-white border border-gray-200 rounded-lg shadow-2xl max-h-96 overflow-y-auto"
+                style={{ 
+                  zIndex: 10000,
+                  top: `${heroDropdownPosition.top}px`,
+                  left: `${heroDropdownPosition.left}px`,
+                  width: `${heroDropdownPosition.width}px`
+                }}
+              >
+                {heroSearchResults.map((result) => (
+                  <div
+                    key={result.country.id}
+                    onClick={() => handleCountryClick(result.name)}
+                    className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 cursor-pointer transition-colors border-b border-gray-100 last:border-b-0"
+                  >
+                    <div className="text-2xl">{result.flag}</div>
+                    <div className="flex-1">
+                      <div className="text-gray-900 font-medium">{result.name}</div>
+                      {result.status === 'Coming Soon' || result.price === 'N/A' || result.price === '0.00' ? (
+                        <div className="text-sm text-orange-600 font-medium">Coming Soon</div>
+                      ) : (
+                        <div className="text-sm text-gray-500">From ${result.price}/GB</div>
+                      )}
+                    </div>
+                    <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </div>
+                ))}
+              </div>,
+              document.body
+            )}
+            
+            {/* No Results Message - Rendered via Portal */}
+            {heroSearchQuery.trim() && heroSearchResults.length === 0 && typeof window !== 'undefined' && createPortal(
+              <div 
+                className="fixed bg-white border border-gray-200 rounded-lg shadow-2xl p-4"
+                style={{ 
+                  zIndex: 10000,
+                  top: `${heroDropdownPosition.top}px`,
+                  left: `${heroDropdownPosition.left}px`,
+                  width: `${heroDropdownPosition.width}px`
+                }}
+              >
+                <p className="text-gray-500 text-center">No countries found. Try a different search.</p>
+              </div>,
+              document.body
+            )}
             </motion.div>
 
             {/* Right Hero Image */}

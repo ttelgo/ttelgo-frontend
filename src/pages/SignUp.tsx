@@ -122,7 +122,7 @@ const SignUp = () => {
   }
 
   return (
-    <div className="min-h-[calc(100vh-80px)] w-full bg-white flex items-center justify-center py-8 md:py-12">
+    <div className="min-h-[calc(100vh-80px)] w-full flex items-center justify-center py-8 md:py-12">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}

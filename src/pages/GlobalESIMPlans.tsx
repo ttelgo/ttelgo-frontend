@@ -139,7 +139,7 @@ const GlobalESIMPlans = () => {
   }
 
   return (
-    <div className="w-full bg-white min-h-screen">
+    <div className="w-full min-h-screen">
       {/* Breadcrumb */}
       <section className="bg-white py-4 border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

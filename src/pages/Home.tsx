@@ -1147,7 +1147,7 @@ const Home = () => {
       {/* Forget About Roaming Section */}
       <section className="py-16 bg-transparent">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-20 items-center">
             {/* Left Content */}
             <motion.div
               initial={{ opacity: 0, x: -20 }}
@@ -1237,18 +1237,21 @@ const Home = () => {
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className="hidden lg:flex relative w-full items-center justify-center"
+              className="hidden lg:flex relative w-full items-center justify-end pr-8 lg:pr-16 xl:pr-24"
+              style={{ zIndex: 15 }}
             >
               <img
                 src="/IMAGES/3DMobile.png"
                 alt="TTelGo eSIM 3D Mobile"
                 className="w-full h-auto object-contain"
                 style={{ 
-                  maxHeight: '700px',
-                  minHeight: '400px',
+                  maxHeight: '1000px',
+                  minHeight: '700px',
                   height: 'auto',
                   width: 'auto',
                   maxWidth: '100%',
+                  transform: 'scale(1.2)',
+                  transformOrigin: 'right center',
                   border: 'none',
                   outline: 'none',
                   boxShadow: 'none'

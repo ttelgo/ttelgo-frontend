@@ -13,7 +13,8 @@ const HeroBackground = () => {
           backgroundImage: 'url(/IMAGES/HeroStyle.png)',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat'
+          backgroundRepeat: 'no-repeat',
+          minHeight: 'fit-content'
         }}
       />
       {/* Overlay for better text readability */}
@@ -43,16 +44,16 @@ const DownloadApp = () => {
   return (
     <div className="w-full">
       {/* Hero Section */}
-      <section className="relative py-12 md:py-20 overflow-hidden">
+      <section className="relative pt-2 pb-4 md:pt-4 md:pb-6 overflow-hidden" style={{ minHeight: 'auto' }}>
         <HeroBackground />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
             {/* Left Content */}
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6 }}
-              className="max-w-[600px] lg:max-w-none pl-8 lg:pl-16 xl:pl-24"
+              className="pl-8 lg:pl-16 xl:pl-24"
             >
               {/* Subtitle */}
               <div className="mb-4">
@@ -62,12 +63,12 @@ const DownloadApp = () => {
               </div>
               
               {/* Main Heading */}
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight">
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-4 leading-tight">
                 Download App
               </h1>
               
               {/* Description */}
-              <p className="text-lg text-gray-700 mb-8 leading-relaxed font-medium">
+              <p className="text-lg text-gray-700 mb-6 leading-relaxed font-medium">
                 Download the TTelGo app today from the Play Store or App Store for instant eSIM activation and seamless support – global connectivity is just a tap away.
               </p>
               
@@ -102,11 +103,13 @@ const DownloadApp = () => {
                 alt="TTelGo eSIM 3D Mobile"
                 className="w-full h-auto object-contain"
                 style={{ 
-                  maxHeight: '700px',
-                  minHeight: '400px',
+                  maxHeight: '900px',
+                  minHeight: '650px',
                   height: 'auto',
                   width: 'auto',
                   maxWidth: '100%',
+                  transform: 'scale(1.25)',
+                  transformOrigin: 'right center',
                   border: 'none',
                   outline: 'none',
                   boxShadow: 'none'

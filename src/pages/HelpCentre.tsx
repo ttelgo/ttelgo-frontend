@@ -116,19 +116,32 @@ const HelpCentre = () => {
               </p>
             </motion.div>
 
-            {/* Right - 3D Mobile Image */}
+            {/* Right - Help Image */}
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className="hidden lg:flex relative w-full items-center justify-end"
-              style={{ zIndex: 15, transform: 'translateX(2rem)' }}
+              className="hidden lg:flex relative w-full items-center justify-end pr-8 lg:pr-16 xl:pr-24"
+              style={{ zIndex: 15 }}
             >
               <img
-                src="/IMAGES/3DMobile.png"
-                alt="TTelGo eSIM 3D Mobile"
-                className="w-full max-w-lg h-auto object-contain"
-                loading="lazy"
+                src="/IMAGES/Hellp.png"
+                alt="Help Centre"
+                className="w-full h-auto object-contain"
+                style={{ 
+                  maxHeight: '700px',
+                  minHeight: '400px',
+                  height: 'auto',
+                  width: 'auto',
+                  maxWidth: '100%',
+                  border: 'none',
+                  outline: 'none',
+                  boxShadow: 'none'
+                }}
+                loading="eager"
+                onError={() => {
+                  console.warn('Hellp image not found at /IMAGES/Hellp.png')
+                }}
               />
             </motion.div>
           </div>

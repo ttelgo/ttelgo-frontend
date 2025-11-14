@@ -89,7 +89,7 @@ const DownloadApp = () => {
               </div>
             </motion.div>
 
-            {/* Right - MockUp Image */}
+            {/* Right - 3D Mobile Image */}
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -98,20 +98,22 @@ const DownloadApp = () => {
               style={{ zIndex: 15 }}
             >
               <img
-                src="/IMAGES/MockUp.png"
-                alt="TTelGo eSIM MockUp"
+                src="/IMAGES/3DMobile.png"
+                alt="TTelGo eSIM 3D Mobile"
                 className="w-full h-auto object-contain"
                 style={{ 
-                  maxHeight: '600px',
+                  maxHeight: '700px',
+                  minHeight: '400px',
                   height: 'auto',
                   width: 'auto',
-                  maxWidth: '100%'
+                  maxWidth: '100%',
+                  border: 'none',
+                  outline: 'none',
+                  boxShadow: 'none'
                 }}
-                onLoad={() => {
-                  // Image loaded successfully
-                }}
+                loading="eager"
                 onError={() => {
-                  console.error('Failed to load MockUp.png');
+                  console.warn('3DMobile image not found at /IMAGES/3DMobile.png')
                 }}
               />
             </motion.div>

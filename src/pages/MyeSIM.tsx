@@ -28,7 +28,6 @@ const HeroBackground = () => {
 }
 
 const MyeSIM = () => {
-  const [searchQuery, setSearchQuery] = useState('')
   const [iccid, setIccid] = useState('')
   const [email, setEmail] = useState('')
   const [subscribeEmail, setSubscribeEmail] = useState('')
@@ -79,25 +78,6 @@ const MyeSIM = () => {
               <p className="text-lg text-gray-700 mb-8 leading-relaxed font-medium">
                 TTelGo (Your) eSIM: Travel smart, connect instantly – no physical SIM, no limits.
               </p>
-              
-              {/* Search Bar */}
-              <div className="relative max-w-md">
-                <div className="absolute left-4 top-1/2 transform -translate-y-1/2 pointer-events-none">
-                  <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                  </svg>
-                </div>
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search for articles..."
-                  className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-telgo-red focus:border-transparent text-gray-900 bg-white"
-                  style={{
-                    boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)'
-                  }}
-                />
-              </div>
             </motion.div>
 
             {/* Right - eSIM Image */}

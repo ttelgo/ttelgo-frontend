@@ -29,43 +29,215 @@ const HeroBackground = () => {
 
 const HelpCentre = () => {
   const [email, setEmail] = useState('')
+  const [expandedTopic, setExpandedTopic] = useState<number | null>(null)
 
   const helpTopics = [
     {
       id: 1,
       title: 'Quick Help for Your eSIM Setup',
-      description: 'TTelGo eSIM not working? Find quick fixes for activation and signal issues....',
+      description: 'TTelGo eSIM not working? Find quick fixes for activation and signal issues to get you connected quickly.',
+      content: (
+        <div className="space-y-4 text-gray-700">
+          <div>
+            <h4 className="font-semibold text-gray-900 mb-2">Activation Issues</h4>
+            <ul className="list-disc list-inside space-y-1 ml-2">
+              <li>Ensure your device supports eSIM technology</li>
+              <li>Check that you have a stable internet connection during activation</li>
+              <li>Verify the QR code is scanned correctly without any obstructions</li>
+              <li>Restart your device if activation fails</li>
+              <li>Make sure you're not trying to activate while roaming</li>
+            </ul>
+          </div>
+          <div>
+            <h4 className="font-semibold text-gray-900 mb-2">Signal Issues</h4>
+            <ul className="list-disc list-inside space-y-1 ml-2">
+              <li>Check if eSIM is enabled in your device settings</li>
+              <li>Verify that data roaming is enabled for the eSIM</li>
+              <li>Ensure you're in a covered area (check coverage map)</li>
+              <li>Try manually selecting the network operator</li>
+              <li>Contact support if issues persist after troubleshooting</li>
+            </ul>
+          </div>
+        </div>
+      ),
     },
     {
       id: 2,
       title: 'Understanding Your eSIM Plan',
-      description: 'Learn how your TTelGo plan works, including validity, extras, and data usage....',
+      description: 'Learn how your TTelGo plan works, including validity periods, extras, and data usage monitoring.',
+      content: (
+        <div className="space-y-4 text-gray-700">
+          <div>
+            <h4 className="font-semibold text-gray-900 mb-2">Plan Validity</h4>
+            <p className="mb-2">Your eSIM plan validity period starts from the moment of activation. Plans typically range from 7 days to 365 days depending on your selected package.</p>
+            <p>Once activated, the validity countdown begins regardless of data usage.</p>
+          </div>
+          <div>
+            <h4 className="font-semibold text-gray-900 mb-2">Data Usage</h4>
+            <ul className="list-disc list-inside space-y-1 ml-2">
+              <li>Monitor your data usage through the TTelGo app</li>
+              <li>Data speeds may vary based on network conditions</li>
+              <li>Unused data does not roll over to the next period</li>
+              <li>You can purchase additional data packs if needed</li>
+            </ul>
+          </div>
+          <div>
+            <h4 className="font-semibold text-gray-900 mb-2">Extras & Add-ons</h4>
+            <p>You can purchase additional data, extend validity, or add hotspot capabilities through the app or website at any time.</p>
+          </div>
+        </div>
+      ),
     },
     {
       id: 3,
       title: 'Transactions, Billing & Refunds',
-      description: 'Find support for payments, invoices, refunds, and billing issues – all in one place....',
+      description: 'Find support for payments, invoices, refunds, and billing issues – all in one convenient place.',
+      content: (
+        <div className="space-y-4 text-gray-700">
+          <div>
+            <h4 className="font-semibold text-gray-900 mb-2">Payment Methods</h4>
+            <ul className="list-disc list-inside space-y-1 ml-2">
+              <li>Credit/Debit Cards (Visa, Mastercard, American Express)</li>
+              <li>PayPal</li>
+              <li>Bank Transfer</li>
+              <li>Apple Pay and Google Pay (in-app)</li>
+            </ul>
+          </div>
+          <div>
+            <h4 className="font-semibold text-gray-900 mb-2">Invoices</h4>
+            <p className="mb-2">All invoices are automatically sent to your registered email address. You can also download invoices from your account dashboard.</p>
+            <p>Invoices include VAT where applicable and are available in multiple currencies.</p>
+          </div>
+          <div>
+            <h4 className="font-semibold text-gray-900 mb-2">Refunds</h4>
+            <ul className="list-disc list-inside space-y-1 ml-2">
+              <li>Refunds are available for unactivated eSIMs within 30 days of purchase</li>
+              <li>Partial refunds may apply for activated plans based on usage</li>
+              <li>Refund requests can be submitted through the support portal</li>
+              <li>Processing time: 5-10 business days</li>
+            </ul>
+          </div>
+        </div>
+      ),
     },
     {
       id: 4,
       title: 'Update & Manage Your TTelGo eSIM',
-      description: 'TTelGo account help – update info, reset passwords, and manage settings in a few steps....',
+      description: 'TTelGo account help – update your information, reset passwords, and manage settings in just a few simple steps.',
+      content: (
+        <div className="space-y-4 text-gray-700">
+          <div>
+            <h4 className="font-semibold text-gray-900 mb-2">Account Management</h4>
+            <ul className="list-disc list-inside space-y-1 ml-2">
+              <li>Update your email, phone number, and billing address from Account Settings</li>
+              <li>Change your password anytime through the security settings</li>
+              <li>Enable two-factor authentication for enhanced security</li>
+              <li>Manage payment methods and billing preferences</li>
+            </ul>
+          </div>
+          <div>
+            <h4 className="font-semibold text-gray-900 mb-2">Password Reset</h4>
+            <p className="mb-2">If you've forgotten your password:</p>
+            <ol className="list-decimal list-inside space-y-1 ml-2">
+              <li>Click "Forgot Password" on the login page</li>
+              <li>Enter your registered email address</li>
+              <li>Check your email for the reset link</li>
+              <li>Follow the instructions to create a new password</li>
+            </ol>
+          </div>
+          <div>
+            <h4 className="font-semibold text-gray-900 mb-2">eSIM Settings</h4>
+            <p>Manage your active eSIMs, view usage statistics, and configure data limits directly from your account dashboard or mobile app.</p>
+          </div>
+        </div>
+      ),
     },
     {
       id: 5,
       title: 'TTelGo eSIM Discounts & Benefits',
-      description: 'Unlock TTelGo promo codes and referral rewards – apply in-app and start saving...',
+      description: 'Unlock TTelGo promo codes and referral rewards – apply them in-app and start saving on your next eSIM purchase.',
+      content: (
+        <div className="space-y-4 text-gray-700">
+          <div>
+            <h4 className="font-semibold text-gray-900 mb-2">Promo Codes</h4>
+            <p className="mb-2">Apply promo codes during checkout to receive discounts on your eSIM purchase. Codes can be entered in the payment section.</p>
+            <p>Subscribe to our newsletter to receive exclusive promo codes and special offers.</p>
+          </div>
+          <div>
+            <h4 className="font-semibold text-gray-900 mb-2">Referral Program</h4>
+            <ul className="list-disc list-inside space-y-1 ml-2">
+              <li>Refer friends and earn credits for each successful referral</li>
+              <li>Both you and your friend receive benefits</li>
+              <li>Share your unique referral code via email, social media, or direct link</li>
+              <li>Track your referrals and rewards in the app</li>
+            </ul>
+          </div>
+          <div>
+            <h4 className="font-semibold text-gray-900 mb-2">Loyalty Benefits</h4>
+            <p>Frequent travelers enjoy additional benefits including priority support, exclusive deals, and early access to new destinations.</p>
+          </div>
+        </div>
+      ),
     },
     {
       id: 6,
       title: 'About eSIM',
-      description: 'Explore eSIM tech: digital activation, no physical SIMs, and smarter mobile experiences...',
+      description: 'Explore eSIM technology: digital activation, no physical SIMs required, and smarter mobile experiences for modern travelers.',
+      content: (
+        <div className="space-y-4 text-gray-700">
+          <div>
+            <h4 className="font-semibold text-gray-900 mb-2">What is eSIM?</h4>
+            <p className="mb-2">eSIM (embedded SIM) is a digital SIM card that's built into your device. Unlike traditional SIM cards, eSIMs don't require physical installation and can be activated instantly via QR code.</p>
+          </div>
+          <div>
+            <h4 className="font-semibold text-gray-900 mb-2">Benefits</h4>
+            <ul className="list-disc list-inside space-y-1 ml-2">
+              <li>No physical SIM card needed - activate instantly</li>
+              <li>Store multiple eSIM profiles on one device</li>
+              <li>Switch between plans without changing cards</li>
+              <li>Perfect for travelers - no SIM card swapping</li>
+              <li>More secure and environmentally friendly</li>
+            </ul>
+          </div>
+          <div>
+            <h4 className="font-semibold text-gray-900 mb-2">Device Compatibility</h4>
+            <p>eSIM is supported on most modern smartphones including iPhone XS and newer, Google Pixel 3 and newer, Samsung Galaxy S20 and newer, and many other devices. Check your device specifications to confirm compatibility.</p>
+          </div>
+        </div>
+      ),
     },
     {
       id: 7,
       title: 'About TTelGo eSIM',
-      description: 'Discover how TTelGo eSIM, powered by TikTel Ltd, delivers global data across 200+ destinations...',
+      description: 'Discover how TTelGo eSIM, powered by TikTel Ltd, delivers global data connectivity across 200+ destinations worldwide.',
       fullWidth: true,
+      content: (
+        <div className="space-y-4 text-gray-700">
+          <div>
+            <h4 className="font-semibold text-gray-900 mb-2">Who We Are</h4>
+            <p className="mb-2">TTelGo is powered by TikTel Ltd. UK, a future-focused managed telecom services provider driving digital transformation through secure connectivity, scalable infrastructure, and advanced eSIM innovation.</p>
+            <p>We specialize in delivering instant, borderless mobile access across 200+ global destinations.</p>
+          </div>
+          <div>
+            <h4 className="font-semibold text-gray-900 mb-2">Our Mission</h4>
+            <p>TTelGo's mission is to empower global travel by connecting people through curated local insights and seamless digital access - eliminating the burden of costly data roaming in a connected world.</p>
+          </div>
+          <div>
+            <h4 className="font-semibold text-gray-900 mb-2">Coverage</h4>
+            <ul className="list-disc list-inside space-y-1 ml-2">
+              <li>200+ destinations worldwide</li>
+              <li>Local, regional, and global eSIM plans</li>
+              <li>High-speed 4G/5G connectivity</li>
+              <li>24/7 customer support</li>
+              <li>Instant activation and QR code delivery</li>
+            </ul>
+          </div>
+          <div>
+            <h4 className="font-semibold text-gray-900 mb-2">Why Choose TTelGo?</h4>
+            <p>We combine cutting-edge eSIM technology with exceptional customer service, offering flexible plans that adapt to your travel needs. Whether you're a business traveler, digital nomad, or vacationer, TTelGo keeps you connected wherever you go.</p>
+          </div>
+        </div>
+      ),
     },
   ]
 
@@ -75,10 +247,14 @@ const HelpCentre = () => {
     setEmail('')
   }
 
+  const handleTopicToggle = (topicId: number) => {
+    setExpandedTopic(prevExpanded => prevExpanded === topicId ? null : topicId)
+  }
+
   return (
     <div className="w-full">
       {/* Hero Section */}
-      <section className="relative py-12 md:py-20 overflow-hidden">
+      <section className="relative py-3 md:py-5 overflow-hidden">
         <HeroBackground />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
@@ -176,7 +352,7 @@ const HelpCentre = () => {
           </motion.div>
 
           {/* Help Topics Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 gap-6" style={{ alignItems: 'start' }}>
             {helpTopics.map((topic, index) => (
               <motion.div
                 key={topic.id}
@@ -184,9 +360,11 @@ const HelpCentre = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
-                className={`bg-white rounded-lg p-6 ${topic.fullWidth ? 'md:col-span-2' : ''}`}
+                className="bg-white rounded-lg p-6"
                 style={{
-                  boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+                  boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+                  alignSelf: 'start',
+                  height: 'auto'
                 }}
               >
                 <h3 className="text-xl font-bold text-gray-900 mb-3">
@@ -195,15 +373,41 @@ const HelpCentre = () => {
                 <p className="text-gray-600 mb-4 leading-relaxed">
                   {topic.description}
                 </p>
-                <a
-                  href="#"
-                  className="text-telgo-red font-semibold hover:underline inline-flex items-center gap-1"
+                
+                {/* Expandable Content */}
+                {expandedTopic === topic.id && topic.content && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="overflow-hidden mb-4 pt-4 border-t border-gray-200"
+                  >
+                    {topic.content}
+                  </motion.div>
+                )}
+                
+                <button
+                  onClick={(e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    handleTopicToggle(topic.id)
+                  }}
+                  className="text-telgo-red font-semibold hover:underline inline-flex items-center gap-1 transition-transform"
+                  type="button"
                 >
-                  More
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                </a>
+                  {expandedTopic === topic.id ? 'Less' : 'More'}
+                  <motion.svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    animate={{ rotate: expandedTopic === topic.id ? 180 : 0 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </motion.svg>
+                </button>
               </motion.div>
             ))}
           </div>

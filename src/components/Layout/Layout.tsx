@@ -7,17 +7,24 @@ const Layout = () => {
   const location = useLocation()
   const prevPathnameRef = useRef(location.pathname)
   
-  // Scroll to top on route change (but preserve hash anchors)
+  // Scroll to top on route change
   useEffect(() => {
-    // Only scroll to top when pathname changes (not when hash changes)
-    // This allows anchor links (like #popular-destinations) to work
+    // Always scroll to top when pathname changes
     if (prevPathnameRef.current !== location.pathname) {
-      // If there's a hash, let the page handle scrolling to it
-      // Otherwise, scroll to top
-      if (!location.hash) {
-        window.scrollTo(0, 0)
-      }
+      // Scroll to top immediately
+      window.scrollTo({ top: 0, left: 0, behavior: 'instant' })
       prevPathnameRef.current = location.pathname
+    }
+    
+    // Handle hash anchors after a brief delay to ensure page is rendered
+    if (location.hash) {
+      const timer = setTimeout(() => {
+        const element = document.querySelector(location.hash)
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        }
+      }, 100)
+      return () => clearTimeout(timer)
     }
   }, [location.pathname, location.hash])
   

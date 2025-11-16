@@ -140,7 +140,7 @@ const ShopPlans = () => {
   return (
     <div className="w-full min-h-screen">
       {/* Hero Section */}
-      <section className="relative py-8 md:py-12 border-b border-gray-200 overflow-visible">
+      <section className="relative py-2 md:py-4 border-b border-gray-200 overflow-visible">
         {/* Background Image */}
         <div 
           className="absolute inset-0 w-full h-full"
@@ -405,7 +405,7 @@ const ShopPlans = () => {
           {/* Global eSIM View - Plan Cards */}
           {esimType === 'global' && (
             <div className="space-y-6">
-              {/* Global - 54 and 82 Countries Plan */}
+              {/* Global Core - 54 and 82 Countries Plan */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -416,7 +416,7 @@ const ShopPlans = () => {
                 <div className="p-6">
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex-1">
-                      <h3 className="text-2xl font-bold text-gray-900 mb-1">Global</h3>
+                      <h3 className="text-2xl font-bold text-gray-900 mb-1">Global Core</h3>
                       <p className="text-sm text-gray-600 mb-3">Start from USD 2.17/GB</p>
                       <div className="flex flex-wrap gap-2 mb-3">
                         <span className="px-3 py-1 bg-pink-100 text-pink-700 rounded-full text-xs font-medium">
@@ -444,7 +444,7 @@ const ShopPlans = () => {
                 </div>
               </motion.div>
 
-              {/* Global-EX - 106 and 112 Countries Plan */}
+              {/* Global Max - 106 and 112 Countries Plan */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -455,7 +455,7 @@ const ShopPlans = () => {
                 <div className="p-6">
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex-1">
-                      <h3 className="text-2xl font-bold text-gray-900 mb-1">Global-EX</h3>
+                      <h3 className="text-2xl font-bold text-gray-900 mb-1">Global Max</h3>
                       <p className="text-sm text-gray-600 mb-3">Start from USD 7.20/GB</p>
                       <div className="flex flex-wrap gap-2 mb-3">
                         <span className="px-3 py-1 bg-pink-100 text-pink-700 rounded-full text-xs font-medium">

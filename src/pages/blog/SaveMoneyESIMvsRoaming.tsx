@@ -5,7 +5,7 @@ const SaveMoneyESIMvsRoaming = () => {
   return (
     <div className="w-full min-h-screen bg-white">
       {/* Hero Section */}
-      <section className="relative py-12 md:py-16 bg-gradient-to-b from-gray-50 to-white">
+      <section className="relative py-3 md:py-5 bg-gradient-to-b from-gray-50 to-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}

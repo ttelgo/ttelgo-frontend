@@ -61,7 +61,7 @@ const countries112 = [
 // Plan configurations
 const planConfigs = {
   54: {
-    name: 'Global',
+    name: 'Global Core',
     countries: countries54,
     plans: [
       { data: '10GB', validity: '180 days', price: 30 },
@@ -72,7 +72,7 @@ const planConfigs = {
     pricePerGB: 2.17,
   },
   82: {
-    name: 'Global',
+    name: 'Global Core',
     countries: countries82,
     plans: [
       { data: '10GB', validity: '180 days', price: 35 },
@@ -83,7 +83,7 @@ const planConfigs = {
     pricePerGB: 2.50,
   },
   106: {
-    name: 'Global-EX',
+    name: 'Global Max',
     countries: countries106,
     plans: [
       { data: '1GB', validity: '7 days', price: 8 },
@@ -93,7 +93,7 @@ const planConfigs = {
     pricePerGB: 7.20,
   },
   112: {
-    name: 'Global-EX',
+    name: 'Global Max',
     countries: countries112,
     plans: [
       { data: '1GB', validity: '7 days', price: 9 },
@@ -109,7 +109,7 @@ const GlobalESIMPlans = () => {
   const [searchParams] = useSearchParams()
   const planType = searchParams.get('type') || 'global' // 'global' or 'global-ex'
   
-  // For Global: allow 54 or 82, for Global-EX: only 106/112 (default to 106)
+  // For Global Core: allow 54 or 82, for Global Max: only 106/112 (default to 106)
   const [selectedPlanType, setSelectedPlanType] = useState<54 | 82 | 106 | 112>(
     planType === 'global-ex' ? 106 : 54
   )

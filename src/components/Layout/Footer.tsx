@@ -69,7 +69,7 @@ const Footer = () => {
             <h3 className="text-gray-900 font-semibold mb-4">TTelGo eSIM</h3>
             <ul className="space-y-2">
               <li>
-                <Link to="/help" className="text-gray-600 hover:text-telgo-red transition-colors text-sm">
+                <Link to="/#faq" className="text-gray-600 hover:text-telgo-red transition-colors text-sm">
                   FAQ
                 </Link>
               </li>
@@ -145,14 +145,6 @@ const Footer = () => {
             <div className="flex flex-col items-center md:items-end">
               <p className="text-gray-600 font-medium mb-3 text-sm">Discover our app</p>
               <div className="flex items-center gap-3">
-                {/* QR Code */}
-                <div className="flex-shrink-0">
-                  <img
-                    src="/IMAGES/QR.png"
-                    alt="QR Code - Scan to download app"
-                    className="w-20 h-20 object-contain border border-gray-200 rounded-lg p-1 bg-white"
-                  />
-                </div>
                 {/* App Store Buttons */}
                 <div className="flex gap-3">
                   <a href="#" className="flex items-center gap-2 px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors text-sm">
@@ -176,7 +168,7 @@ const Footer = () => {
         {/* Copyright Section - Full Bottom */}
         <div className="mt-8 pt-6 border-t border-gray-300">
           <div className="flex justify-center items-center py-4">
-            <p className="text-gray-800 text-lg font-semibold">
+            <p className="text-gray-800 text-sm font-semibold">
               TTelGo, Powered by the TikTel Ltd. (UK) {currentYear} - {currentYear + 1}
             </p>
           </div>

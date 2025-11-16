@@ -65,9 +65,15 @@ const Contact = () => {
   const contactMethods = [
     {
       icon: (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-        </svg>
+        <img 
+          src="/IMAGES/gmail.png" 
+          alt="Email" 
+          className="w-8 h-8 object-contain"
+          onError={(e) => {
+            const target = e.target as HTMLImageElement
+            target.style.display = 'none'
+          }}
+        />
       ),
       title: 'Email Us',
       description: 'Send us an email anytime',
@@ -77,34 +83,51 @@ const Contact = () => {
     },
     {
       icon: (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-        </svg>
+        <img 
+          src="/IMAGES/whatsapp.png" 
+          alt="WhatsApp" 
+          className="w-8 h-8 object-contain"
+          onError={(e) => {
+            const target = e.target as HTMLImageElement
+            target.style.display = 'none'
+          }}
+        />
       ),
       title: 'Call Us',
       description: 'Mon-Fri from 8am to 6pm',
-      contact: '+44 20 1234 5678',
-      link: 'tel:+442012345678',
+      contact: '+44 7818 984385',
+      link: 'https://wa.me/447818984385',
       color: 'bg-green-500'
     },
     {
       icon: (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-        </svg>
+        <img 
+          src="/IMAGES/placeholder.png" 
+          alt="Location" 
+          className="w-8 h-8 object-contain"
+          onError={(e) => {
+            const target = e.target as HTMLImageElement
+            target.style.display = 'none'
+          }}
+        />
       ),
       title: 'Visit Us',
       description: 'Come say hello at our office',
       contact: 'London, United Kingdom',
-      link: '#',
+      link: 'https://www.google.com/maps/search/?api=1&query=71-75+Shelton+Street,+Covent+Garden,+London,+WC2H+9JQ',
       color: 'bg-purple-500'
     },
     {
       icon: (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
-        </svg>
+        <img 
+          src="/IMAGES/live.png" 
+          alt="Live Chat" 
+          className="w-8 h-8 object-contain"
+          onError={(e) => {
+            const target = e.target as HTMLImageElement
+            target.style.display = 'none'
+          }}
+        />
       ),
       title: 'Live Chat',
       description: '24/7 customer support',
@@ -117,7 +140,7 @@ const Contact = () => {
   return (
     <div className="w-full">
       {/* Hero Section */}
-      <section className="relative py-12 md:py-20 overflow-hidden">
+      <section className="relative py-3 md:py-5 overflow-hidden">
         <HeroBackground />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
@@ -149,31 +172,28 @@ const Contact = () => {
               </p>
             </motion.div>
 
-            {/* Right Image/Illustration */}
+            {/* Right Image */}
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
               className="flex items-center justify-center lg:justify-end pr-8 lg:pr-16 xl:pr-24"
             >
-              <div className="relative w-full max-w-xl">
-                {/* Decorative circles */}
-                <div className="absolute -top-10 -right-10 w-32 h-32 bg-telgo-red/10 rounded-full blur-2xl"></div>
-                <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-blue-500/10 rounded-full blur-2xl"></div>
-                
-                {/* Contact illustration placeholder */}
-                <div className="relative bg-gradient-to-br from-telgo-red/20 to-blue-500/20 rounded-2xl p-12 backdrop-blur-sm border border-white/50">
-                  <div className="text-center">
-                    <div className="inline-flex items-center justify-center w-24 h-24 bg-telgo-red rounded-full mb-6">
-                      <svg className="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                      </svg>
-                    </div>
-                    <h3 className="text-2xl font-bold text-gray-900 mb-2">We're Here to Help</h3>
-                    <p className="text-gray-600">24/7 Support Available</p>
-                  </div>
-                </div>
-              </div>
+              <img
+                src="/IMAGES/ABouttt.png"
+                alt="Contact Us"
+                className="w-full max-w-xl h-auto object-contain rounded-lg"
+                style={{ 
+                  position: 'relative',
+                  zIndex: 10
+                }}
+                onLoad={() => {
+                  // Image loaded successfully
+                }}
+                onError={() => {
+                  console.error('Failed to load ABouttt.png');
+                }}
+              />
             </motion.div>
           </div>
         </div>
@@ -211,7 +231,7 @@ const Contact = () => {
                 whileHover={{ scale: 1.05, y: -5 }}
                 className="bg-white rounded-xl p-6 shadow-md hover:shadow-xl transition-all cursor-pointer group"
               >
-                <div className={`${method.color} w-14 h-14 rounded-lg flex items-center justify-center text-white mb-4 group-hover:scale-110 transition-transform`}>
+                <div className="flex items-center justify-start mb-2 group-hover:scale-110 transition-transform">
                   {method.icon}
                 </div>
                 <h3 className="text-xl font-semibold text-gray-900 mb-2">{method.title}</h3>
@@ -407,25 +427,37 @@ const Contact = () => {
                 </h3>
                 <div className="space-y-4">
                   <div className="flex items-start gap-4">
-                    <div className="flex-shrink-0 w-12 h-12 bg-telgo-red/10 rounded-lg flex items-center justify-center">
-                      <svg className="w-6 h-6 text-telgo-red" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                      </svg>
+                    <div className="flex-shrink-0 flex items-center justify-start">
+                      <img 
+                        src="/IMAGES/placeholder.png" 
+                        alt="Address" 
+                        className="w-8 h-8 object-contain"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement
+                          target.style.display = 'none'
+                        }}
+                      />
                     </div>
                     <div>
                       <h4 className="font-semibold text-gray-900 mb-1">Address</h4>
                       <p className="text-gray-600">
                         TikTel Ltd. (UK)<br />
-                        London, United Kingdom
+                        71-75 Shelton Street, Covent Garden<br />
+                        London, WC2H 9JQ, United Kingdom
                       </p>
                     </div>
                   </div>
                   <div className="flex items-start gap-4">
-                    <div className="flex-shrink-0 w-12 h-12 bg-telgo-red/10 rounded-lg flex items-center justify-center">
-                      <svg className="w-6 h-6 text-telgo-red" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
+                    <div className="flex-shrink-0 flex items-center justify-start">
+                      <img 
+                        src="/IMAGES/working-time.png" 
+                        alt="Business Hours" 
+                        className="w-8 h-8 object-contain"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement
+                          target.style.display = 'none'
+                        }}
+                      />
                     </div>
                     <div>
                       <h4 className="font-semibold text-gray-900 mb-1">Business Hours</h4>
@@ -438,18 +470,18 @@ const Contact = () => {
                 </div>
               </div>
 
-              {/* Right - Map Placeholder */}
-              <div className="relative h-64 lg:h-80 rounded-xl overflow-hidden bg-gray-200 border-2 border-gray-300">
-                <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
-                  <div className="text-center">
-                    <svg className="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                    <p className="text-gray-600 font-medium">Map View</p>
-                    <p className="text-gray-500 text-sm mt-2">London, United Kingdom</p>
-                  </div>
-                </div>
+              {/* Right - Google Map */}
+              <div className="relative h-64 lg:h-80 rounded-xl overflow-hidden border-2 border-gray-300">
+                <iframe
+                  src="https://www.google.com/maps?q=71-75+Shelton+Street,+Covent+Garden,+London,+WC2H+9JQ&output=embed"
+                  width="100%"
+                  height="100%"
+                  style={{ border: 0 }}
+                  allowFullScreen
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  title="TikTel Ltd. Office Location - 71-75 Shelton Street, Covent Garden, London, WC2H 9JQ"
+                ></iframe>
               </div>
             </div>
           </motion.div>

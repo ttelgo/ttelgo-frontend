@@ -38,7 +38,7 @@ const Blog = () => {
   return (
     <div className="w-full min-h-screen">
       {/* Hero Section */}
-      <section className="relative py-16 md:py-24 bg-gradient-to-b from-gray-50 to-white">
+      <section className="relative py-4 md:py-6 bg-gradient-to-b from-gray-50 to-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}

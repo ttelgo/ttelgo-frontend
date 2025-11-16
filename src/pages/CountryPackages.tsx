@@ -84,7 +84,7 @@ const CountryPackages = () => {
   return (
     <div className="w-full min-h-screen">
       {/* Hero Section */}
-      <section className="relative py-8 md:py-12 border-b border-gray-200 overflow-hidden">
+      <section className="relative py-2 md:py-4 border-b border-gray-200 overflow-hidden">
         {/* Background Image */}
         <div 
           className="absolute inset-0 w-full h-full"

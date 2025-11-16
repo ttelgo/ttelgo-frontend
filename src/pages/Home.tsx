@@ -1,7 +1,7 @@
 import { useState, useRef, useMemo, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { allCountries as countriesData } from '@/utils/countriesData'
+import { allCountries as countriesData, Country } from '@/utils/countriesData'
 
 // Generate random price between 0.50 and 2.00
 const getRandomPrice = () => {
@@ -193,6 +193,25 @@ const Home = () => {
   const handleDestinationsCountryClick = (countryName: string) => {
     navigate(`/country/${encodeURIComponent(countryName)}`)
     setDestinationsSearchQuery('') // Clear search after navigation
+  }
+
+  // Handle destination card click - navigate to country packages page to select package
+  const handleDestinationClick = (destination: { name: string; price: string }) => {
+    // Extract country name from destination (e.g., "Rome, Italy" -> "Italy")
+    let countryName = destination.name.split(', ').pop() || destination.name
+    
+    // Map common abbreviations to full country names
+    const countryNameMap: Record<string, string> = {
+      'UK': 'United Kingdom',
+      'USA': 'United States',
+      'UAE': 'United Arab Emirates',
+    }
+    
+    // Replace abbreviation with full name if it exists
+    countryName = countryNameMap[countryName] || countryName
+    
+    // Navigate to country packages page where user can select their preferred package
+    navigate(`/country/${encodeURIComponent(countryName)}`)
   }
 
   // All 200+ countries for Global eSIMs - Generated once with fixed prices
@@ -603,7 +622,7 @@ const Home = () => {
   return (
     <div className="w-full">
       {/* Hero Section */}
-      <section className="relative py-12 md:py-20 overflow-visible">
+      <section className="relative py-3 md:py-5 overflow-visible">
         {/* Background Image - Covering entire section */}
         <HeroBackground />
         
@@ -803,6 +822,7 @@ const Home = () => {
                 {destinations.map((dest, index) => (
                   <div
                     key={index}
+                    onClick={() => handleDestinationClick(dest)}
                     className="flex-shrink-0 bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow cursor-pointer w-[300px]"
                   >
                     <div className="h-48 bg-gray-200 flex items-center justify-center">
@@ -1267,7 +1287,7 @@ const Home = () => {
       </section>
 
       {/* FAQ Section */}
-      <section className="py-16 bg-transparent">
+      <section id="faq" className="py-16 bg-transparent">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}

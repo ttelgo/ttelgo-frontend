@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion'
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 // Hero Background Component - HeroStyle.png background
 const HeroBackground = () => {
@@ -28,6 +29,7 @@ const HeroBackground = () => {
 }
 
 const About = () => {
+  const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [, setTeamIndex] = useState(0)
 
@@ -52,7 +54,7 @@ const About = () => {
   return (
     <div className="w-full">
       {/* Hero Section */}
-      <section className="relative py-12 md:py-20 overflow-hidden">
+      <section className="relative py-3 md:py-5 overflow-hidden">
         <HeroBackground />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
@@ -65,7 +67,7 @@ const About = () => {
             >
               {/* Subtitle */}
               <div className="mb-4 text-center lg:text-left">
-                <span className="text-xs text-gray-600 uppercase tracking-[0.2em] font-medium">
+                <span className="text-xs text-telgo-red uppercase tracking-[0.2em] font-semibold">
                   WE CONNECT. GLOBALLY.
                 </span>
               </div>
@@ -160,7 +162,10 @@ const About = () => {
                 TTelGo&apos;s mission is to empower global travel by connecting people through curated local insights and seamless digital access - eliminating the burden of costly data roaming in a connected world.
               </p>
               <div className="relative inline-block">
-                <button className="px-8 py-3 bg-telgo-red text-white rounded-lg font-semibold hover:bg-red-700 transition-colors relative z-10">
+                <button 
+                  onClick={() => navigate('/blog')}
+                  className="px-8 py-3 bg-telgo-red text-white rounded-lg font-semibold hover:bg-red-700 transition-colors relative z-10"
+                >
                   View More
                 </button>
                 <div className="absolute -right-4 top-1/2 -translate-y-1/2 w-8 h-8 bg-white rounded-full -z-0"></div>
@@ -247,7 +252,10 @@ const About = () => {
                 From AI and IT to fiber networks and cloud solutions, TikTel empowers businesses to thrive in a hyper-connected world - with TTelGo as its flagship eSIM platform, delivering instant, borderless mobile access across 200+ global destinations.
               </p>
               <div className="relative inline-block">
-                <button className="px-8 py-3 bg-telgo-red text-white rounded-lg font-semibold hover:bg-red-700 transition-colors relative z-10">
+                <button 
+                  onClick={() => navigate('/blog')}
+                  className="px-8 py-3 bg-telgo-red text-white rounded-lg font-semibold hover:bg-red-700 transition-colors relative z-10"
+                >
                   View More
                 </button>
                 <div className="absolute -right-4 top-1/2 -translate-y-1/2 w-8 h-8 bg-white rounded-full -z-0"></div>

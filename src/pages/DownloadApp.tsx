@@ -44,7 +44,7 @@ const DownloadApp = () => {
   return (
     <div className="w-full">
       {/* Hero Section */}
-      <section className="relative pt-2 pb-4 md:pt-4 md:pb-6 overflow-hidden" style={{ minHeight: 'auto' }}>
+      <section className="relative pt-1 pb-1 md:pt-2 md:pb-2 overflow-hidden" style={{ minHeight: 'auto' }}>
         <HeroBackground />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
@@ -71,23 +71,6 @@ const DownloadApp = () => {
               <p className="text-lg text-gray-700 mb-6 leading-relaxed font-medium">
                 Download the TTelGo app today from the Play Store or App Store for instant eSIM activation and seamless support – global connectivity is just a tap away.
               </p>
-              
-              {/* Search Bar */}
-              <div className="relative max-w-md">
-                <div className="absolute left-4 top-1/2 transform -translate-y-1/2 pointer-events-none">
-                  <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                  </svg>
-                </div>
-                <input
-                  type="text"
-                  placeholder="Search for your next destination"
-                  className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-telgo-red focus:border-transparent text-gray-900 bg-white"
-                  style={{
-                    boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)'
-                  }}
-                />
-              </div>
             </motion.div>
 
             {/* Right - 3D Mobile Image */}

@@ -1,7 +1,7 @@
 import { useState, useRef, useMemo, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { allCountries as countriesData, Country } from '@/utils/countriesData'
+import { allCountries as countriesData } from '@/utils/countriesData'
 
 // Generate random price between 0.50 and 2.00
 const getRandomPrice = () => {

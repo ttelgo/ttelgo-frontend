@@ -2,10 +2,10 @@
 # Usage: .\deploy-fast.ps1
 
 param(
-    [string]$PemKeyPath = "C:\Users\Zia\Desktop\Video\ttelgo.pem",
+    [string]$PemKeyPath = "D:\tiktel\ttelgo.pem",
     [string]$ServerUser = "ubuntu",
     [string]$ServerIP = "3.88.101.239",
-    [string]$ProjectPath = "C:\Users\Zia\Desktop\TTelGoWeb2",
+    [string]$ProjectPath = "D:\tiktel\front-end\TTelGoWeb2",
     [string]$CommitMessage = ""
 )
 
@@ -64,9 +64,9 @@ if ($hasUncommitted) {
     Write-Host "No changes to commit or push, skipping git operations..." -ForegroundColor Gray
 }
 
-# Build locally
-Write-Host "Building..." -ForegroundColor Yellow
-npm run build
+# Build locally (production build)
+Write-Host "Building for production..." -ForegroundColor Yellow
+npm run build:production
 if ($LASTEXITCODE -ne 0) {
     Write-Host "Build failed!" -ForegroundColor Red
     exit 1

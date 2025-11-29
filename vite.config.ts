@@ -16,5 +16,13 @@ export default defineConfig({
     host: 'localhost',
     port: 5173,
     strictPort: true,
+    proxy: {
+      '/api': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+        secure: false,
+        // Vite proxy will forward /api requests to http://localhost:8080/api
+      },
+    },
   },
 })

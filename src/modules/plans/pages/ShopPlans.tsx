@@ -23,7 +23,7 @@ const ShopPlans = () => {
   }, [searchParams])
 
   const handleRegionClick = (regionName: string) => {
-    // Navigate to country selection page for this region
+    // Navigate to the country selection page for the selected region
     navigate(`/region/${encodeURIComponent(regionName)}`)
   }
 
@@ -140,25 +140,7 @@ const ShopPlans = () => {
   return (
     <div className="w-full min-h-screen">
       {/* Hero Section */}
-      <section className="relative py-2 md:py-4 border-b border-gray-200 overflow-visible">
-        {/* Background Image */}
-        <div 
-          className="absolute inset-0 w-full h-full"
-          style={{
-            zIndex: 0,
-            backgroundImage: 'url(/IMAGES/HeroStyle.png)',
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            backgroundRepeat: 'no-repeat'
-          }}
-        />
-        {/* Overlay for better text readability */}
-        <div 
-          className="absolute inset-0 w-full h-full bg-white/50"
-          style={{
-            zIndex: 1
-          }}
-        />
+      <section className="relative py-2 md:py-4 border-b border-gray-200 overflow-visible bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -331,7 +313,7 @@ const ShopPlans = () => {
                 return (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {filteredRegions.map((region, index) => {
-                      // Get all countries in this region from regional plans
+                      // Retrieve all countries within this region from regional plans data
                       const regionCountries = new Set<string>()
                       regionalPlans
                         .filter(plan => plan.continent === region)

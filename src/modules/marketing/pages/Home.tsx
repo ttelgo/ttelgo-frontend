@@ -1,4 +1,4 @@
-import { useState, useRef, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect, useRef } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { allCountries as countriesData } from '@/modules/countries/utils/countriesData'
@@ -8,16 +8,16 @@ const getRandomPrice = () => {
   return (Math.random() * 1.5 + 0.5).toFixed(2)
 }
 
-// Hero Background Component - HeroStyle.png background
+// Hero Background Component - Image background
 const HeroBackground = () => {
   return (
     <>
-      {/* Hero Background Image */}
+      {/* Image background */}
       <div 
         className="absolute inset-0 w-full h-full"
         style={{
           zIndex: 0,
-          backgroundImage: 'url(/IMAGES/HeroStyle.png)',
+          backgroundImage: 'url(/IMAGES/travels.jpg)',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat'
@@ -25,7 +25,7 @@ const HeroBackground = () => {
       />
       {/* Overlay for better text readability */}
       <div 
-        className="absolute inset-0 w-full h-full bg-white/50"
+        className="absolute inset-0 w-full h-full bg-black/20"
         style={{
           zIndex: 1
         }}
@@ -51,7 +51,7 @@ const Home = () => {
   const destinationsSearchResultsRef = useRef<HTMLDivElement>(null)
   const destinationsSearchInputRef = useRef<HTMLInputElement>(null)
 
-  // Handle scrolling to popular destinations section when navigating from other pages
+  // Automatically scroll to the popular destinations section when navigating from other pages using hash
   useEffect(() => {
     if (location.hash === '#popular-destinations') {
       setTimeout(() => {
@@ -210,7 +210,7 @@ const Home = () => {
     // Replace abbreviation with full name if it exists
     countryName = countryNameMap[countryName] || countryName
     
-    // Navigate to country packages page where user can select their preferred package
+    // Navigate to the country packages page where users can browse and select their preferred eSIM plan
     navigate(`/country/${encodeURIComponent(countryName)}`)
   }
 
@@ -621,20 +621,23 @@ const Home = () => {
 
   return (
     <div className="w-full">
-      {/* Hero Section */}
-      <section className="relative py-3 md:py-5 overflow-visible">
-        {/* Background Image - Covering entire section */}
-        <HeroBackground />
-        
+      {/* Hero Section - Merged with Navbar */}
+      <section 
+        className="relative overflow-hidden bg-white"
+        style={{
+          paddingTop: '3rem', // Space for navbar
+          paddingBottom: '4rem' // Fixed bottom padding instead of minHeight
+        }}
+      >
         {/* Content Container with proper z-index */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-[1fr_1fr] gap-8 lg:gap-8 items-center">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 -mt-8 pb-2">
+          <div className="flex items-center gap-8 lg:gap-12">
             {/* Left Content */}
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6 }}
-              className="max-w-[600px] lg:max-w-none relative z-20 pl-8 lg:pl-16 xl:pl-24"
+              className="flex-1 max-w-[800px] relative z-20 pl-8 lg:pl-16 xl:pl-24"
             >
               {/* Redeem Banner Button */}
               <motion.div 
@@ -644,22 +647,19 @@ const Home = () => {
                 transition={{ duration: 0.5 }}
               >
                 <motion.button
-                  whileHover={{ scale: 1.05, boxShadow: '0 8px 16px rgba(204, 0, 0, 0.3)' }}
                   whileTap={{ scale: 0.95 }}
-                  className="relative overflow-hidden group rounded-2xl"
+                  className="relative overflow-hidden group rounded-2xl bg-gradient-to-r from-telgo-red to-red-600 hover:bg-white transition-colors duration-300"
                   onClick={() => {
                     // Handle redeem action - can navigate to a page or show modal
                     alert('Redeem 1GB - Feature coming soon!')
                   }}
                   style={{
-                    background: 'linear-gradient(135deg, #cc0000 0%, #ff3333 100%)',
-                    boxShadow: '0 4px 12px rgba(204, 0, 0, 0.25)',
-                    transition: 'all 0.3s ease'
+                    boxShadow: '0 4px 12px rgba(204, 0, 0, 0.25)'
                   }}
                 >
-                  <span className="relative z-10 text-white font-bold text-sm uppercase tracking-wide px-6 py-3 rounded-2xl inline-flex items-center gap-2">
+                  <span className="relative z-10 text-white group-hover:text-black font-bold text-sm uppercase tracking-wide px-6 py-3 rounded-2xl inline-flex items-center gap-2 transition-colors duration-300">
                     <svg 
-                      className="w-5 h-5 group-hover:rotate-12 transition-transform duration-300" 
+                      className="w-5 h-5 group-hover:text-black transition-colors duration-300" 
                       fill="none" 
                       stroke="currentColor" 
                       viewBox="0 0 24 24"
@@ -668,7 +668,7 @@ const Home = () => {
                     </svg>
                     Redeem 1GB for your next trip
                     <svg 
-                      className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" 
+                      className="w-4 h-4 group-hover:text-black transition-colors duration-300" 
                       fill="none" 
                       stroke="currentColor" 
                       viewBox="0 0 24 24"
@@ -693,12 +693,14 @@ const Home = () => {
               </motion.div>
               
               {/* Main Headline */}
-              <h1 className="text-4xl md:text-5xl lg:text-[3.5rem] xl:text-6xl font-bold text-gray-900 mb-6 leading-[1.2]" style={{ textShadow: '0 2px 4px rgba(0, 0, 0, 0.1)' }}>
+              <h1 className="text-4xl md:text-5xl lg:text-[3.5rem] xl:text-6xl font-bold text-gray-900 mb-6 leading-[1.2]">
                 <span>Stay connected</span>
                 <br />
                 <span>
                   in over{' '}
-                  <span className="text-telgo-red underline decoration-2 underline-offset-4">
+                  <span 
+                    className="text-telgo-red underline decoration-2 underline-offset-4"
+                  >
                     200+ destinations
                   </span>
                 </span>
@@ -706,10 +708,28 @@ const Home = () => {
                 <span>worldwide</span>
               </h1>
               
-              {/* Sub-headline */}
-              <p className="text-lg text-gray-700 mb-8 max-w-xl font-medium">
-                Scalable, secure, API-ready eSIM connectivity for businesses, travel platforms and fintech.
-              </p>
+              {/* View All Plans Button */}
+              <motion.button
+                onClick={() => {
+                  const element = document.getElementById('popular-destinations')
+                  if (element) {
+                    element.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                  }
+                }}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="mb-8 inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-telgo-red to-red-600 text-white font-semibold rounded-2xl hover:from-red-700 hover:to-red-800 transition-all duration-300 shadow-lg hover:shadow-xl"
+              >
+                View All Plans
+                <svg 
+                  className="w-5 h-5" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </motion.button>
               
               {/* Search Bar */}
               <div className="relative max-w-md hero-search-container" style={{ zIndex: 9999 }}>
@@ -764,41 +784,30 @@ const Home = () => {
                 )}
               </div>
             </motion.div>
-
-            {/* Right Hero Image */}
+            
+            {/* Right Image */}
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className="hidden lg:flex relative w-full items-center justify-end pr-0 lg:pr-0 xl:pr-0"
-              style={{ zIndex: 15 }}
+              className="hidden lg:flex flex-1 items-center justify-center relative z-20 pr-8 lg:pr-16 xl:pr-24"
             >
-              <div className="relative w-full flex items-center justify-end translate-x-12 lg:translate-x-20 xl:translate-x-32">
-                <img
-                  src="/IMAGES/Hero Right.png"
-                  alt="Hero Right"
-                  className="w-full h-auto object-cover rounded-lg"
-                  style={{ 
-                    display: 'block',
-                    maxHeight: '700px',
-                    width: '100%',
-                    height: 'auto'
-                  }}
-                  onLoad={() => {
-                    // Image loaded successfully
-                  }}
-                  onError={() => {
-                    console.error('Failed to load Hero Right.png');
-                  }}
-                />
-              </div>
+              <img 
+                src="/IMAGES/HeroR.png" 
+                alt="Hero illustration" 
+                className="w-full h-auto max-w-xl object-contain"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.style.display = 'none';
+                }}
+              />
             </motion.div>
           </div>
         </div>
       </section>
 
       {/* Your Journey Section */}
-      <section className="py-16 bg-transparent">
+      <section className="pt-4 pb-16 bg-transparent relative z-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -807,10 +816,10 @@ const Home = () => {
             transition={{ duration: 0.6 }}
           >
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4 text-center">
-              Your Journey With TTelGo Travel eSIM
+              Top 10 Destinations
             </h2>
             <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto text-center">
-              200+ destinations. Unlimited possibilities. TTelGo lets you choose the perfect data plan for your journey.
+              Explore our top 10 most popular destinations. Discover the perfect eSIM plan for your next adventure.
             </p>
             
             {/* Destination Cards - Horizontal Scroll */}
@@ -874,8 +883,8 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Popular Destinations Section */}
-      <section id="popular-destinations" className="py-16 bg-transparent">
+      {/* All Destinations Section */}
+      <section id="popular-destinations" className="pt-0 pb-16 bg-transparent">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -884,10 +893,13 @@ const Home = () => {
             transition={{ duration: 0.6 }}
           >
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4 text-center">
-              Popular Destinations
+              All Destinations
             </h2>
-            <p className="text-lg text-gray-600 mb-6 max-w-2xl mx-auto text-center">
-              Explore our wide range of eSIM options for destinations around the world. Choose from local, regional, or global plans to stay connected wherever your journey takes you.
+            <p className="text-lg text-gray-600 mb-4 max-w-2xl mx-auto text-center">
+              Browse all available destinations and find the perfect eSIM plan for your travels.
+            </p>
+            <p className="text-sm text-gray-500 mb-6 max-w-2xl mx-auto text-center">
+              Please dial <span className="font-bold">*#06#</span> to check device compatibility, if EID exist then your device is compatible.
             </p>
             
             {/* Search Bar */}
@@ -1165,7 +1177,7 @@ const Home = () => {
       </section>
 
       {/* Forget About Roaming Section */}
-      <section className="py-16 bg-transparent">
+      <section className="pt-0 pb-16 bg-transparent -mt-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-20 items-center">
             {/* Left Content */}
@@ -1176,7 +1188,7 @@ const Home = () => {
               transition={{ duration: 0.6 }}
             >
               <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-8">
-                Forget About Roaming. Get A TTelGo eSIM And Enjoy Your Trips
+                Why Choose Us
               </h2>
               
               <div className="space-y-6">
@@ -1287,7 +1299,7 @@ const Home = () => {
       </section>
 
       {/* FAQ Section */}
-      <section id="faq" className="py-16 bg-transparent">
+      <section id="faq" className="pt-0 pb-16 bg-transparent -mt-20">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -1296,7 +1308,7 @@ const Home = () => {
             transition={{ duration: 0.6 }}
           >
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-8 text-center">
-              TTelGo eSIM FAQ
+              TTelGo FAQs
             </h2>
             
             <div className="space-y-4">
@@ -1348,11 +1360,11 @@ const Home = () => {
       </section>
 
       {/* Testimonials Section */}
-      <section className="pt-20 pb-4 bg-transparent">
+      <section className="pt-0 pb-16 bg-transparent">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-[1.1fr_1.9fr] gap-8 lg:gap-12 items-start">
-            {/* Left Section - Label, Heading, and Pagination Dots */}
-            <div className="flex flex-col justify-between min-h-[400px] lg:min-h-[450px]">
+            {/* Left Section - Label and Heading */}
+            <div className="flex flex-col">
               {/* Top: Label and Heading */}
               <div>
                 <div className="mb-6">
@@ -1360,26 +1372,10 @@ const Home = () => {
                     TESTIMONIALS
                   </span>
                 </div>
-                <h2 className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-gray-900 leading-[1.2]">
+                <h2 className="text-3xl md:text-4xl font-bold text-gray-900 leading-[1.2]">
                   <span className="block whitespace-nowrap">What People Say</span>
                   <span className="block whitespace-nowrap">About Us.</span>
                 </h2>
-              </div>
-              
-              {/* Bottom: Pagination Dots - Horizontal */}
-              <div className="flex gap-2.5 mt-6">
-                {testimonials.map((_, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setTestimonialIndex(index)}
-                    className={`rounded-full transition-all duration-300 ${
-                      testimonialIndex === index
-                        ? 'bg-telgo-red h-2 w-8'
-                        : 'bg-gray-200 h-2 w-2'
-                    }`}
-                    aria-label={`Go to testimonial ${index + 1}`}
-                  />
-                ))}
               </div>
             </div>
 
@@ -1567,7 +1563,7 @@ const Home = () => {
       </section>
 
       {/* Subscribe Section */}
-      <section className="py-16 bg-transparent relative">
+      <section className="pt-0 pb-16 bg-transparent relative -mt-20">
         {/* Dots and Plus Pattern Background */}
         <div 
           className="absolute inset-0 opacity-30"

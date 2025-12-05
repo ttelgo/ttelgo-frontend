@@ -94,8 +94,8 @@ const Checkout = () => {
     return v
   }
 
-  // Card validation removed - payment is handled automatically by backend
-  // Card fields are kept for UI purposes only
+  // Payment processing is handled automatically by the backend
+  // Card input fields are displayed for UI consistency but validation is not required
 
   const validateBilling = () => {
     const newErrors: Record<string, string> = {}
@@ -183,9 +183,8 @@ const Checkout = () => {
       return
     }
     
-    // Note: Card validation is optional since payment is handled by backend
-    // Only validate if user explicitly selected card payment and wants to see errors
-    // For now, we skip card validation since backend handles payment
+    // Card validation is optional since payment processing is handled by the backend
+    // The backend automatically processes payments, so frontend card validation is not required
     
     setIsProcessing(true)
     setErrors({})
@@ -194,8 +193,8 @@ const Checkout = () => {
       // Import checkout service
       const { checkoutService } = await import('@/modules/checkout/services/checkout.service')
       
-      // Get bundle ID from plan
-      // Priority: bundleId (from API) > id (plan ID)
+      // Extract bundle ID from plan data
+      // Priority order: bundleId from API response, then fallback to plan ID
       const bundleId = (plan as any).bundleId || plan.id
       
       console.log('Creating order with bundleId:', bundleId)

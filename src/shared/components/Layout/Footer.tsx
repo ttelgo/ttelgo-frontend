@@ -32,7 +32,7 @@ const Footer = () => {
 
   return (
     <footer className="bg-white border-t border-gray-200 mt-auto">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-2">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Company Info */}
           <div className="col-span-1 md:col-span-2">
@@ -59,6 +59,16 @@ const Footer = () => {
               <li>
                 <Link to="/contact" className="text-gray-600 hover:text-telgo-red transition-colors text-sm">
                   Contact Us
+                </Link>
+              </li>
+              <li>
+                <Link to="/terms" className="text-gray-600 hover:text-telgo-red transition-colors text-sm">
+                  Terms & Conditions
+                </Link>
+              </li>
+              <li>
+                <Link to="/privacy" className="text-gray-600 hover:text-telgo-red transition-colors text-sm">
+                  Privacy Policy
                 </Link>
               </li>
             </ul>
@@ -166,11 +176,50 @@ const Footer = () => {
         </div>
 
         {/* Copyright Section - Full Bottom */}
-        <div className="mt-8 pt-6 border-t border-gray-300">
-          <div className="flex justify-center items-center py-4">
+        <div className="mt-8 pt-4 border-t border-gray-300">
+          <div className="flex flex-col items-center gap-3 py-2">
             <p className="text-gray-800 text-sm font-semibold">
               TTelGo, Powered by the TikTel Ltd. (UK) {currentYear} - {currentYear + 1}
             </p>
+            {/* Payment Method Icons */}
+            <div className="flex items-center gap-4 flex-wrap justify-center">
+              <img 
+                src="/IMAGES/gpay.svg" 
+                alt="Google Pay" 
+                className="h-12 w-auto object-contain opacity-80 hover:opacity-100 transition-opacity"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement
+                  target.style.display = 'none'
+                }}
+              />
+              <img 
+                src="/IMAGES/applepay.svg" 
+                alt="Apple Pay" 
+                className="h-12 w-auto object-contain opacity-80 hover:opacity-100 transition-opacity"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement
+                  target.style.display = 'none'
+                }}
+              />
+              <img 
+                src="/IMAGES/visa.svg" 
+                alt="Visa" 
+                className="h-12 w-auto object-contain opacity-80 hover:opacity-100 transition-opacity"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement
+                  target.style.display = 'none'
+                }}
+              />
+              <img 
+                src="/IMAGES/mastercard.svg" 
+                alt="Mastercard" 
+                className="h-12 w-auto object-contain opacity-80 hover:opacity-100 transition-opacity"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement
+                  target.style.display = 'none'
+                }}
+              />
+            </div>
           </div>
         </div>
       </div>

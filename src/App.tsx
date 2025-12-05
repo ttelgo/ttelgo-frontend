@@ -27,6 +27,8 @@ import MyeSIM from '@/modules/dashboard/pages/MyeSIM'
 // Support module
 import HelpCentre from '@/modules/support/pages/HelpCentre'
 import Contact from '@/modules/support/pages/Contact'
+import TermsAndConditions from '@/modules/support/pages/TermsAndConditions'
+import PrivacyPolicy from '@/modules/support/pages/PrivacyPolicy'
 
 // Blog module
 import Blog from '@/modules/blog/pages/Blog'
@@ -66,6 +68,8 @@ function App() {
           {/* Support routes */}
           <Route path="/help" element={<HelpCentre />} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="/terms" element={<TermsAndConditions />} />
+          <Route path="/privacy" element={<PrivacyPolicy />} />
           
           {/* Blog routes */}
           <Route path="/blog" element={<Blog />} />

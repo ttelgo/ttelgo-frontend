@@ -41,7 +41,7 @@ export interface ActivateBundleResponse {
   currency?: string
   status?: string
   statusMessage?: string
-  orderReference?: string // UUID for QR code endpoint - this is the key field!
+  orderReference?: string // UUID identifier required for QR code endpoint retrieval
   createdDate?: string
   assigned?: boolean
   // Legacy fields for backward compatibility

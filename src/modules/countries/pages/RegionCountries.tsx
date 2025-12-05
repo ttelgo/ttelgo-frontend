@@ -13,7 +13,7 @@ const RegionCountries = () => {
   const decodedRegionName = regionName ? decodeURIComponent(regionName) : ''
 
   // Map region names from regional plans to country data regions
-  // Note: 'America' in regional plans includes both North and South America
+  // The 'America' region in regional plans encompasses both North and South America
   const regionMapping: Record<string, string[]> = {
     'Europe': ['Europe'],
     'Asia': ['Asia'],
@@ -22,9 +22,7 @@ const RegionCountries = () => {
     'Middle East': ['Middle East'],
   }
 
-  // Note: regionCountriesFromPlans is used indirectly through the country matching logic below
-
-  // Get full country data for countries in this region
+  // Retrieve complete country data for all countries within the selected region
   const countriesInRegion = useMemo(() => {
     // First, get countries from regional plans
     const countryMap = new Map<string, { name: string; flag: string }>()
@@ -38,7 +36,7 @@ const RegionCountries = () => {
         })
       })
 
-    // Match with allCountries data where possible
+    // Match regional plan countries with complete country data when available
     const matchedCountries: Array<Country & { flag: string }> = []
     const unmatchedCountries: Array<{ name: string; flag: string }> = []
 

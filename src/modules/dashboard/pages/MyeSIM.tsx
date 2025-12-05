@@ -4,16 +4,16 @@ import { motion } from 'framer-motion'
 import { esimService } from '@/modules/esim/services/esim.service'
 import { processQRCodeData } from '@/shared/utils/qrCodeUtils'
 
-// Hero Background Component - HeroStyle.png background
+// Hero Background Component - Image background
 const HeroBackground = () => {
   return (
     <>
-      {/* Hero Background Image */}
+      {/* Image background */}
       <div 
         className="absolute inset-0 w-full h-full"
         style={{
           zIndex: 0,
-          backgroundImage: 'url(/IMAGES/HeroStyle.png)',
+          backgroundImage: 'url(/IMAGES/travels.jpg)',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat'
@@ -21,7 +21,7 @@ const HeroBackground = () => {
       />
       {/* Overlay for better text readability */}
       <div 
-        className="absolute inset-0 w-full h-full bg-white/50"
+        className="absolute inset-0 w-full h-full bg-black/20"
         style={{
           zIndex: 1
         }}
@@ -97,7 +97,7 @@ const MyeSIM = () => {
           }
         }
 
-        // Last resort: try matchingId (but this usually doesn't work)
+        // Fallback option: attempt to use matchingId (note: this may not work as QR code endpoint requires UUID)
         if (!qrCodeId && matchingIdFromUrl) {
           qrCodeId = matchingIdFromUrl
           console.log('Using matchingId (may not work):', qrCodeId)
@@ -250,31 +250,32 @@ const MyeSIM = () => {
 
   return (
     <div className="w-full">
-      {/* Hero Section */}
-      <section className="relative py-3 md:py-5 overflow-hidden">
-        <HeroBackground />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_0.8fr] gap-8 lg:gap-12 items-center">
+      {/* Hero Section - Merged with Navbar */}
+      <section 
+        className="relative pb-16 md:pb-24 overflow-hidden bg-white"
+        style={{
+          paddingTop: '2rem' // Space for navbar
+        }}
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10" style={{ paddingTop: '2rem' }}>
+          <div className="flex items-center justify-between gap-8">
             {/* Left Content */}
             <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
-              className="max-w-[600px] lg:max-w-none pl-8 lg:pl-16 xl:pl-24"
+              className="flex-1 relative z-20 text-left"
             >
               {/* Subtitle */}
               <div className="mb-4">
-                <span className="text-xs text-telgo-red uppercase tracking-[0.2em] font-semibold">
+                <span className="text-xs text-gray-600 uppercase tracking-[0.2em] font-semibold">
                   ACCESS YOUR ESIM DASHBOARD
                 </span>
               </div>
               
               {/* Main Heading */}
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight">
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-telgo-red mb-6 leading-tight">
                 My eSIM
-                <svg className="mt-2" width="140" height="6" viewBox="0 0 140 6" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M2 3C2 3 10 1 20 2C30 3 40 1 50 2C60 3 70 1 80 2C90 3 100 1 110 2C120 3 130 1 138 3" stroke="#cc0000" strokeWidth="3" strokeLinecap="round" fill="none"/>
-                </svg>
               </h1>
               
               {/* Tagline */}
@@ -282,24 +283,21 @@ const MyeSIM = () => {
                 TTelGo (Your) eSIM: Travel smart, connect instantly – no physical SIM, no limits.
               </p>
             </motion.div>
-
-            {/* Right - eSIM Image */}
+            
+            {/* Right Image */}
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className="hidden lg:flex relative w-full items-center justify-end pr-8 lg:pr-16 xl:pr-24"
-              style={{ zIndex: 15 }}
+              className="hidden lg:flex flex-1 items-center justify-center relative z-20"
             >
-              <img
-                src="/IMAGES/eSIM.png"
-                alt="eSIM Technology"
-                className="w-full max-w-lg h-auto object-contain"
-                onLoad={() => {
-                  // Image loaded successfully
-                }}
-                onError={() => {
-                  console.error('Failed to load eSIM.png');
+              <img 
+                src="/IMAGES/eSIM.png" 
+                alt="eSIM" 
+                className="w-full h-auto max-w-md object-contain"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.style.display = 'none';
                 }}
               />
             </motion.div>
@@ -466,7 +464,7 @@ const MyeSIM = () => {
       )}
 
       {/* Manage My eSIMs Section */}
-      <section className="py-16 bg-transparent">
+      <section className="pt-0 pb-16 bg-transparent">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             {/* Left Illustration */}
@@ -573,7 +571,7 @@ const MyeSIM = () => {
       </section>
 
       {/* Subscription Section */}
-      <section className="py-16 bg-transparent relative">
+      <section className="pt-8 pb-16 bg-transparent relative">
         {/* Dots and Plus Pattern Background */}
         <div 
           className="absolute inset-0 opacity-30"

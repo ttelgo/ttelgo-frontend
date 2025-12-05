@@ -1,25 +1,24 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 
-// Hero Background Component - HeroStyle.png background
+// Hero Background Component - Image background
 const HeroBackground = () => {
   return (
     <>
-      {/* Hero Background Image */}
+      {/* Image background */}
       <div 
         className="absolute inset-0 w-full h-full"
         style={{
           zIndex: 0,
-          backgroundImage: 'url(/IMAGES/HeroStyle.png)',
+          backgroundImage: 'url(/IMAGES/travels.jpg)',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat',
-          minHeight: 'fit-content'
+          backgroundRepeat: 'no-repeat'
         }}
       />
       {/* Overlay for better text readability */}
       <div 
-        className="absolute inset-0 w-full h-full bg-white/50"
+        className="absolute inset-0 w-full h-full bg-black/20"
         style={{
           zIndex: 1
         }}
@@ -43,63 +42,54 @@ const DownloadApp = () => {
 
   return (
     <div className="w-full">
-      {/* Hero Section */}
-      <section className="relative pt-1 pb-1 md:pt-2 md:pb-2 overflow-hidden" style={{ minHeight: 'auto' }}>
-        <HeroBackground />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+      {/* Hero Section - Merged with Navbar */}
+      <section 
+        className="relative pb-20 md:pb-28 overflow-hidden bg-white mt-4"
+        style={{
+          paddingTop: '0rem' // Space for navbar
+        }}
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10" style={{ paddingTop: '0rem' }}>
+          <div className="flex items-center justify-between gap-8">
             {/* Left Content */}
             <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
-              className="pl-8 lg:pl-16 xl:pl-24"
+              className="flex-1 relative z-20 text-left"
             >
-              {/* Subtitle */}
-              <div className="mb-4">
-                <span className="text-xs text-telgo-red uppercase tracking-[0.2em] font-semibold">
-                  DOWNLOAD THE APP, ENJOY THE DISCOUNT!
-                </span>
-              </div>
-              
-              {/* Main Heading */}
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-4 leading-tight">
-                Download App
-              </h1>
-              
-              {/* Description */}
-              <p className="text-lg text-gray-700 mb-6 leading-relaxed font-medium">
-                Download the TTelGo app today from the Play Store or App Store for instant eSIM activation and seamless support – global connectivity is just a tap away.
-              </p>
+            {/* Subtitle */}
+            <div className="mb-4">
+              <span className="text-xs text-gray-600 uppercase tracking-[0.2em] font-semibold">
+                DOWNLOAD THE APP, ENJOY THE DISCOUNT!
+              </span>
+            </div>
+            
+            {/* Main Heading */}
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-telgo-red mb-4 leading-tight">
+              Download App
+            </h1>
+            
+            {/* Description */}
+            <p className="text-lg text-gray-700 mb-6 leading-relaxed font-medium">
+              Download the TTelGo app today from the Play Store or App Store for instant eSIM activation and seamless support – global connectivity is just a tap away.
+            </p>
             </motion.div>
-
-            {/* Right - 3D Mobile Image */}
+            
+            {/* Right Image */}
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className="hidden lg:flex relative w-full items-center justify-end pr-8 lg:pr-16 xl:pr-24"
-              style={{ zIndex: 15 }}
+              className="hidden lg:flex flex-1 items-center justify-center relative z-20"
             >
-              <img
-                src="/IMAGES/3DMobile.png"
-                alt="TTelGo eSIM 3D Mobile"
-                className="w-full h-auto object-contain"
-                style={{ 
-                  maxHeight: '900px',
-                  minHeight: '650px',
-                  height: 'auto',
-                  width: 'auto',
-                  maxWidth: '100%',
-                  transform: 'scale(1.25)',
-                  transformOrigin: 'right center',
-                  border: 'none',
-                  outline: 'none',
-                  boxShadow: 'none'
-                }}
-                loading="eager"
-                onError={() => {
-                  console.warn('3DMobile image not found at /IMAGES/3DMobile.png')
+              <img 
+                src="/IMAGES/3DMobile.png" 
+                alt="3D Mobile" 
+                className="w-full h-auto max-w-xl object-contain"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.style.display = 'none';
                 }}
               />
             </motion.div>
@@ -108,7 +98,7 @@ const DownloadApp = () => {
       </section>
 
       {/* Download the TTelGo App Section */}
-      <section className="py-16 bg-transparent">
+      <section className="pt-8 pb-16 bg-transparent -mt-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -221,7 +211,7 @@ const DownloadApp = () => {
       </section>
 
       {/* Subscription Section */}
-      <section className="py-16 bg-transparent relative">
+      <section className="pt-0 pb-16 bg-transparent relative -mt-20">
         {/* Dots and Plus Pattern Background */}
         <div 
           className="absolute inset-0 opacity-30"

@@ -60,7 +60,7 @@ const CountryPackages = () => {
         console.log('Fetching bundles for country:', country.name, 'ISO:', countryIso)
         
         if (countryIso) {
-          // Fetch bundles for this country
+          // Retrieve available bundles for the selected country
           const countryBundles = await plansService.getBundlesByCountry(countryIso)
           console.log('Received bundles:', countryBundles)
           setBundles(countryBundles)
@@ -119,7 +119,7 @@ const CountryPackages = () => {
       regions: bundle.countryName ? [bundle.countryName] : [country.region],
       features: [],
       popular: false,
-      bundleId: bundle.id, // Store bundle ID (which is bundle.name) for API call
+      bundleId: bundle.id, // Store bundle ID for API calls (bundle.id corresponds to bundle.name from API)
     } : {
       id: `${country.id}-${selectedDataSize}`,
       name: `${country.name} - ${selectedDataSize}`,
@@ -236,7 +236,7 @@ const CountryPackages = () => {
                 ) : null}
 
                 <div className="space-y-4">
-                  {/* Show bundles from API if available, otherwise show mock data */}
+                  {/* Display bundles from API when available, otherwise fall back to mock data */}
                   {bundles.length > 0 ? (
                     bundles.map((bundle) => (
                       <button

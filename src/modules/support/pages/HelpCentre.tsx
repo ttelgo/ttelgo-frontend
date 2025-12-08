@@ -255,7 +255,7 @@ const HelpCentre = () => {
     <div className="w-full">
       {/* Hero Section - Merged with Navbar */}
       <section 
-        className="relative pb-24 md:pb-32 overflow-hidden bg-white -mt-12"
+        className="relative pb-24 md:pb-32 overflow-hidden bg-white -mt-16"
         style={{
           paddingTop: '4rem' // Space for navbar
         }}
@@ -309,7 +309,7 @@ const HelpCentre = () => {
       </section>
 
       {/* Main Content - Help Topics */}
-      <section className="pt-0 pb-16 bg-transparent mt-4">
+      <section className="pt-0 pb-16 bg-transparent -mt-4">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Section Title */}
           <motion.div

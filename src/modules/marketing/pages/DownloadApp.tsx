@@ -44,7 +44,7 @@ const DownloadApp = () => {
     <div className="w-full">
       {/* Hero Section - Merged with Navbar */}
       <section 
-        className="relative pb-20 md:pb-28 overflow-hidden bg-white mt-4"
+        className="relative pb-20 md:pb-28 overflow-hidden bg-white mt-0"
         style={{
           paddingTop: '0rem' // Space for navbar
         }}

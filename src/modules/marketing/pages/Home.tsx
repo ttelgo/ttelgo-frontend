@@ -623,7 +623,7 @@ const Home = () => {
     <div className="w-full">
       {/* Hero Section - Merged with Navbar */}
       <section 
-        className="relative overflow-hidden bg-white"
+        className="relative overflow-hidden bg-white mt-12"
         style={{
           paddingTop: '3rem', // Space for navbar
           paddingBottom: '4rem' // Fixed bottom padding instead of minHeight
@@ -693,7 +693,7 @@ const Home = () => {
               </motion.div>
               
               {/* Main Headline */}
-              <h1 className="text-4xl md:text-5xl lg:text-[3.5rem] xl:text-6xl font-bold text-gray-900 mb-6 leading-[1.2]">
+              <h1 className="text-3xl md:text-4xl lg:text-[3rem] xl:text-5xl font-bold text-gray-900 mb-6 leading-[1.2]">
                 <span>Stay connected</span>
                 <br />
                 <span>
@@ -791,9 +791,10 @@ const Home = () => {
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
               className="hidden lg:flex flex-1 items-center justify-center relative z-20 pr-8 lg:pr-16 xl:pr-24"
+              style={{ marginTop: '-1.5rem' }}
             >
               <img 
-                src="/IMAGES/HeroR.png" 
+                src="/IMAGES/HeroRRR.png" 
                 alt="Hero illustration" 
                 className="w-full h-auto max-w-xl object-contain"
                 onError={(e) => {
@@ -1299,7 +1300,7 @@ const Home = () => {
       </section>
 
       {/* FAQ Section */}
-      <section id="faq" className="pt-0 pb-16 bg-transparent -mt-20">
+      <section id="faq" className="pt-0 pb-16 bg-transparent -mt-28">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -1312,7 +1313,7 @@ const Home = () => {
             </h2>
             
             <div className="space-y-4">
-              {faqs.map((faq) => (
+              {faqs.map((faq, index) => (
                 <motion.div
                   key={faq.id}
                   initial={{ opacity: 0, y: 10 }}
@@ -1335,7 +1336,10 @@ const Home = () => {
                     onClick={() => setOpenFAQ(openFAQ === faq.id ? null : faq.id)}
                     className="w-full px-6 py-4 flex justify-between items-center hover:bg-gray-50 transition-colors"
                   >
-                    <span className="text-left font-medium text-gray-900">{faq.question}</span>
+                    <span className="text-left font-medium text-gray-900">
+                      <span className="text-telgo-red font-semibold mr-2">{index + 1}.</span>
+                      {faq.question}
+                    </span>
                     <svg
                       className={`w-5 h-5 text-telgo-red transform transition-transform ${
                         openFAQ === faq.id ? 'rotate-45' : ''
@@ -1563,7 +1567,7 @@ const Home = () => {
       </section>
 
       {/* Subscribe Section */}
-      <section className="pt-0 pb-16 bg-transparent relative -mt-20">
+      <section className="pt-0 pb-16 bg-transparent relative -mt-8">
         {/* Dots and Plus Pattern Background */}
         <div 
           className="absolute inset-0 opacity-30"
@@ -1616,7 +1620,7 @@ const Home = () => {
                 className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto"
               >
                 <div className="relative flex-1">
-                  <div className="absolute left-4 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                  <div className="absolute left-4 top-1/2 transform -translate-y-1/2 pointer-events-none z-10">
                     <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                     </svg>
@@ -1626,13 +1630,23 @@ const Home = () => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="Your email"
-                    className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-telgo-red focus:border-transparent bg-white text-gray-900"
+                    className="w-full pl-12 pr-4 py-2.5 rounded-lg bg-white focus:outline-none transition-all placeholder-gray-400 text-gray-900 text-sm focus:ring-2 focus:ring-telgo-red"
+                    style={{
+                      boxShadow: '0 6px 8px -1px rgba(0, 0, 0, 0.12), 0 3px 5px -1px rgba(0, 0, 0, 0.08), 0 -3px 5px -1px rgba(0, 0, 0, 0.08)',
+                      transition: 'box-shadow 0.3s ease'
+                    }}
+                    onFocus={(e) => {
+                      e.currentTarget.style.boxShadow = '0 12px 16px -2px rgba(0, 0, 0, 0.15), 0 6px 8px -2px rgba(0, 0, 0, 0.1), 0 -6px 8px -2px rgba(0, 0, 0, 0.1)'
+                    }}
+                    onBlur={(e) => {
+                      e.currentTarget.style.boxShadow = '0 6px 8px -1px rgba(0, 0, 0, 0.12), 0 3px 5px -1px rgba(0, 0, 0, 0.08), 0 -3px 5px -1px rgba(0, 0, 0, 0.08)'
+                    }}
                     required
                   />
                 </div>
                 <button
                   type="submit"
-                  className="px-6 py-3 bg-telgo-red text-white rounded-lg font-semibold hover:bg-red-700 transition-colors whitespace-nowrap"
+                  className="px-6 py-2.5 bg-telgo-red text-white rounded-lg font-semibold hover:bg-red-700 transition-colors duration-200 shadow-md hover:shadow-lg whitespace-nowrap text-sm"
                 >
                   Subscribe
                 </button>

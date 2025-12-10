@@ -1,184 +1,198 @@
-/**
- * Shared Type Definitions
- * Types used across multiple modules
- * Based on TTelGo project scope
- */
+// ... existing code ...
 
-// User types
-export interface User {
-  id: string
-  email: string
-  name?: string
-  phone?: string
-  createdAt: string
-  kycStatus?: KYCStatus
-}
-
-export type KYCStatus = 'pending' | 'approved' | 'rejected' | 'not_submitted'
-
-// Authentication types
-export interface LoginRequest {
-  email: string
-  otp?: string
-  password?: string
-}
-
-export interface SignUpRequest {
-  email: string
-  name?: string
-  phone?: string
-  referralCode?: string
-  password?: string
-}
-
-// Form types (for UI forms)
-export interface LoginForm {
-  email: string
-  password: string
-}
-
-export interface SignUpForm {
-  email: string
-  password: string
-  confirmPassword: string
-  referralCode?: string
-  name?: string
-  phone?: string
-}
-
-export interface AuthResponse {
-  user: User
-  token: string
-  refreshToken?: string
-}
-
-// Country & Destination types
-export interface Country {
-  id: string
-  code: string
-  name: string
-  flag?: string
-  region?: string
-  planCount?: number
-}
-
-// eSIM Plan types
-export interface eSIMPlan {
-  id: string
-  name: string
-  description: string
-  price: number
-  currency: string
-  data: string // e.g., "5GB", "Unlimited"
-  validity: string // e.g., "30 days"
-  countries?: string[] // Country codes (optional for backward compatibility)
-  regions?: string[]
-  features: string[]
-  popular?: boolean
-  type?: 'country' | 'regional' | 'global'
-}
-
-// Order & Payment types
-export interface Order {
-  id: string
-  userId: string
-  planId: string
-  planName: string
-  amount: number
-  currency: string
-  status: OrderStatus
-  paymentStatus: PaymentStatus
-  createdAt: string
-  completedAt?: string
-}
-
-export type OrderStatus = 'pending' | 'completed' | 'cancelled' | 'refunded'
-export type PaymentStatus = 'pending' | 'paid' | 'failed' | 'refunded'
-
-export interface PaymentIntent {
-  clientSecret: string
-  orderId: string
-}
-
-// eSIM Management types
-export interface eSIMProfile {
-  id: string
-  orderId: string
-  planId: string
-  planName: string
-  qrCode?: string
-  activationCode?: string
-  smdpAddress?: string
-  status: eSIMStatus
-  dataRemaining?: string
-  dataTotal?: string
-  validity: string
-  activationDate?: string
-  expirationDate?: string
-  country?: string
-}
-
-export type eSIMStatus = 'active' | 'inactive' | 'expired' | 'pending' | 'installed'
-
-// KYC types
-export interface KYCSubmission {
-  id: string
-  userId: string
-  documentType: string
-  documentUrl: string
-  status: KYCStatus
-  submittedAt: string
-  reviewedAt?: string
-  rejectionReason?: string
-}
-
-// Support types
 export interface FAQ {
-  id: string
+  id: number
   question: string
   answer: string
-  category: string
+  category?: string
+  displayOrder?: number
+  isActive?: boolean
 }
 
-export interface SupportTicket {
-  id: string
-  userId?: string
-  subject: string
-  message: string
-  status: 'open' | 'in_progress' | 'resolved' | 'closed'
+// Admin Types
+export interface AdminDashboardStats {
+  totalUsers: number
+  activeUsers: number
+  newUsersToday: number
+  newUsersThisWeek: number
+  newUsersThisMonth: number
+  totalOrders: number
+  pendingOrders: number
+  completedOrders: number
+  cancelledOrders: number
+  totalRevenue: number
+  revenueToday: number
+  revenueThisWeek: number
+  revenueThisMonth: number
+  totalEsims: number
+  activeEsims: number
+  activatedToday: number
+  activatedThisWeek: number
+  totalApiKeys: number
+  activeApiKeys: number
+  totalApiRequests: number
+  apiRequestsToday: number
+  averageApiResponseTime: number
+  recentOrders: RecentOrder[]
+  recentUsers: RecentUser[]
+  topApiKeys: TopApiKey[]
+  ordersByDay: Record<string, number>
+  usersByDay: Record<string, number>
+  revenueByDay: Record<string, number>
+  apiRequestsByDay: Record<string, number>
+}
+
+export interface RecentOrder {
+  id: number
+  orderReference: string
+  customerEmail: string
+  amount: number
+  status: string
   createdAt: string
 }
 
-// Blog types
-export interface BlogPost {
-  id: string
-  title: string
-  slug: string
-  excerpt: string
-  content: string
-  author: string
-  publishedAt: string
-  imageUrl?: string
-  tags?: string[]
+export interface RecentUser {
+  id: number
+  email: string
+  phone: string
+  createdAt: string
 }
 
-// API Response types
-export interface ApiResponse<T> {
-  data: T
-  message?: string
-  success: boolean
+export interface TopApiKey {
+  id: number
+  keyName: string
+  customerEmail: string
+  requestCount: number
+  averageResponseTime: number
 }
 
-export interface PaginatedResponse<T> {
-  data: T[]
-  total: number
-  page: number
-  limit: number
-  totalPages: number
+export interface ApiKey {
+  id: number
+  keyName: string
+  apiKey?: string // Only shown on creation/regeneration
+  customerName: string
+  customerEmail: string
+  isActive: boolean
+  rateLimitPerMinute: number
+  rateLimitPerHour: number
+  rateLimitPerDay: number
+  allowedIps?: string[]
+  scopes?: string[]
+  expiresAt?: string
+  lastUsedAt?: string
+  createdAt: string
+  updatedAt: string
+  notes?: string
+  totalRequests?: number
+  requestsToday?: number
+  averageResponseTime?: number
 }
 
-// Common types
-export interface SelectOption {
-  value: string
-  label: string
+export interface CreateApiKeyRequest {
+  keyName: string
+  customerName: string
+  customerEmail: string
+  rateLimitPerMinute?: number
+  rateLimitPerHour?: number
+  rateLimitPerDay?: number
+  allowedIps?: string[]
+  scopes?: string[]
+  expiresAt?: string
+  notes?: string
+}
+
+export interface UpdateApiKeyRequest {
+  keyName?: string
+  customerName?: string
+  customerEmail?: string
+  isActive?: boolean
+  rateLimitPerMinute?: number
+  rateLimitPerHour?: number
+  rateLimitPerDay?: number
+  allowedIps?: string[]
+  scopes?: string[]
+  expiresAt?: string
+  notes?: string
+}
+
+export interface ApiUsageStats {
+  totalRequests: number
+  requestsToday: number
+  requestsThisWeek: number
+  requestsThisMonth: number
+  averageResponseTime: number
+  totalErrors: number
+  errorRate: number
+  topEndpoints: EndpointUsage[]
+  statusCodeDistribution: StatusCodeCount[]
+  dailyUsage: DailyUsage[]
+  hourlyUsage?: Record<string, number>
+}
+
+export interface EndpointUsage {
+  endpoint: string
+  count: number
+  averageResponseTime?: number
+}
+
+export interface StatusCodeCount {
+  statusCode: number
+  count: number
+}
+
+export interface DailyUsage {
+  date: string
+  requests: number
+  errors?: number
+  averageResponseTime?: number
+}
+
+// User Types
+export interface UserResponse {
+  id: number
+  email: string
+  phone?: string
+  firstName?: string
+  lastName?: string
+  country?: string
+  city?: string
+  address?: string
+  postalCode?: string
+  isEmailVerified?: boolean
+  isPhoneVerified?: boolean
+  referralCode?: string
+  referredBy?: number
+  role?: string
+  createdAt?: string
+  updatedAt?: string
+}
+
+export interface UpdateUserRequest {
+  firstName?: string
+  lastName?: string
+  country?: string
+  city?: string
+  address?: string
+  postalCode?: string
+  phone?: string
+}
+
+// Order Types
+export interface OrderResponse {
+  id: number
+  orderReference: string
+  userId?: number
+  bundleId?: string
+  bundleName?: string
+  quantity?: number
+  unitPrice?: number
+  totalAmount?: number
+  currency?: string
+  status?: string
+  paymentStatus?: string
+  esimId?: string
+  matchingId?: string
+  iccid?: string
+  createdAt?: string
+  updatedAt?: string
 }

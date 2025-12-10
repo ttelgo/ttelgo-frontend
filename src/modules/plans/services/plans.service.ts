@@ -40,13 +40,16 @@ export interface Bundle {
   currency: string // Defaults to USD
   data: string // Formatted from dataAmount (e.g., "1GB", "Unlimited")
   validity: string // Formatted from duration (e.g., "7 days", "30 days")
-  countries?: string[] // Country ISO codes
+  countries?: string[] // Country ISO codes (for backward compatibility)
+  countryObjects?: Array<{ name: string; region: string; iso: string }> // Full country objects
   countryIso?: string // First country ISO
   countryName?: string // First country name
   duration: number // Days
   dataAmount: number // MB
   unlimited: boolean
   imageUrl?: string
+  group?: string[] | null
+  roamingEnabled?: boolean
   [key: string]: unknown // For any additional fields
 }
 
@@ -88,13 +91,15 @@ function transformBundle(apiBundle: ApiBundle): Bundle {
       currency: 'USD', // Default currency
       data: dataDisplay,
       validity: validityDisplay,
-      countries: countryIsos,
+      countries: countryIsos, // ISO codes for backward compatibility
+      countryObjects: apiBundle.countries || [], // Full country objects for regional/global grouping
       countryIso: countryIso,
       countryName: countryName,
       duration: apiBundle.duration || 0,
       dataAmount: apiBundle.dataAmount || 0,
       unlimited: apiBundle.unlimited || false,
       imageUrl: apiBundle.imageUrl,
+      group: apiBundle.group ? (Array.isArray(apiBundle.group) ? apiBundle.group : [apiBundle.group]) : null,
       // Keep original fields for reference
       autostart: apiBundle.autostart,
       roamingEnabled: apiBundle.roamingEnabled,
@@ -151,6 +156,36 @@ class PlansService {
   async getBundleById(bundleId: string): Promise<Bundle> {
     const apiBundle = await apiClient.get<ApiBundle>(`/plans/bundles/${bundleId}`)
     return transformBundle(apiBundle)
+  }
+
+  /**
+   * Get local eSIM bundles (single country)
+   * GET /api/plans/bundles/local
+   */
+  async getLocalBundles(): Promise<Bundle[]> {
+    const response = await apiClient.get<BundlesResponse>('/plans/bundles/local')
+    const apiBundles = response.bundles || []
+    return apiBundles.map(transformBundle)
+  }
+
+  /**
+   * Get regional eSIM bundles (multiple countries in a region)
+   * GET /api/plans/bundles/regional
+   */
+  async getRegionalBundles(): Promise<Bundle[]> {
+    const response = await apiClient.get<BundlesResponse>('/plans/bundles/regional')
+    const apiBundles = response.bundles || []
+    return apiBundles.map(transformBundle)
+  }
+
+  /**
+   * Get global eSIM bundles (many countries globally)
+   * GET /api/plans/bundles/global
+   */
+  async getGlobalBundles(): Promise<Bundle[]> {
+    const response = await apiClient.get<BundlesResponse>('/plans/bundles/global')
+    const apiBundles = response.bundles || []
+    return apiBundles.map(transformBundle)
   }
 
   /**

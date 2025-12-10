@@ -44,9 +44,24 @@ class CheckoutService {
    * POST /api/esims/activate
    */
   async createOrder(data: CheckoutRequest): Promise<CheckoutResponse> {
+    // Get userId from localStorage if user is logged in
+    let userId: number | undefined
+    try {
+      const userStr = localStorage.getItem('user')
+      if (userStr) {
+        const user = JSON.parse(userStr)
+        if (user.id) {
+          userId = user.id
+        }
+      }
+    } catch (e) {
+      console.warn('Could not parse user from localStorage:', e)
+    }
+
     const activateRequest: ActivateBundleRequest = {
       type: 'transaction',
       assign: data.assign ?? true,
+      userId: userId, // Include userId if user is logged in
       order: [
         {
           type: 'bundle',

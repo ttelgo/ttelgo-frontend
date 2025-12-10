@@ -2,25 +2,213 @@ import { useState, useEffect, useMemo, useRef, useCallback } from 'react'
 import { createPortal } from 'react-dom'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { regionalPlans } from '@/modules/plans/utils/regionalPlansData'
 import { allCountries as countriesData } from '@/modules/countries/utils/countriesData'
+import { plansService } from '@/modules/plans/services/plans.service'
 
 const ShopPlans = () => {
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
   const [searchQuery, setSearchQuery] = useState('')
-  const [esimType, setEsimType] = useState<'local' | 'regional' | 'global'>('global')
+  // Initialize esimType from URL params, default to 'local' if no tab specified
+  const initialTab = searchParams.get('tab') as 'local' | 'regional' | 'global' | null
+  const [esimType, setEsimType] = useState<'local' | 'regional' | 'global'>(
+    initialTab && ['local', 'regional', 'global'].includes(initialTab) ? initialTab : 'local'
+  )
   const shopSearchResultsRef = useRef<HTMLDivElement>(null)
   const searchInputRef = useRef<HTMLInputElement>(null)
   const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 })
+  const apiCountriesLoadedRef = useRef(false) // Track if countries have been loaded
+  const [apiCountries, setApiCountries] = useState<Array<{
+    name: string
+    countryIso: string
+    flag: string
+    price: string
+    region?: string
+  }>>([])
+  const [regionalBundles, setRegionalBundles] = useState<typeof plansService.getBundles extends () => Promise<infer T> ? T : never>([])
+  const [globalBundles, setGlobalBundles] = useState<typeof plansService.getBundles extends () => Promise<infer T> ? T : never>([])
+  const [countriesLoading, setCountriesLoading] = useState(true)
+  const [regionalLoading, setRegionalLoading] = useState(true)
+  const [globalLoading, setGlobalLoading] = useState(true)
 
   // Get tab from URL query parameter
   useEffect(() => {
     const tab = searchParams.get('tab')
     if (tab === 'local' || tab === 'regional' || tab === 'global') {
-      setEsimType(tab)
+      // Only update if it's different from current type to avoid unnecessary re-renders
+      if (esimType !== tab) {
+        console.log('Tab changed from URL:', { from: esimType, to: tab, apiCountriesCount: apiCountries.length })
+        setEsimType(tab)
+        // Clear search query when tab changes from URL
+        setSearchQuery('')
+      } else if (tab === 'local') {
+        // If already on local tab, ensure search is cleared
+        if (searchQuery.trim()) {
+          console.log('Already on local tab, clearing search query')
+          setSearchQuery('')
+        }
+      }
+    } else if (!tab) {
+      // If no tab in URL, default to local
+      if (esimType !== 'local') {
+        console.log('No tab in URL, defaulting to local')
+        setEsimType('local')
+        setSearchParams({ tab: 'local' })
+        setSearchQuery('')
+      }
     }
-  }, [searchParams])
+  }, [searchParams, esimType, searchQuery, apiCountries.length])
+
+  // Fetch local bundles (single country) from API - ONLY ONCE on mount
+  useEffect(() => {
+    // Only fetch if we haven't loaded yet (using ref to prevent re-fetching)
+    if (apiCountriesLoadedRef.current) {
+      console.log('apiCountries already loaded (ref check), skipping fetch. Count:', apiCountries.length)
+      return
+    }
+
+    const fetchLocalBundles = async () => {
+      try {
+        setCountriesLoading(true)
+        console.log('Fetching local bundles from API...')
+        
+        // Fetch local bundles from API (single country bundles)
+        const localBundles = await plansService.getLocalBundles()
+        console.log('Received local bundles:', localBundles.length)
+        
+        // Group bundles by country and calculate min price per GB
+        const countryMap = new Map<string, {
+          countryName: string
+          countryIso: string
+          bundles: typeof localBundles
+          minPricePerGB: number
+          region?: string
+        }>()
+
+        localBundles.forEach(bundle => {
+          if (!bundle.countryName || !bundle.countryIso) return
+
+          const existing = countryMap.get(bundle.countryIso)
+          
+          // Calculate price per GB for this bundle
+          const dataMatch = bundle.data?.match(/(\d+(?:\.\d+)?)/)
+          if (!dataMatch) return
+          
+          const dataGB = parseFloat(dataMatch[1])
+          if (dataGB === 0 || isNaN(dataGB)) return
+          
+          const pricePerGB = bundle.price / dataGB
+
+          // Get region from bundle or countriesData
+          let region: string | undefined
+          const countryData = countriesData.find(c => 
+            c.name.toLowerCase() === bundle.countryName?.toLowerCase() ||
+            c.id.toLowerCase() === bundle.countryIso?.toLowerCase()
+          )
+          region = countryData?.region
+
+          if (existing) {
+            existing.bundles.push(bundle)
+            existing.minPricePerGB = Math.min(existing.minPricePerGB, pricePerGB)
+          } else {
+            countryMap.set(bundle.countryIso, {
+              countryName: bundle.countryName,
+              countryIso: bundle.countryIso,
+              bundles: [bundle],
+              minPricePerGB: pricePerGB,
+              region: region,
+            })
+          }
+        })
+
+        // Convert to array and map to country format with flags
+        const countriesFromApi = Array.from(countryMap.values()).map(country => {
+          const countryData = countriesData.find(c => 
+            c.name.toLowerCase() === country.countryName.toLowerCase() ||
+            c.id.toLowerCase() === country.countryIso.toLowerCase()
+          )
+
+          return {
+            name: country.countryName,
+            countryIso: country.countryIso,
+            flag: countryData?.flag || '🌍',
+            price: country.minPricePerGB.toFixed(2),
+            region: country.region || countryData?.region,
+          }
+        })
+
+        // Sort by country name for consistent display
+        countriesFromApi.sort((a, b) => a.name.localeCompare(b.name))
+
+        console.log('Setting apiCountries with', countriesFromApi.length, 'countries')
+        setApiCountries(countriesFromApi)
+        apiCountriesLoadedRef.current = true // Mark as loaded
+      } catch (error) {
+        console.error('Error fetching local bundles from API:', error)
+        // Don't reset to empty array if we already have data
+        if (!apiCountriesLoadedRef.current) {
+          setApiCountries([])
+        }
+      } finally {
+        setCountriesLoading(false)
+      }
+    }
+
+    fetchLocalBundles()
+  }, []) // Empty deps - only run once on mount // Only fetch once on mount
+
+  // Fetch regional bundles from API
+  // Since eSIMGo API returns mostly single-country bundles, we'll use local bundles
+  // and group them by region to create regional views
+  useEffect(() => {
+    const fetchRegionalBundles = async () => {
+      try {
+        setRegionalLoading(true)
+        // Get all local bundles and we'll group them by region in the UI
+        const bundles = await plansService.getLocalBundles()
+        console.log('Fetched bundles for regional grouping:', bundles.length, bundles)
+        setRegionalBundles(bundles)
+      } catch (error) {
+        console.error('Error fetching bundles for regional grouping:', error)
+        setRegionalBundles([])
+      } finally {
+        setRegionalLoading(false)
+      }
+    }
+
+    fetchRegionalBundles()
+  }, [])
+
+  // Fetch global bundles from API
+  // Since eSIMGo API may not have true global bundles, we'll check for:
+  // 1. Bundles with roamingEnabled=true
+  // 2. Bundles with group containing "global"
+  // 3. If none found, we can create a global view from all regions
+  useEffect(() => {
+    const fetchGlobalBundles = async () => {
+      try {
+        setGlobalLoading(true)
+        const bundles = await plansService.getGlobalBundles()
+        console.log('Fetched global bundles:', bundles.length, bundles)
+        
+        // If no global bundles found, we can use all bundles to create global plans
+        // by grouping them differently (showing all regions combined)
+        if (bundles.length === 0) {
+          console.log('No true global bundles found, will create global view from all bundles')
+          // For now, return empty - we'll handle this in the UI
+        }
+        
+        setGlobalBundles(bundles)
+      } catch (error) {
+        console.error('Error fetching global bundles from API:', error)
+        setGlobalBundles([])
+      } finally {
+        setGlobalLoading(false)
+      }
+    }
+
+    fetchGlobalBundles()
+  }, [])
 
   const handleRegionClick = (regionName: string) => {
     // Navigate to country selection page for this region
@@ -28,44 +216,74 @@ const ShopPlans = () => {
   }
 
   const handleEsimTypeChange = (type: 'local' | 'regional' | 'global') => {
+    console.log('handleEsimTypeChange called:', { currentType: esimType, newType: type, apiCountriesCount: apiCountries.length, searchQuery })
+    
+    // Always clear search query first to ensure full list is shown
+    if (searchQuery.trim()) {
+      console.log('Clearing search query:', searchQuery)
+      setSearchQuery('')
+    }
+    
+    // Only update if switching to a different tab
+    if (esimType === type) {
+      // If clicking the same tab, just ensure search is cleared and don't update URL
+      console.log('Same tab clicked, clearing search only. apiCountries count:', apiCountries.length)
+      return
+    }
+    
+    console.log('Switching tab from', esimType, 'to', type)
     setEsimType(type)
     setSearchParams({ tab: type })
   }
 
-  // Local eSIMs - All 200+ countries (Open Now only for display)
+  // Local eSIMs - Countries from API
   const localDestinations = useMemo(() => {
-    return countriesData
-      .filter(country => country.status === 'Open Now')
-      .map(country => ({
-        name: country.name,
-        flag: country.flag,
-        price: country.prices['1GB'].toFixed(2), // Price per GB from 1GB plan
-        country: country, // Keep full country object for navigation
-      }))
-  }, [])
-
-  // All countries for search (including Coming Soon)
-  const allCountriesForSearch = useMemo(() => {
-    return countriesData.map(country => ({
+    const destinations = apiCountries.map(country => ({
       name: country.name,
       flag: country.flag,
-      price: country.prices?.['1GB']?.toFixed(2) || 'N/A', // Price per GB from 1GB plan, or N/A if no prices
-      country: country, // Keep full country object for navigation
-      status: country.status,
+      price: country.price,
+      countryIso: country.countryIso,
+      region: country.region,
     }))
-  }, [])
+    console.log('Local destinations computed:', destinations.length, 'from', apiCountries.length, 'API countries')
+    return destinations
+  }, [apiCountries])
+
+  // All countries for search (from API)
+  const allCountriesForSearch = useMemo(() => {
+    return apiCountries.map(country => ({
+      name: country.name,
+      flag: country.flag,
+      price: country.price,
+      countryIso: country.countryIso,
+      region: country.region,
+      status: 'Open Now' as const, // All countries from API are available
+    }))
+  }, [apiCountries])
 
   // Filter local destinations by search query
   const filteredLocalDestinations = useMemo(() => {
-    if (!searchQuery.trim()) {
+    console.log('filteredLocalDestinations useMemo running:', { 
+      localDestinationsCount: localDestinations.length, 
+      apiCountriesCount: apiCountries.length,
+      searchQuery: searchQuery || '(empty)',
+      searchQueryTrimmed: searchQuery?.trim() || '(empty)'
+    })
+    
+    // Always ensure we have the full list if no search query
+    if (!searchQuery || !searchQuery.trim()) {
+      console.log('No search query, returning all', localDestinations.length, 'local destinations from', apiCountries.length, 'API countries')
       return localDestinations
     }
-    const query = searchQuery.toLowerCase()
-    return localDestinations.filter(dest =>
+    const query = searchQuery.toLowerCase().trim()
+    const filtered = localDestinations.filter(dest =>
       dest.name.toLowerCase().includes(query) ||
-      dest.country.region?.toLowerCase().includes(query)
+      dest.region?.toLowerCase().includes(query) ||
+      dest.countryIso.toLowerCase().includes(query)
     )
-  }, [localDestinations, searchQuery])
+    console.log('Filtered local destinations:', filtered.length, 'from', localDestinations.length, 'with query:', query)
+    return filtered
+  }, [localDestinations, searchQuery, apiCountries.length])
 
   // Filter countries for shop hero search dropdown (includes all countries)
   const shopSearchResults = useMemo(() => {
@@ -76,7 +294,8 @@ const ShopPlans = () => {
     return allCountriesForSearch
       .filter(dest => 
         dest.name.toLowerCase().includes(query) ||
-        dest.country.region?.toLowerCase().includes(query)
+        dest.region?.toLowerCase().includes(query) ||
+        dest.countryIso.toLowerCase().includes(query)
       )
       .slice(0, 10) // Show up to 10 results in dropdown
   }, [searchQuery, allCountriesForSearch])
@@ -209,14 +428,14 @@ const ShopPlans = () => {
               >
                 {shopSearchResults.map((result) => (
                   <div
-                    key={result.country.id}
+                    key={result.countryIso}
                     onClick={() => handleShopCountryClick(result.name)}
                     className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 cursor-pointer transition-colors border-b border-gray-100 last:border-b-0"
                   >
                     <div className="text-2xl">{result.flag}</div>
                     <div className="flex-1">
                       <div className="text-gray-900 font-medium">{result.name}</div>
-                      {result.status === 'Coming Soon' || result.price === 'N/A' || result.price === '0.00' ? (
+                      {(result.status && result.status !== 'Open Now') || result.price === 'N/A' || result.price === '0.00' ? (
                         <div className="text-sm text-orange-600 font-medium">Coming Soon</div>
                       ) : (
                         <div className="text-sm text-gray-500">From ${result.price}/GB</div>
@@ -307,18 +526,98 @@ const ShopPlans = () => {
           {/* Regional eSIM View */}
           {esimType === 'regional' && (
             <div className="space-y-8">
-              {/* Get unique regions from regional plans */}
-              {(() => {
-                const uniqueRegions = Array.from(new Set(regionalPlans.map(plan => plan.continent)))
-                const filteredRegions = searchQuery.trim()
-                  ? uniqueRegions.filter(region => 
-                      region.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                      regionalPlans.some(plan => 
-                        plan.continent === region && 
-                        plan.countries.some(c => c.name.toLowerCase().includes(searchQuery.toLowerCase()))
-                      )
+              {regionalLoading ? (
+                <div className="text-center py-12">
+                  <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-telgo-red"></div>
+                  <p className="mt-4 text-gray-600">Loading regions...</p>
+                </div>
+              ) : regionalBundles.length === 0 ? (
+                <div className="text-center py-12">
+                  <p className="text-gray-500 text-lg">No bundles available to group by region.</p>
+                  <p className="text-gray-400 text-sm mt-2">Check console for details.</p>
+                </div>
+              ) : (() => {
+                // Group local bundles by region to create regional views
+                // Since eSIMGo API returns single-country bundles, we group them by region
+                const regionMap = new Map<string, {
+                  region: string
+                  bundles: typeof regionalBundles
+                  countries: Map<string, { name: string; iso: string; flag: string }>
+                  minPricePerGB: number
+                }>()
+
+                console.log('Processing bundles for regional grouping:', regionalBundles.length)
+                regionalBundles.forEach(bundle => {
+                  // Use countryObjects if available, otherwise fall back to countries array
+                  const countryObjects = bundle.countryObjects || []
+                  if (countryObjects.length === 0 && (!bundle.countries || bundle.countries.length === 0)) return
+
+                  // Get the region from the first country object
+                  const firstCountry = countryObjects[0]
+                  let region = 'Unknown'
+                  if (firstCountry && firstCountry.region) {
+                    region = firstCountry.region
+                  } else if (bundle.countries && bundle.countries.length > 0) {
+                    // Fallback: try to get region from countriesData
+                    const firstCountryIso = bundle.countries[0]
+                    const firstCountryData = countriesData.find(c => 
+                      c.id.toLowerCase() === firstCountryIso.toLowerCase()
                     )
-                  : uniqueRegions
+                    region = firstCountryData?.region || 'Unknown'
+                  }
+
+                  // Calculate price per GB
+                  const dataMatch = bundle.data?.match(/(\d+(?:\.\d+)?)/)
+                  if (!dataMatch) return
+                  const dataGB = parseFloat(dataMatch[1])
+                  if (dataGB === 0 || isNaN(dataGB)) return
+                  const pricePerGB = bundle.price / dataGB
+
+                  const existing = regionMap.get(region)
+                  
+                  if (existing) {
+                    existing.bundles.push(bundle)
+                    existing.minPricePerGB = Math.min(existing.minPricePerGB, pricePerGB)
+                    // Add countries from countryObjects
+                    countryObjects.forEach(country => {
+                      const countryData = countriesData.find(c => 
+                        c.id.toLowerCase() === country.iso.toLowerCase()
+                      )
+                      existing.countries.set(country.iso, {
+                        name: country.name,
+                        iso: country.iso,
+                        flag: countryData?.flag || '🌍'
+                      })
+                    })
+                  } else {
+                    const countriesMap = new Map<string, { name: string; iso: string; flag: string }>()
+                    countryObjects.forEach(country => {
+                      const countryData = countriesData.find(c => 
+                        c.id.toLowerCase() === country.iso.toLowerCase()
+                      )
+                      countriesMap.set(country.iso, {
+                        name: country.name,
+                        iso: country.iso,
+                        flag: countryData?.flag || '🌍'
+                      })
+                    })
+                    
+                    regionMap.set(region, {
+                      region: region,
+                      bundles: [bundle],
+                      countries: countriesMap,
+                      minPricePerGB: pricePerGB,
+                    })
+                  }
+                })
+
+                const regions = Array.from(regionMap.values())
+                const filteredRegions = searchQuery.trim()
+                  ? regions.filter(r => 
+                      r.region.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                      Array.from(r.countries.values()).some(c => c.name.toLowerCase().includes(searchQuery.toLowerCase()))
+                    )
+                  : regions
 
                 if (filteredRegions.length === 0) {
                   return (
@@ -330,21 +629,13 @@ const ShopPlans = () => {
 
                 return (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {filteredRegions.map((region, index) => {
-                      // Get all countries in this region from regional plans
-                      const regionCountries = new Set<string>()
-                      regionalPlans
-                        .filter(plan => plan.continent === region)
-                        .forEach(plan => {
-                          plan.countries.forEach(country => regionCountries.add(country.name))
-                        })
-                      
-                      const countryCount = regionCountries.size
-                      const sampleCountries = Array.from(regionCountries).slice(0, 6)
+                    {filteredRegions.map((regionData, index) => {
+                      const countryCount = regionData.countries.size
+                      const sampleCountries = Array.from(regionData.countries.values()).slice(0, 6)
 
                       return (
                         <motion.div
-                          key={region}
+                          key={regionData.region}
                           initial={{ opacity: 0, y: 20 }}
                           animate={{ opacity: 1, y: 0 }}
                           whileHover={{ scale: 1.05, y: -5, boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)' }}
@@ -352,33 +643,27 @@ const ShopPlans = () => {
                             default: { duration: 0.3, delay: index * 0.1 },
                             hover: { duration: 0.08, ease: "easeOut" }
                           }}
-                          onClick={() => handleRegionClick(region)}
+                          onClick={() => handleRegionClick(regionData.region)}
                           className="bg-white rounded-lg border border-gray-200 cursor-pointer overflow-hidden"
                         >
                           <div className="p-6">
-                            {/* Header */}
                             <div className="mb-4">
-                              <h3 className="text-2xl font-bold text-gray-900 mb-2">{region}</h3>
+                              <h3 className="text-2xl font-bold text-gray-900 mb-2">{regionData.region}</h3>
                               <p className="text-sm text-gray-600">
                                 {countryCount} {countryCount === 1 ? 'Country' : 'Countries'} Available
                               </p>
+                              <p className="text-sm text-telgo-red mt-1">
+                                From ${regionData.minPricePerGB.toFixed(2)}/GB
+                              </p>
                             </div>
 
-                            {/* Sample Country Flags */}
                             <div className="flex flex-wrap gap-2 mb-4">
-                              {sampleCountries.map((countryName, idx) => {
-                                // Find the country flag from regional plans
-                                const countryInfo = regionalPlans
-                                  .find(plan => plan.continent === region)
-                                  ?.countries.find(c => c.name === countryName)
-                                
-                                return countryInfo ? (
+                              {sampleCountries.map((country, idx) => (
                                   <div key={idx} className="flex items-center gap-1.5 bg-gray-50 px-2 py-1 rounded text-sm">
-                                    <span className="text-lg">{countryInfo.flag}</span>
-                                    <span className="text-gray-700">{countryInfo.name}</span>
+                                  <span className="text-lg">{country.flag}</span>
+                                  <span className="text-gray-700">{country.name}</span>
                                   </div>
-                                ) : null
-                              })}
+                              ))}
                               {countryCount > 6 && (
                                 <div className="flex items-center text-sm text-gray-500">
                                   +{countryCount - 6} more
@@ -386,7 +671,6 @@ const ShopPlans = () => {
                               )}
                             </div>
 
-                            {/* View Countries Button */}
                             <button
                               className="w-full py-2.5 bg-telgo-red text-white text-sm font-semibold rounded-lg hover:bg-red-700 transition-colors"
                             >
@@ -405,124 +689,184 @@ const ShopPlans = () => {
           {/* Global eSIM View - Plan Cards */}
           {esimType === 'global' && (
             <div className="space-y-6">
-              {/* Global Core - 54 and 82 Countries Plan */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                whileHover={{ scale: 1.05, y: -5, boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)' }}
-                transition={{ duration: 0.1 }}
-                className="bg-white rounded-lg border border-gray-200 overflow-hidden cursor-pointer"
-              >
-                <div className="p-6">
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex-1">
-                      <h3 className="text-2xl font-bold text-gray-900 mb-1">Global Core</h3>
-                      <p className="text-sm text-gray-600 mb-3">Start from USD 2.17/GB</p>
-                      <div className="flex flex-wrap gap-2 mb-3">
-                        <span className="px-3 py-1 bg-pink-100 text-pink-700 rounded-full text-xs font-medium">
-                          10GB - 50GB
-                        </span>
-                        <span className="px-3 py-1 bg-pink-100 text-pink-700 rounded-full text-xs font-medium">
-                          30DAY - 365DAY
-                        </span>
+              {globalLoading ? (
+                <div className="text-center py-12">
+                  <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-telgo-red"></div>
+                  <p className="mt-4 text-gray-600">Loading global plans...</p>
                       </div>
-                      <p className="text-sm text-gray-600">Available in 54 / 82 Countries</p>
-                    </div>
-                    <button
-                      onClick={() => navigate('/global-esim?type=global')}
-                      className="px-6 py-2 bg-telgo-red text-white text-sm font-semibold rounded-lg hover:bg-red-700 transition-colors"
-                    >
-                      Shop Now
-                    </button>
-                  </div>
-                  <button
-                    onClick={() => navigate('/global-esim?type=global')}
-                    className="text-telgo-red text-sm font-medium hover:text-red-700 transition-colors"
-                  >
-                    View All →
-                  </button>
+              ) : globalBundles.length === 0 ? (
+                <div className="text-center py-12">
+                  <p className="text-gray-500 text-lg mb-4">No global bundles found in API.</p>
+                  <p className="text-gray-400 text-sm">
+                    Global bundles are identified by: 50+ countries, roaming enabled, or group containing "global".
+                  </p>
+                  <p className="text-gray-400 text-sm mt-2">
+                    Check the eSIMGo API for bundles with these characteristics.
+                  </p>
                 </div>
-              </motion.div>
+              ) : (() => {
+                // Group global bundles by plan type (based on data amount ranges or group field)
+                const planGroups = new Map<string, {
+                  name: string
+                  bundles: typeof globalBundles
+                  minPricePerGB: number
+                  countryCount: number
+                  dataRange: { min: number; max: number }
+                  durationRange: { min: number; max: number }
+                }>()
 
-              {/* Global Max - 106 and 112 Countries Plan */}
+                globalBundles.forEach(bundle => {
+                  // Determine plan group name from bundle name or group field
+                  let groupName = 'Global Plan'
+                  if (bundle.group && Array.isArray(bundle.group) && bundle.group.length > 0) {
+                    groupName = bundle.group[0]
+                  } else if (bundle.name) {
+                    // Try to extract plan type from name (e.g., "global_core", "global_max")
+                    const nameLower = bundle.name.toLowerCase()
+                    if (nameLower.includes('core')) groupName = 'Global Core'
+                    else if (nameLower.includes('max')) groupName = 'Global Max'
+                    else if (nameLower.includes('global')) groupName = 'Global Plan'
+                  }
+
+                  const existing = planGroups.get(groupName)
+                  
+                  // Calculate price per GB
+                  const dataMatch = bundle.data?.match(/(\d+(?:\.\d+)?)/)
+                  const dataGB = dataMatch ? parseFloat(dataMatch[1]) : 0
+                  const pricePerGB = dataGB > 0 ? bundle.price / dataGB : bundle.price
+                  
+                  // Get country count from countryObjects or countries array
+                  const countryCount = bundle.countryObjects?.length || bundle.countries?.length || 0
+
+                  if (existing) {
+                    existing.bundles.push(bundle)
+                    existing.minPricePerGB = Math.min(existing.minPricePerGB, pricePerGB)
+                    existing.countryCount = Math.max(existing.countryCount, countryCount)
+                    if (dataGB > 0) {
+                      existing.dataRange.min = Math.min(existing.dataRange.min, dataGB)
+                      existing.dataRange.max = Math.max(existing.dataRange.max, dataGB)
+                    }
+                    existing.durationRange.min = Math.min(existing.durationRange.min, bundle.duration)
+                    existing.durationRange.max = Math.max(existing.durationRange.max, bundle.duration)
+                  } else {
+                    planGroups.set(groupName, {
+                      name: groupName,
+                      bundles: [bundle],
+                      minPricePerGB: pricePerGB,
+                      countryCount: countryCount,
+                      dataRange: { min: dataGB, max: dataGB },
+                      durationRange: { min: bundle.duration, max: bundle.duration },
+                    })
+                  }
+                })
+
+                const plans = Array.from(planGroups.values())
+                plans.sort((a, b) => a.minPricePerGB - b.minPricePerGB)
+
+                return (
+                  <>
+                    {plans.map((plan, index) => (
               <motion.div
+                        key={plan.name}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 whileHover={{ scale: 1.05, y: -5, boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)' }}
-                transition={{ duration: 0.1 }}
+                        transition={{ duration: 0.1, delay: index * 0.1 }}
                 className="bg-white rounded-lg border border-gray-200 overflow-hidden cursor-pointer"
               >
                 <div className="p-6">
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex-1">
-                      <h3 className="text-2xl font-bold text-gray-900 mb-1">Global Max</h3>
-                      <p className="text-sm text-gray-600 mb-3">Start from USD 7.20/GB</p>
+                              <h3 className="text-2xl font-bold text-gray-900 mb-1">{plan.name}</h3>
+                              <p className="text-sm text-gray-600 mb-3">Start from USD {plan.minPricePerGB.toFixed(2)}/GB</p>
                       <div className="flex flex-wrap gap-2 mb-3">
+                                {plan.dataRange.min > 0 && (
                         <span className="px-3 py-1 bg-pink-100 text-pink-700 rounded-full text-xs font-medium">
-                          1GB - 5GB
+                                    {plan.dataRange.min === plan.dataRange.max 
+                                      ? `${plan.dataRange.min}GB`
+                                      : `${plan.dataRange.min}GB - ${plan.dataRange.max}GB`}
                         </span>
+                                )}
                         <span className="px-3 py-1 bg-pink-100 text-pink-700 rounded-full text-xs font-medium">
-                          1DAY - 30DAY
+                                  {plan.durationRange.min === plan.durationRange.max
+                                    ? `${plan.durationRange.min}DAY`
+                                    : `${plan.durationRange.min}DAY - ${plan.durationRange.max}DAY`}
                         </span>
                       </div>
-                      <p className="text-sm text-gray-600">Available in 106 / 112 Countries</p>
+                              <p className="text-sm text-gray-600">Available in {plan.countryCount} Countries</p>
                     </div>
                     <button
-                      onClick={() => navigate('/global-esim?type=global-ex')}
+                              onClick={() => navigate(`/global-esim?type=${plan.name.toLowerCase().replace(/\s+/g, '-')}`)}
                       className="px-6 py-2 bg-telgo-red text-white text-sm font-semibold rounded-lg hover:bg-red-700 transition-colors"
                     >
                       Shop Now
                     </button>
                   </div>
                   <button
-                    onClick={() => navigate('/global-esim?type=global-ex')}
+                            onClick={() => navigate(`/global-esim?type=${plan.name.toLowerCase().replace(/\s+/g, '-')}`)}
                     className="text-telgo-red text-sm font-medium hover:text-red-700 transition-colors"
                   >
                     View All →
                   </button>
                 </div>
               </motion.div>
+                    ))}
+                  </>
+                )
+              })()}
             </div>
           )}
 
           {/* Local eSIM View - All Countries */}
           {esimType === 'local' && (
             <div className="space-y-6">
-              {/* Results Count */}
-              <div className="mb-4">
-                <p className="text-gray-600 text-sm">
-                  {filteredLocalDestinations.length} {filteredLocalDestinations.length === 1 ? 'country' : 'countries'} available
-                </p>
-              </div>
-
-              {/* Countries Grid */}
-              {filteredLocalDestinations.length === 0 ? (
+              {countriesLoading ? (
                 <div className="text-center py-12">
-                  <p className="text-gray-500 text-lg">No countries found. Try a different search.</p>
+                  <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-telgo-red"></div>
+                  <p className="mt-4 text-gray-600">Loading countries...</p>
                 </div>
               ) : (
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 max-h-[600px] overflow-y-auto pr-2">
-                  {filteredLocalDestinations.map((dest, index) => (
-                    <motion.div
-                      key={dest.country.id}
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      whileHover={{ scale: 1.1, y: -8, boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)' }}
-                      transition={{ 
-                        default: { duration: 0.3, delay: Math.min(index * 0.02, 0.5) },
-                        hover: { duration: 0.08, ease: "easeOut" }
-                      }}
-                      onClick={() => navigate(`/country/${encodeURIComponent(dest.name)}`)}
-                      className="bg-white rounded-xl shadow-md p-6 text-center cursor-pointer"
-                    >
-                      <div className="text-4xl mb-3">{dest.flag}</div>
-                      <div className="text-gray-900 font-semibold mb-2">{dest.name}</div>
-                      <div className="text-telgo-red text-sm font-medium">
-                        From ${dest.price}/GB
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
+                <>
+                  {/* Results Count */}
+                  <div className="mb-4">
+                    <p className="text-gray-600 text-sm">
+                      {filteredLocalDestinations.length} {filteredLocalDestinations.length === 1 ? 'country' : 'countries'} available
+                      {searchQuery.trim() && (
+                        <span className="text-gray-400 text-xs ml-2">(filtered by: "{searchQuery}")</span>
+                      )}
+                    </p>
+                  </div>
+
+                  {/* Countries Grid */}
+                  {filteredLocalDestinations.length === 0 ? (
+                    <div className="text-center py-12">
+                      <p className="text-gray-500 text-lg">No countries found. Try a different search.</p>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 max-h-[600px] overflow-y-auto pr-2">
+                      {filteredLocalDestinations.map((dest, index) => (
+                        <motion.div
+                          key={dest.countryIso}
+                          initial={{ opacity: 0, scale: 0.9 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          whileHover={{ scale: 1.1, y: -8, boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)' }}
+                          transition={{ 
+                            default: { duration: 0.3, delay: Math.min(index * 0.02, 0.5) },
+                            hover: { duration: 0.08, ease: "easeOut" }
+                          }}
+                          onClick={() => navigate(`/country/${encodeURIComponent(dest.name)}`)}
+                          className="bg-white rounded-xl shadow-md p-6 text-center cursor-pointer"
+                        >
+                          <div className="text-4xl mb-3">{dest.flag}</div>
+                          <div className="text-gray-900 font-semibold mb-2">{dest.name}</div>
+                          <div className="text-telgo-red text-sm font-medium">
+                            From ${dest.price}/GB
+                          </div>
+                        </motion.div>
+                      ))}
+                    </div>
+                  )}
+                </>
               )}
             </div>
           )}

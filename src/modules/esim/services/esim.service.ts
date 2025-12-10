@@ -9,6 +9,7 @@ import { apiClient } from '@/shared/services/api/client'
 export interface ActivateBundleRequest {
   type: 'transaction'
   assign: boolean
+  userId?: number // Optional user ID for database records
   order: Array<{
     type: 'bundle'
     item: string // Bundle ID (e.g., "esim_1GB_7D_GB_V2")

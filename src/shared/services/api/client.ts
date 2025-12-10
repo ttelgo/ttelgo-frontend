@@ -40,9 +40,27 @@ export class ApiClient {
       ...options,
     }
 
-    // Add auth token if available
+    // Add API key if available (for frontend API access)
+    const apiKey = localStorage.getItem('api_key')
+    const apiSecret = localStorage.getItem('api_secret')
+    
+    if (apiKey) {
+      config.headers = {
+        ...config.headers,
+        'X-API-Key': apiKey,
+      }
+      
+      if (apiSecret) {
+        config.headers = {
+          ...config.headers,
+          'X-API-Secret': apiSecret,
+        }
+      }
+    }
+    
+    // Add auth token if available (for user authentication)
     const token = localStorage.getItem('auth_token')
-    if (token) {
+    if (token && !apiKey) {
       config.headers = {
         ...config.headers,
         Authorization: `Bearer ${token}`,

@@ -1,81 +1,136 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { regionalPlans } from '@/modules/plans/utils/regionalPlansData'
 import { allCountries, Country } from '@/modules/countries/utils/countriesData'
+import { plansService } from '@/modules/plans/services/plans.service'
 
 const RegionCountries = () => {
   const navigate = useNavigate()
   const { regionName } = useParams<{ regionName: string }>()
   const [searchQuery, setSearchQuery] = useState('')
+  const [countriesFromApi, setCountriesFromApi] = useState<Array<{
+    name: string
+    countryIso: string
+    flag: string
+    region: string
+  }>>([])
+  const [loading, setLoading] = useState(true)
 
   // Decode region name from URL
   const decodedRegionName = regionName ? decodeURIComponent(regionName) : ''
 
-  // Map region names from regional plans to country data regions
-  // Note: 'America' in regional plans includes both North and South America
+  // Map region names to match API region values
   const regionMapping: Record<string, string[]> = {
     'Europe': ['Europe'],
     'Asia': ['Asia'],
-    'America': ['North America', 'South America'], // America includes both
+    'America': ['North America', 'South America'],
+    'Americas': ['North America', 'South America'],
+    'North America': ['North America'],
+    'South America': ['South America'],
     'Africa': ['Africa'],
     'Middle East': ['Middle East'],
+    'Oceania': ['Oceania'],
   }
 
-  // Note: regionCountriesFromPlans is used indirectly through the country matching logic below
+  // Fetch countries from API filtered by region
+  useEffect(() => {
+    const fetchCountriesByRegion = async () => {
+      try {
+        setLoading(true)
+        
+        // Fetch all local bundles from API
+        const localBundles = await plansService.getLocalBundles()
+        
+        // Group bundles by country and extract region from API
+        const countryMap = new Map<string, {
+          name: string
+          countryIso: string
+          flag: string
+          region: string
+        }>()
 
-  // Get full country data for countries in this region
-  const countriesInRegion = useMemo(() => {
-    // First, get countries from regional plans
-    const countryMap = new Map<string, { name: string; flag: string }>()
-    regionalPlans
-      .filter(plan => plan.continent === decodedRegionName)
-      .forEach(plan => {
-        plan.countries.forEach(country => {
-          if (!countryMap.has(country.name)) {
-            countryMap.set(country.name, country)
+        localBundles.forEach(bundle => {
+          if (!bundle.countryName || !bundle.countryIso) return
+          
+          // Get region from API bundle data
+          const regionFromApi = bundle.countryObjects?.[0]?.region || 'Unknown'
+          
+          // Map region name to API region values
+          const mappedRegions = regionMapping[decodedRegionName] || [decodedRegionName]
+          
+          // Check if this country belongs to the requested region (strict matching)
+          const belongsToRegion = mappedRegions.some(mappedRegion => {
+            const apiRegionLower = regionFromApi.trim().toLowerCase()
+            const mappedRegionLower = mappedRegion.trim().toLowerCase()
+            return apiRegionLower === mappedRegionLower
+          })
+          
+          // Skip if region doesn't match
+          if (!belongsToRegion) {
+            console.log(`Skipping ${bundle.countryName} - API region: "${regionFromApi}", Requested: "${decodedRegionName}"`)
+            return
+          }
+
+          // Get flag from allCountries if available, otherwise use default
+          const countryData = allCountries.find(c => 
+            c.name.toLowerCase() === bundle.countryName?.toLowerCase() ||
+            (bundle.countryIso && c.id.toLowerCase() === bundle.countryIso.toLowerCase())
+          )
+
+          if (!countryMap.has(bundle.countryIso)) {
+            countryMap.set(bundle.countryIso, {
+              name: bundle.countryName,
+              countryIso: bundle.countryIso,
+              flag: countryData?.flag || '🌍',
+              region: regionFromApi,
+            })
+            console.log(`Added ${bundle.countryName} (${bundle.countryIso}) - Region: ${regionFromApi}`)
           }
         })
-      })
 
-    // Match with allCountries data where possible
-    const matchedCountries: Array<Country & { flag: string }> = []
-    const unmatchedCountries: Array<{ name: string; flag: string }> = []
+        // Convert to array and sort by country name
+        const countries = Array.from(countryMap.values())
+          .sort((a, b) => a.name.localeCompare(b.name))
 
-    countryMap.forEach((planCountry, countryName) => {
-      const fullCountry = allCountries.find(
-        c => c.name.toLowerCase() === countryName.toLowerCase()
-      )
-      if (fullCountry) {
-        matchedCountries.push({ ...fullCountry, flag: planCountry.flag })
-      } else {
-        unmatchedCountries.push(planCountry)
+        console.log(`Found ${countries.length} countries in ${decodedRegionName} from API`)
+        setCountriesFromApi(countries)
+      } catch (error) {
+        console.error('Error fetching countries by region from API:', error)
+        setCountriesFromApi([])
+      } finally {
+        setLoading(false)
       }
-    })
+    }
 
-    // Add countries from allCountries that match the region but aren't in regional plans
-    const mappedRegions = regionMapping[decodedRegionName] || [decodedRegionName]
-    allCountries
-      .filter(country => mappedRegions.includes(country.region))
-      .forEach(country => {
-        if (!matchedCountries.some(c => c.id === country.id)) {
-          matchedCountries.push(country)
-        }
-      })
-    return [...matchedCountries, ...unmatchedCountries.map(c => ({
-      id: c.name.toLowerCase().replace(/\s+/g, '-'),
-      name: c.name,
-      flag: c.flag,
-      region: (mappedRegions[0] || decodedRegionName) as Country['region'],
-      status: 'Open Now' as const,
-      prices: {
-        '1GB': 3.99,
-        '5GB': 12.99,
-        '10GB': 22.99,
-        'Unlimited': 44.99,
-      },
-    }))]
+    if (decodedRegionName) {
+      fetchCountriesByRegion()
+    }
   }, [decodedRegionName])
+
+  // Get countries in region from API
+  const countriesInRegion = useMemo(() => {
+    return countriesFromApi.map(country => {
+      // Try to find full country data from allCountries for additional info
+      const fullCountry = allCountries.find(c => 
+        c.name.toLowerCase() === country.name.toLowerCase() ||
+        c.id.toLowerCase() === country.countryIso.toLowerCase()
+      )
+
+      return {
+        id: country.countryIso.toLowerCase(),
+        name: country.name,
+        flag: country.flag,
+        region: country.region as Country['region'],
+        status: (fullCountry?.status || 'Open Now') as 'Open Now' | 'Coming Soon',
+        prices: fullCountry?.prices || {
+          '1GB': 3.99,
+          '5GB': 12.99,
+          '10GB': 22.99,
+          'Unlimited': 44.99,
+        },
+      } as Country
+    })
+  }, [countriesFromApi])
 
   // Filter countries by search query
   const filteredCountries = useMemo(() => {
@@ -162,16 +217,23 @@ const RegionCountries = () => {
       {/* Countries Grid */}
       <section className="py-8 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Results Count */}
-          <div className="mb-6">
-            <p className="text-gray-600">
-              {filteredCountries.length} {filteredCountries.length === 1 ? 'country' : 'countries'} found
-            </p>
-          </div>
+          {loading ? (
+            <div className="text-center py-12">
+              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-telgo-red"></div>
+              <p className="mt-4 text-gray-600">Loading countries...</p>
+            </div>
+          ) : (
+            <>
+              {/* Results Count */}
+              <div className="mb-6">
+                <p className="text-gray-600">
+                  {filteredCountries.length} {filteredCountries.length === 1 ? 'country' : 'countries'} found
+                </p>
+              </div>
 
-          {/* Countries Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {filteredCountries.map((country, index) => (
+              {/* Countries Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                {filteredCountries.map((country, index) => (
               <motion.div
                 key={country.id || country.name}
                 initial={{ opacity: 0, y: 20 }}
@@ -204,14 +266,16 @@ const RegionCountries = () => {
                   </button>
                 </div>
               </motion.div>
-            ))}
-          </div>
+                ))}
+              </div>
 
-          {/* No Results */}
-          {filteredCountries.length === 0 && (
-            <div className="text-center py-12">
-              <p className="text-gray-500 text-lg">No countries found. Try a different search.</p>
-            </div>
+              {/* No Results */}
+              {filteredCountries.length === 0 && (
+                <div className="text-center py-12">
+                  <p className="text-gray-500 text-lg">No countries found. Try a different search.</p>
+                </div>
+              )}
+            </>
           )}
         </div>
       </section>

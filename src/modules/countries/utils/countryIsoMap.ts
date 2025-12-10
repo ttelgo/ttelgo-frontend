@@ -79,6 +79,45 @@ export const countryIsoMap: Record<string, string> = {
   // Oceania
   'New Zealand': 'NZ',
   
+  // Additional countries from API
+  'Aland Islands': 'AX',
+  'Aaland Islands': 'AX', // Alternative spelling
+  'Albania': 'AL',
+  'Andorra': 'AD',
+  'Anguilla': 'AI',
+  'Antigua and Barbuda': 'AG',
+  'Armenia': 'AM',
+  'Aruba': 'AW',
+  'Azerbaijan': 'AZ',
+  'Bahamas': 'BS',
+  'Bahrain': 'BH',
+  'Bangladesh': 'BD',
+  'Barbados': 'BB',
+  'Belarus': 'BY',
+  'Benin': 'BJ',
+  'Bermuda': 'BM',
+  'Bolivia': 'BO',
+  'Bonaire, Sint Eustatius And Saba': 'BQ',
+  'Bosnia and Herzegovina': 'BA',
+  'Botswana': 'BW',
+  'Brunei Darussalam': 'BN',
+  'Brunei': 'BN',
+  'Burkina Faso': 'BF',
+  'Cameroon': 'CM',
+  'Cape Verde': 'CV',
+  'Central African Republic': 'CF',
+  'Congo': 'CG',
+  'Congo, the Democratic Republic of the': 'CD',
+  'Democratic Republic of the Congo': 'CD',
+  'Costa Rica': 'CR',
+  'Cote d\'Ivoire': 'CI',
+  'Ivory Coast': 'CI',
+  'Cuba': 'CU',
+  'Curacao': 'CW',
+  'Cyprus': 'CY',
+  'Northern Cyprus': 'CYP',
+  'Dominica': 'DM',
+  
   // Add more as needed - check your backend for available country codes
 }
 

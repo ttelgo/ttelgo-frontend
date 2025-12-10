@@ -1,7 +1,13 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { motion } from 'framer-motion'
+import { loadStripe, StripeElementsOptions } from '@stripe/stripe-js'
+import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js'
 import { eSIMPlan } from '@/shared/types'
+import { paymentService, type CreatePaymentIntentRequest } from '@/modules/payment/services/payment.service'
+
+// Stripe promise - will be initialized with publishable key
+let stripePromise: Promise<any> | null = null
 
 const Checkout = () => {
   const navigate = useNavigate()
@@ -59,6 +65,10 @@ const Checkout = () => {
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [isProcessing, setIsProcessing] = useState(false)
   const [showSuccess, setShowSuccess] = useState(false)
+  const [paymentIntent, setPaymentIntent] = useState<any>(null)
+  const [orderId, setOrderId] = useState<number | null>(null)
+  const [stripePublishableKey, setStripePublishableKey] = useState<string | null>(null)
+  const [isLoadingPaymentIntent, setIsLoadingPaymentIntent] = useState(false)
 
   // Format currency symbol
   const getCurrencySymbol = (currency: string) => {
@@ -94,8 +104,103 @@ const Checkout = () => {
     return v
   }
 
-  // Card validation removed - payment is handled automatically by backend
-  // Card fields are kept for UI purposes only
+  // Reset payment intent when payment method changes away from Stripe
+  useEffect(() => {
+    if (paymentMethod !== 'stripe') {
+      setPaymentIntent(null)
+      setOrderId(null)
+      setStripePublishableKey(null)
+      setIsLoadingPaymentIntent(false)
+      // Clear any payment-related errors
+      if (errors.submit && errors.submit.includes('payment')) {
+        setErrors({ ...errors, submit: '' })
+      }
+    }
+  }, [paymentMethod])
+
+  // Create payment intent when Stripe is selected and email is available
+  useEffect(() => {
+    // Only proceed if Stripe is selected
+    if (paymentMethod !== 'stripe') {
+      return
+    }
+
+    // Debounce email validation to prevent too many API calls
+    const email = billingData.email?.trim() || ''
+    const isValidEmail = email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+    
+    // Don't create if email is invalid or payment intent already exists
+    if (!isValidEmail || paymentIntent) {
+      return
+    }
+
+    // Prevent multiple simultaneous requests
+    let isCancelled = false
+
+    const createPaymentIntent = async () => {
+      if (isCancelled) return
+
+      try {
+        setIsLoadingPaymentIntent(true)
+        const bundleId = (plan as any).bundleId || plan.id
+        
+        const request: CreatePaymentIntentRequest = {
+          amount: plan.price,
+          currency: plan.currency?.toLowerCase() || 'usd',
+          bundleId: bundleId,
+          bundleName: plan.name,
+          quantity: 1,
+          customerEmail: billingData.email,
+        }
+
+        const response = await paymentService.createPaymentIntent(request)
+        
+        if (isCancelled) return
+
+        // Store the full response which includes clientSecret
+        setPaymentIntent({
+          clientSecret: response.clientSecret,
+          paymentIntentId: response.paymentIntentId,
+          publishableKey: response.publishableKey,
+          orderId: response.orderId
+        })
+        setOrderId(response.orderId)
+        setStripePublishableKey(response.publishableKey)
+        
+        // Initialize Stripe with publishable key
+        if (!stripePromise && response.publishableKey) {
+          stripePromise = loadStripe(response.publishableKey)
+        }
+        
+        // Clear any previous errors
+        setErrors(prev => {
+          const newErrors = { ...prev }
+          delete newErrors.submit
+          return newErrors
+        })
+      } catch (err: any) {
+        if (isCancelled) return
+        
+        console.error('Failed to create payment intent:', err)
+        const errorMessage = err.message || err.response?.data?.message || 'Failed to initialize payment. Please refresh the page.'
+        setErrors({ submit: errorMessage })
+      } finally {
+        if (!isCancelled) {
+          setIsLoadingPaymentIntent(false)
+        }
+      }
+    }
+
+    // Debounce the API call - wait 800ms after user stops typing
+    const timeoutId = setTimeout(() => {
+      createPaymentIntent()
+    }, 800)
+
+    return () => {
+      isCancelled = true
+      clearTimeout(timeoutId)
+    }
+  }, [plan.id, billingData.email, paymentMethod]) // Removed paymentIntent from dependencies to prevent loops
 
   const validateBilling = () => {
     const newErrors: Record<string, string> = {}
@@ -163,8 +268,132 @@ const Checkout = () => {
     }
   }
 
+  // Stripe payment handler (used by StripeCheckoutForm component)
+  const handleStripePayment = async (stripe: any, elements: any, cardElement?: any) => {
+    if (!stripe || !elements || !paymentIntent || !orderId) {
+      throw new Error('Payment not initialized. Please wait a moment and try again.')
+    }
+
+    setIsProcessing(true)
+    setErrors({})
+
+    try {
+      // Validate billing information first
+      const billingErrors = validateBilling()
+      if (Object.keys(billingErrors).length > 0) {
+        setErrors(billingErrors)
+        setIsProcessing(false)
+        const firstErrorField = Object.keys(billingErrors)[0]
+        const element = document.getElementById(firstErrorField)
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' })
+          element.focus()
+        }
+        return
+      }
+
+      // Get card element - use provided element or get it fresh
+      let cardElementToUse = cardElement
+      
+      // If element not provided, get it fresh from elements
+      if (!cardElementToUse) {
+        try {
+          cardElementToUse = elements.getElement(CardElement) || elements.getElement('card')
+        } catch (e) {
+          console.error('Error getting card element:', e)
+        }
+      }
+      
+      // Verify element is valid
+      if (!cardElementToUse) {
+        throw new Error('Card element is not accessible. Please ensure the card form is fully loaded and try again.')
+      }
+      
+      // Additional validation: ensure element is actually mounted
+      if (typeof cardElementToUse !== 'object' || cardElementToUse === null) {
+        throw new Error('Card element is invalid. Please refresh the page and try again.')
+      }
+
+      // Confirm payment with Stripe
+      const { error: confirmError, paymentIntent: confirmedPayment } = await stripe.confirmCardPayment(
+        paymentIntent.clientSecret,
+        {
+          payment_method: {
+            card: cardElementToUse,
+            billing_details: {
+              name: `${billingData.firstName} ${billingData.lastName}`,
+              email: billingData.email,
+              phone: billingData.phone || undefined,
+              address: {
+                line1: billingData.address,
+                city: billingData.city,
+                state: billingData.state || undefined,
+                postal_code: billingData.zipCode,
+                country: billingData.country,
+              },
+            },
+          },
+        }
+      )
+
+      if (confirmError) {
+        throw new Error(confirmError.message || 'Payment failed')
+      }
+
+      if (confirmedPayment?.status === 'succeeded' && orderId) {
+        // Confirm payment on backend
+        await paymentService.confirmPayment(confirmedPayment.id)
+
+        // Activate eSIM after payment confirmation
+        const activationResponse = await paymentService.activateEsimAfterPayment(orderId)
+        
+        // Extract order reference for QR code
+        const orderReference = activationResponse?.orderReference || activationResponse?.id
+        const matchingId = activationResponse?.order?.[0]?.esims?.[0]?.matchingId
+        const iccid = activationResponse?.order?.[0]?.esims?.[0]?.iccid
+
+        setIsProcessing(false)
+        setShowSuccess(true)
+        
+        // Redirect to My eSIM with orderReference (for QR code)
+        setTimeout(() => {
+          const params = new URLSearchParams()
+          if (orderId) params.set('orderId', orderId.toString())
+          if (orderReference) params.set('esimId', orderReference)
+          if (matchingId) params.set('matchingId', matchingId)
+          if (iccid) params.set('iccid', iccid)
+          
+          navigate(`/my-esim?${params.toString()}`, { 
+            state: { 
+              plan, 
+              order: activationResponse,
+              esimId: orderReference,
+              matchingId: matchingId,
+              iccid: iccid,
+              success: true 
+            } 
+          })
+        }, 1500)
+      } else {
+        throw new Error('Payment not completed')
+      }
+    } catch (error) {
+      console.error('Payment failed:', error)
+      setIsProcessing(false)
+      setErrors({ 
+        submit: error instanceof Error ? error.message : 'Payment failed. Please try again.' 
+      })
+    }
+  }
+
+  // Legacy handler for non-Stripe payment methods
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    
+    if (paymentMethod === 'stripe') {
+      // Stripe payment is handled by StripeCheckoutForm component
+      return
+    }
     
     // Clear previous errors
     setErrors({})
@@ -173,7 +402,6 @@ const Checkout = () => {
     const billingErrors = validateBilling()
     if (Object.keys(billingErrors).length > 0) {
       setErrors(billingErrors)
-      // Scroll to first error
       const firstErrorField = Object.keys(billingErrors)[0]
       const element = document.getElementById(firstErrorField)
       if (element) {
@@ -183,85 +411,14 @@ const Checkout = () => {
       return
     }
     
-    // Note: Card validation is optional since payment is handled by backend
-    // Only validate if user explicitly selected card payment and wants to see errors
-    // For now, we skip card validation since backend handles payment
-    
     setIsProcessing(true)
     setErrors({})
 
-    try {
-      // Import checkout service
-      const { checkoutService } = await import('@/modules/checkout/services/checkout.service')
-      
-      // Get bundle ID from plan
-      // Priority: bundleId (from API) > id (plan ID)
-      const bundleId = (plan as any).bundleId || plan.id
-      
-      console.log('Creating order with bundleId:', bundleId)
-      
-      // Create order via API (payment handled by backend automatically)
-      const order = await checkoutService.createOrder({
-        bundleId: bundleId,
-        quantity: 1,
-        assign: true,
-        allowReassign: false,
-      })
-      
-      console.log('Order created successfully:', order)
-
-      setIsProcessing(false)
-      setShowSuccess(true)
-      
-      // Extract identifiers from response
-      // IMPORTANT: orderReference is the UUID needed for QR code endpoint
-      const orderReference = (order as any).orderReference || order.esimId // orderReference is the UUID
-      const matchingId = (order as any).matchingId // From esims array (NOT for QR code)
-      const iccid = (order as any).iccid
-      const orderId = order.orderId || orderReference || 'unknown'
-      
-      console.log('Order Reference (UUID for QR):', orderReference)
-      console.log('Order ID:', orderId)
-      console.log('Matching ID:', matchingId, '(not used for QR code)')
-      console.log('ICCID:', iccid)
-      
-      // Validate that we have orderReference (required for QR code)
-      if (!orderReference) {
-        console.error('orderReference not found in response!', order)
-        setErrors({ 
-          submit: 'Order created but QR code identifier not found. Please contact support.' 
-        })
-        alert('Order created successfully, but QR code identifier is missing. Please contact support with your order details.')
-        return
-      }
-      
-      // Redirect to My eSIM with orderReference (for QR code)
-      setTimeout(() => {
-        const params = new URLSearchParams()
-        if (orderId && orderId !== 'unknown') params.set('orderId', orderId)
-        if (orderReference) params.set('esimId', orderReference) // orderReference is the UUID for QR code
-        if (matchingId) params.set('matchingId', matchingId) // Keep for reference
-        if (iccid) params.set('iccid', iccid)
-        
-        navigate(`/my-esim?${params.toString()}`, { 
-          state: { 
-            plan, 
-            order,
-            esimId: orderReference, // orderReference (UUID) for QR code
-            matchingId: matchingId,
-            iccid: iccid,
-            success: true 
-          } 
-        })
-      }, 1500)
-    } catch (error) {
-      console.error('Order creation failed:', error)
-      setIsProcessing(false)
-      setErrors({ 
-        submit: error instanceof Error ? error.message : 'Failed to create order. Please try again.' 
-      })
-      alert(error instanceof Error ? error.message : 'Failed to create order. Please try again.')
-    }
+    // For PayPal and Bank Transfer, show coming soon message
+    setErrors({ 
+      submit: `${paymentMethod === 'paypal' ? 'PayPal' : 'Bank Transfer'} payment is coming soon. Please use Stripe for now.` 
+    })
+    setIsProcessing(false)
   }
 
   // Calculate totals
@@ -269,6 +426,134 @@ const Checkout = () => {
   const tax = 0 // No tax for demo
   const processingFee = 0 // No fee for demo
   const total = subtotal + tax + processingFee
+
+  // Stripe Elements options - only when we have a client secret
+  const elementsOptions: StripeElementsOptions | undefined = paymentIntent?.clientSecret
+    ? {
+        clientSecret: paymentIntent.clientSecret,
+        appearance: {
+          theme: 'stripe' as const,
+        },
+      }
+    : undefined
+
+  // Stripe Checkout Form Component (inline) - handles card input and payment only
+  const StripeCheckoutForm = () => {
+    const stripe = useStripe()
+    const elements = useElements()
+    const [cardElementReady, setCardElementReady] = useState(false)
+    const cardElementRef = useRef<any>(null)
+
+    // Note: We don't need to store the element in a ref
+    // The onReady callback will tell us when it's ready
+    // We'll get it fresh from elements when needed
+
+    const handlePayment = async () => {
+      if (!stripe || !elements || !paymentIntent) {
+        setErrors({ submit: 'Payment not initialized. Please wait a moment and try again.' })
+        return
+      }
+
+      // Ensure the element is ready before proceeding
+      if (!cardElementReady) {
+        setErrors({ submit: 'Card element is not ready. Please wait for the card form to load completely.' })
+        return
+      }
+
+      // Always get the element fresh from elements - don't use stored ref
+      // This ensures we're using the current mounted element
+      let cardElement = null
+      try {
+        cardElement = elements.getElement(CardElement) || elements.getElement('card')
+      } catch (e) {
+        console.error('Error getting card element:', e)
+      }
+
+      if (!cardElement) {
+        setErrors({ submit: 'Card element is not accessible. Please refresh the page and try again.' })
+        return
+      }
+
+      // Call the parent handler with the fresh element reference
+      try {
+        await handleStripePayment(stripe, elements, cardElement)
+      } catch (error: any) {
+        // Error is already handled in handleStripePayment
+        console.error('Payment error:', error)
+      }
+    }
+
+    return (
+      <div className="space-y-6">
+        {/* Card Details */}
+        <div className="space-y-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-gray-900">Card Details</h3>
+            <div className="flex gap-2">
+              <div className="text-xs text-gray-500">Secured by</div>
+              <div className="font-bold text-blue-600">Stripe</div>
+            </div>
+          </div>
+          
+          <div>
+            <label htmlFor="card-element" className="block text-sm font-medium text-gray-700 mb-2">
+              Card Information
+            </label>
+            <div className="p-3 border border-gray-300 rounded-lg focus-within:ring-2 focus-within:ring-telgo-red focus-within:border-transparent bg-white"
+              style={{
+                boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)'
+              }}
+            >
+              <CardElement
+                id="card-element"
+                options={{
+                  style: {
+                    base: {
+                      fontSize: '16px',
+                      color: '#32325d',
+                      '::placeholder': {
+                        color: '#aab7c4',
+                      },
+                    },
+                    invalid: {
+                      color: '#fa755a',
+                      iconColor: '#fa755a',
+                    },
+                  },
+                }}
+                onReady={() => {
+                  // Element is ready - we can now use it
+                  setCardElementReady(true)
+                }}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Submit Button */}
+        <button
+          type="button"
+          onClick={handlePayment}
+          disabled={isProcessing || !stripe || !elements || !paymentIntent || !cardElementReady}
+          className="w-full py-4 bg-telgo-red text-white rounded-lg font-semibold hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-lg mt-6"
+          style={{
+            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+          }}
+        >
+          {isProcessing 
+            ? 'Processing Payment...' 
+            : !cardElementReady
+            ? 'Loading card form...'
+            : `Pay - ${getCurrencySymbol(plan.currency)}${total.toFixed(2)}`
+          }
+        </button>
+        
+        {errors.submit && (
+          <p className="text-sm text-red-600 text-center mt-2">{errors.submit}</p>
+        )}
+      </div>
+    )
+  }
 
   return (
     <div className="w-full min-h-screen py-8 md:py-12">
@@ -453,124 +738,31 @@ const Checkout = () => {
               {/* Payment Forms */}
               <form onSubmit={handleSubmit} className="space-y-6">
                 {/* Stripe Card Form */}
-                {paymentMethod === 'stripe' && (
+                {paymentMethod === 'stripe' && stripePublishableKey && stripePromise && elementsOptions && paymentIntent?.clientSecret && (
+                  <Elements 
+                    stripe={stripePromise} 
+                    options={elementsOptions}
+                  >
+                    <StripeCheckoutForm />
+                  </Elements>
+                )}
+                
+                {paymentMethod === 'stripe' && !stripePublishableKey && (
                   <div className="space-y-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-lg font-semibold text-gray-900">Card Details</h3>
-                      <div className="flex gap-2">
-                        <div className="text-xs text-gray-500">Secured by</div>
-                        <div className="font-bold text-blue-600">Stripe</div>
-                      </div>
-                    </div>
-                    
-                    <div>
-                      <label htmlFor="cardholderName" className="block text-sm font-medium text-gray-700 mb-2">
-                        Cardholder Name
-                      </label>
-                      <input
-                        type="text"
-                        id="cardholderName"
-                        value={cardData.cardholderName}
-                        onChange={(e) => {
-                          setCardData({ ...cardData, cardholderName: e.target.value })
-                          if (errors.cardholderName) {
-                            setErrors({ ...errors, cardholderName: '' })
-                          }
-                        }}
-                        placeholder="John Doe"
-                        className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 ${
-                          errors.cardholderName 
-                            ? 'border-red-500 focus:ring-red-500' 
-                            : 'border-gray-300 focus:ring-telgo-red focus:border-transparent'
-                        } text-gray-900 bg-white`}
-                        style={{
-                          boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)'
-                        }}
-                      />
-                      {errors.cardholderName && (
-                        <p className="mt-1 text-sm text-red-600">{errors.cardholderName}</p>
+                    <div className="flex items-center justify-center py-8">
+                      {isLoadingPaymentIntent ? (
+                        <>
+                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-telgo-red"></div>
+                          <span className="ml-3 text-gray-600">Initializing secure payment...</span>
+                        </>
+                      ) : (
+                        <div className="text-center">
+                          <p className="text-gray-600 mb-2">Please enter your email address above to initialize payment.</p>
+                          {errors.submit && (
+                            <p className="text-sm text-red-600 mt-2">{errors.submit}</p>
+                          )}
+                        </div>
                       )}
-                    </div>
-
-                    <div>
-                      <label htmlFor="cardNumber" className="block text-sm font-medium text-gray-700 mb-2">
-                        Card Number
-                      </label>
-                      <input
-                        type="text"
-                        id="cardNumber"
-                        value={cardData.cardNumber}
-                        onChange={handleCardNumberChange}
-                        placeholder="1234 5678 9012 3456"
-                        maxLength={19}
-                        className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 ${
-                          errors.cardNumber 
-                            ? 'border-red-500 focus:ring-red-500' 
-                            : 'border-gray-300 focus:ring-telgo-red focus:border-transparent'
-                        } text-gray-900 bg-white`}
-                        style={{
-                          boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)'
-                        }}
-                      />
-                      {errors.cardNumber && (
-                        <p className="mt-1 text-sm text-red-600">{errors.cardNumber}</p>
-                      )}
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label htmlFor="expiryDate" className="block text-sm font-medium text-gray-700 mb-2">
-                          Expiry Date
-                        </label>
-                        <input
-                          type="text"
-                          id="expiryDate"
-                          value={cardData.expiryDate}
-                          onChange={handleExpiryChange}
-                          placeholder="MM/YY"
-                          maxLength={5}
-                          className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 ${
-                            errors.expiryDate 
-                              ? 'border-red-500 focus:ring-red-500' 
-                              : 'border-gray-300 focus:ring-telgo-red focus:border-transparent'
-                          } text-gray-900 bg-white`}
-                          style={{
-                            boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)'
-                          }}
-                        />
-                        {errors.expiryDate && (
-                          <p className="mt-1 text-sm text-red-600">{errors.expiryDate}</p>
-                        )}
-                      </div>
-                      <div>
-                        <label htmlFor="cvv" className="block text-sm font-medium text-gray-700 mb-2">
-                          CVV
-                        </label>
-                        <input
-                          type="text"
-                          id="cvv"
-                          value={cardData.cvv}
-                          onChange={(e) => {
-                            setCardData({ ...cardData, cvv: e.target.value.replace(/\D/g, '').slice(0, 4) })
-                            if (errors.cvv) {
-                              setErrors({ ...errors, cvv: '' })
-                            }
-                          }}
-                          placeholder="123"
-                          maxLength={4}
-                          className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 ${
-                            errors.cvv 
-                              ? 'border-red-500 focus:ring-red-500' 
-                              : 'border-gray-300 focus:ring-telgo-red focus:border-transparent'
-                          } text-gray-900 bg-white`}
-                          style={{
-                            boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)'
-                          }}
-                        />
-                        {errors.cvv && (
-                          <p className="mt-1 text-sm text-red-600">{errors.cvv}</p>
-                        )}
-                      </div>
                     </div>
                   </div>
                 )}
@@ -935,34 +1127,40 @@ const Checkout = () => {
                   </div>
                 </div>
 
-                {/* Submit Button */}
-                <button
-                  type="submit"
-                  disabled={isProcessing || showSuccess}
-                  className="w-full py-4 bg-telgo-red text-white rounded-lg font-semibold hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-lg mt-6"
-                  style={{
-                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
-                  }}
-                >
-                  {isProcessing 
-                    ? 'Activating eSIM...' 
-                    : showSuccess
-                    ? 'eSIM Activated Successfully!'
-                    : `Complete Purchase - ${getCurrencySymbol(plan.currency)}${total.toFixed(2)}`
-                  }
-                </button>
-                
-                {/* Info message about automatic payment */}
-                <p className="text-xs text-gray-500 text-center mt-2">
-                  Payment will be processed automatically from your eSIMGo account
-                </p>
+                {/* Submit Button - Only for non-Stripe payment methods */}
+                {paymentMethod !== 'stripe' && (
+                  <>
+                    <button
+                      type="submit"
+                      disabled={isProcessing || showSuccess}
+                      className="w-full py-4 bg-telgo-red text-white rounded-lg font-semibold hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-lg mt-6"
+                      style={{
+                        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+                      }}
+                    >
+                      {isProcessing 
+                        ? 'Processing...' 
+                        : showSuccess
+                        ? 'Success!'
+                        : `Complete Purchase - ${getCurrencySymbol(plan.currency)}${total.toFixed(2)}`
+                      }
+                    </button>
+                    
+                    {errors.submit && (
+                      <p className="text-sm text-red-600 text-center mt-2">{errors.submit}</p>
+                    )}
+                  </>
+                )}
 
                 {/* Security Notice */}
                 <div className="flex items-center justify-center gap-2 text-sm text-gray-500 mt-4">
                   <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
                   </svg>
-                  <span>Your payment is secure and encrypted</span>
+                  <span>
+                    Your payment is secure and encrypted
+                    {paymentMethod === 'stripe' && ' by Stripe'}
+                  </span>
                 </div>
               </form>
             </motion.div>

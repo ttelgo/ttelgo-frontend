@@ -30,15 +30,40 @@ import Contact from '@/modules/support/pages/Contact'
 
 // Blog module
 import Blog from '@/modules/blog/pages/Blog'
-import UltimateGuideESIMTravel from '@/modules/blog/pages/UltimateGuideESIMTravel'
-import SaveMoneyESIMvsRoaming from '@/modules/blog/pages/SaveMoneyESIMvsRoaming'
-import ESIMSetupGuideBeginners from '@/modules/blog/pages/ESIMSetupGuideBeginners'
+import BlogPostDetail from '@/modules/blog/pages/BlogPostDetail'
+import AdminBlogManagement from '@/modules/blog/pages/AdminBlogManagement'
+
+// FAQ module
+import Faq from '@/modules/faq/pages/Faq'
+import AdminFaqManagement from '@/modules/faq/pages/AdminFaqManagement'
+
+// Admin module
+import AdminLayout from '@/modules/admin/components/AdminLayout'
+import AdminDashboard from '@/modules/admin/pages/AdminDashboard'
+import ApiKeyManagement from '@/modules/admin/pages/ApiKeyManagement'
+import UserManagement from '@/modules/admin/pages/UserManagement'
+import OrderManagement from '@/modules/admin/pages/OrderManagement'
+import EsimManagement from '@/modules/admin/pages/EsimManagement'
+import PlanManagement from '@/modules/admin/pages/PlanManagement'
 
 function App() {
   return (
     <Router>
       <Routes>
-        {/* All routes with Layout */}
+        {/* Admin routes - Separate layout (no frontend navbar/footer) */}
+        <Route path="/admin" element={<AdminLayout />}>
+          <Route index element={<AdminDashboard />} />
+          <Route path="dashboard" element={<AdminDashboard />} />
+          <Route path="users" element={<UserManagement />} />
+          <Route path="orders" element={<OrderManagement />} />
+          <Route path="esims" element={<EsimManagement />} />
+          <Route path="plans" element={<PlanManagement />} />
+          <Route path="blog" element={<AdminBlogManagement />} />
+          <Route path="faq" element={<AdminFaqManagement />} />
+          <Route path="api-keys" element={<ApiKeyManagement />} />
+        </Route>
+
+        {/* All other routes with Layout (frontend navbar/footer) */}
         <Route element={<Layout />}>
           {/* Marketing routes */}
           <Route path="/" element={<Home />} />
@@ -69,9 +94,10 @@ function App() {
           
           {/* Blog routes */}
           <Route path="/blog" element={<Blog />} />
-          <Route path="/blog/ultimate-guide-esim-travel-2024" element={<UltimateGuideESIMTravel />} />
-          <Route path="/blog/save-money-esim-vs-roaming" element={<SaveMoneyESIMvsRoaming />} />
-          <Route path="/blog/esim-setup-guide-beginners" element={<ESIMSetupGuideBeginners />} />
+          <Route path="/blog/:slug" element={<BlogPostDetail />} />
+          
+          {/* FAQ routes */}
+          <Route path="/faq" element={<Faq />} />
         </Route>
       </Routes>
     </Router>

@@ -4,6 +4,8 @@
  * Ready for Spring Boot backend integration
  */
 
+import { apiKeyConfig } from '@/shared/utils/apiKeyConfig'
+
 // Use proxy in development (via Vite), full URL in production
 // When using Vite proxy, use relative path '/api'
 // When not using proxy, use full URL 'http://localhost:8080/api'
@@ -40,11 +42,23 @@ export class ApiClient {
       ...options,
     }
 
-    // Add API key if available (for frontend API access)
-    const apiKey = localStorage.getItem('api_key')
-    const apiSecret = localStorage.getItem('api_secret')
+    // API key is REQUIRED for all requests (except auth endpoints)
+    // Check if this is an auth endpoint that doesn't need API key
+    const isAuthEndpoint = endpoint.startsWith('/auth/')
+    const isHealthEndpoint = endpoint.startsWith('/health/')
     
-    if (apiKey) {
+    if (!isAuthEndpoint && !isHealthEndpoint) {
+      const apiKey = apiKeyConfig.getApiKey()
+      const apiSecret = apiKeyConfig.getApiSecret()
+      
+      if (!apiKey) {
+        const error: ApiError = {
+          message: 'API key is required. Please configure your API key in the admin panel or set VITE_API_KEY environment variable.',
+          status: 401,
+        }
+        throw error
+      }
+      
       config.headers = {
         ...config.headers,
         'X-API-Key': apiKey,
@@ -58,9 +72,9 @@ export class ApiClient {
       }
     }
     
-    // Add auth token if available (for user authentication)
+    // Add auth token if available (for user authentication - used in addition to API key)
     const token = localStorage.getItem('auth_token')
-    if (token && !apiKey) {
+    if (token) {
       config.headers = {
         ...config.headers,
         Authorization: `Bearer ${token}`,

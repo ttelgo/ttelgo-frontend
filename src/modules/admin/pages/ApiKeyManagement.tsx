@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { apiKeyService } from '@/modules/admin/services/apikey.service'
+import { apiKeyConfig } from '@/shared/utils/apiKeyConfig'
 import type { ApiKey, CreateApiKeyRequest, UpdateApiKeyRequest, ApiUsageStats } from '@/shared/types'
 
 const ApiKeyManagement = () => {
@@ -50,6 +51,12 @@ const ApiKeyManagement = () => {
       if (created && created.apiKey && created.apiKey.trim() !== '') {
         console.log('Setting new API key in state:', created.apiKey.substring(0, 20) + '...')
         setNewApiKey(created.apiKey)
+        // Automatically configure the API key for frontend use if this is the frontend key
+        if (formData.keyName.toLowerCase().includes('frontend') || 
+            formData.customerName.toLowerCase().includes('ttelgo')) {
+          apiKeyConfig.setApiKey(created.apiKey)
+          console.log('API key automatically configured for frontend use')
+        }
         // Don't close form or reset until user closes modal
         await fetchApiKeys()
       } else {
@@ -79,6 +86,7 @@ const ApiKeyManagement = () => {
         rateLimitPerDay: formData.rateLimitPerDay,
         allowedIps: formData.allowedIps,
         scopes: formData.scopes,
+        expiresAt: formData.expiresAt,
         notes: formData.notes
       }
       
@@ -110,7 +118,16 @@ const ApiKeyManagement = () => {
     
     try {
       const regenerated = await apiKeyService.regenerateApiKey(id)
-      setNewApiKey(regenerated.apiKey || null)
+      if (regenerated.apiKey) {
+        setNewApiKey(regenerated.apiKey)
+        // Update stored API key if this is the one currently in use
+        const currentKey = apiKeyConfig.getApiKey()
+        const keyToUpdate = apiKeys.find(k => k.id === id)
+        if (keyToUpdate && currentKey && keyToUpdate.apiKey === currentKey) {
+          apiKeyConfig.setApiKey(regenerated.apiKey)
+          console.log('Regenerated API key automatically configured for frontend use')
+        }
+      }
       await fetchApiKeys()
     } catch (error) {
       console.error('Error regenerating API key:', error)
@@ -140,6 +157,7 @@ const ApiKeyManagement = () => {
       rateLimitPerDay: 10000,
       allowedIps: [],
       scopes: [],
+      expiresAt: undefined,
       notes: ''
     })
     setEditingKey(null)
@@ -157,6 +175,7 @@ const ApiKeyManagement = () => {
       rateLimitPerDay: key.rateLimitPerDay,
       allowedIps: key.allowedIps || [],
       scopes: key.scopes || [],
+      expiresAt: key.expiresAt,
       notes: key.notes || ''
     })
     setShowForm(true)
@@ -223,10 +242,23 @@ const ApiKeyManagement = () => {
                   <p className="text-xs text-blue-700 mb-1">• Add this header to your API requests:</p>
                   <code className="text-xs bg-white px-2 py-1 rounded block mb-2">X-API-Key: {newApiKey.substring(0, 20)}...</code>
                   <p className="text-xs text-blue-700">• Share this key securely with your vendor/customer</p>
+                  <p className="text-xs text-blue-700 mt-2">• For frontend use, click "Use for Frontend" below</p>
                 </div>
               </div>
 
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                <button
+                  onClick={() => {
+                    apiKeyConfig.setApiKey(newApiKey)
+                    alert('✅ API key configured for frontend use! The frontend will now use this key for all API requests.')
+                  }}
+                  className="bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition font-semibold flex items-center justify-center gap-2"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  Use for Frontend
+                </button>
                 <button
                   onClick={async () => {
                     try {
@@ -357,7 +389,52 @@ const ApiKeyManagement = () => {
                     className="w-full border border-gray-300 rounded-lg px-3 py-2"
                   />
                 </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Expiration Date (Optional)</label>
+                  <input
+                    type="datetime-local"
+                    value={formData.expiresAt ? new Date(formData.expiresAt).toISOString().slice(0, 16) : ''}
+                    onChange={(e) => setFormData({ 
+                      ...formData, 
+                      expiresAt: e.target.value ? new Date(e.target.value).toISOString() : undefined 
+                    })}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                    min={new Date().toISOString().slice(0, 16)}
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Leave empty for no expiration</p>
+                </div>
               </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Allowed IP Addresses (Optional)</label>
+                <p className="text-xs text-gray-500 mb-2">Enter one IP per line. Leave empty to allow all IPs. Use * for wildcard.</p>
+                <textarea
+                  value={formData.allowedIps?.join('\n') || ''}
+                  onChange={(e) => setFormData({ 
+                    ...formData, 
+                    allowedIps: e.target.value.split('\n').filter(ip => ip.trim() !== '') 
+                  })}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 font-mono text-sm"
+                  rows={4}
+                  placeholder="192.168.1.1&#10;10.0.0.0/24&#10;*"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Scopes/Permissions (Optional)</label>
+                <p className="text-xs text-gray-500 mb-2">Enter one scope per line. Format: METHOD:/api/endpoint/** or use * for all endpoints.</p>
+                <textarea
+                  value={formData.scopes?.join('\n') || ''}
+                  onChange={(e) => setFormData({ 
+                    ...formData, 
+                    scopes: e.target.value.split('\n').filter(scope => scope.trim() !== '') 
+                  })}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 font-mono text-sm"
+                  rows={4}
+                  placeholder="GET:/api/plans/**&#10;POST:/api/orders/**&#10;*"
+                />
+              </div>
+              
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Notes</label>
                 <textarea

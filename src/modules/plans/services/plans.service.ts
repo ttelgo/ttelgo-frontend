@@ -84,7 +84,7 @@ function transformBundle(apiBundle: ApiBundle): Bundle {
     const countryIsos = apiBundle.countries?.map(c => c.iso) || []
 
     return {
-      id: apiBundle.name, // Use name as ID since API doesn't provide separate ID
+      id: apiBundle.name, // Use bundle name as identifier since the API doesn't provide a separate ID field
       name: apiBundle.name,
       description: apiBundle.description || '',
       price: apiBundle.price || 0,

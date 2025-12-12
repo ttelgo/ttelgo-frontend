@@ -1,16 +1,16 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 
-// Hero Background Component - HeroStyle.png background
+// Hero Background Component - Image background
 const HeroBackground = () => {
   return (
     <>
-      {/* Hero Background Image */}
+      {/* Image background */}
       <div 
         className="absolute inset-0 w-full h-full"
         style={{
           zIndex: 0,
-          backgroundImage: 'url(/IMAGES/HeroStyle.png)',
+          backgroundImage: 'url(/IMAGES/travels.jpg)',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat'
@@ -18,7 +18,7 @@ const HeroBackground = () => {
       />
       {/* Overlay for better text readability */}
       <div 
-        className="absolute inset-0 w-full h-full bg-white/50"
+        className="absolute inset-0 w-full h-full bg-black/20"
         style={{
           zIndex: 1
         }}
@@ -253,37 +253,32 @@ const HelpCentre = () => {
 
   return (
     <div className="w-full">
-      {/* Hero Section */}
-      <section className="relative py-3 md:py-5 overflow-hidden">
-        <HeroBackground />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+      {/* Hero Section - Merged with Navbar */}
+      <section 
+        className="relative pb-8 md:pb-16 overflow-hidden bg-white -mt-16"
+        style={{
+          paddingTop: '4rem' // Space for navbar
+        }}
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10" style={{ paddingTop: '4rem' }}>
+          <div className="flex items-center justify-between gap-8">
             {/* Left Content */}
             <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
-              className="max-w-[600px] lg:max-w-none pl-8 lg:pl-16 xl:pl-24"
+              className="flex-1 relative z-20 text-left -mt-8"
             >
               {/* Subtitle */}
               <div className="mb-4">
-                <span className="text-xs text-telgo-red uppercase tracking-[0.2em] font-semibold">
+                <span className="text-xs text-gray-600 uppercase tracking-[0.2em] font-semibold">
                   WE&apos;RE HERE - DAY OR NIGHT, ANYTIME.
                 </span>
               </div>
               
               {/* Main Heading */}
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight">
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-telgo-red mb-6 leading-tight">
                 Help Center
-                <svg className="mt-2" width="180" height="6" viewBox="0 0 180 6" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M2 3C2 3 12 1 24 2.5C36 4 48 2 60 3C72 4 84 2 96 3C108 4 120 2 132 3C144 4 156 2 168 3C178 4 178 2 178 3" stroke="#cc0000" strokeWidth="3" strokeLinecap="round" fill="none" style={{ filter: 'url(#scribble-help)' }}/>
-                  <defs>
-                    <filter id="scribble-help" x="0" y="0" width="180" height="6">
-                      <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="4" result="noise"/>
-                      <feDisplacementMap in="SourceGraphic" in2="noise" scale="1"/>
-                    </filter>
-                  </defs>
-                </svg>
               </h1>
               
               {/* Description */}
@@ -291,32 +286,21 @@ const HelpCentre = () => {
                 Our support team is available 24/7 – and we&apos;re always happy to help you stay connected.
               </p>
             </motion.div>
-
-            {/* Right - Help Image */}
+            
+            {/* Right Image */}
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className="hidden lg:flex relative w-full items-center justify-end pr-8 lg:pr-16 xl:pr-24"
-              style={{ zIndex: 15 }}
+              className="hidden lg:flex flex-1 items-center justify-center relative z-20"
             >
-              <img
-                src="/IMAGES/Hellp.png"
-                alt="Help Centre"
-                className="w-full h-auto object-contain"
-                style={{ 
-                  maxHeight: '700px',
-                  minHeight: '400px',
-                  height: 'auto',
-                  width: 'auto',
-                  maxWidth: '100%',
-                  border: 'none',
-                  outline: 'none',
-                  boxShadow: 'none'
-                }}
-                loading="eager"
-                onError={() => {
-                  console.warn('Hellp image not found at /IMAGES/Hellp.png')
+              <img 
+                src="/IMAGES/Hellp.png" 
+                alt="Help Center" 
+                className="w-full h-auto max-w-md object-contain"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.style.display = 'none';
                 }}
               />
             </motion.div>
@@ -325,7 +309,7 @@ const HelpCentre = () => {
       </section>
 
       {/* Main Content - Help Topics */}
-      <section className="py-16 bg-transparent">
+      <section className="pt-0 pb-16 bg-transparent mt-4">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Section Title */}
           <motion.div
@@ -415,7 +399,7 @@ const HelpCentre = () => {
       </section>
 
       {/* Subscription Section */}
-      <section className="py-16 bg-transparent relative">
+      <section className="pt-8 pb-16 bg-transparent relative">
         {/* Dots and Plus Pattern Background */}
         <div 
           className="absolute inset-0 opacity-30"

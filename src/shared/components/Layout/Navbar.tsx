@@ -40,14 +40,13 @@ const Navbar = () => {
 
   return (
     <nav 
-      className="relative z-50 bg-white transition-all duration-300"
+      className="sticky top-0 left-0 right-0 z-50 transition-all duration-300 bg-white"
       style={{
-        boxShadow: 'none',
-        borderBottom: 'none',
-        backgroundColor: '#ffffff'
+        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+        borderBottom: '1px solid rgba(0, 0, 0, 0.1)'
       }}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center">
@@ -60,7 +59,7 @@ const Navbar = () => {
               <Link
                 key={link.path}
                 to={link.path}
-                className={`px-3 py-2 text-sm font-medium transition-colors ${
+                className={`px-3 py-2 text-lg font-medium transition-colors relative z-10 ${
                   isActive(link.path)
                     ? 'text-telgo-red border-b-2 border-telgo-red'
                     : 'text-gray-700 hover:text-telgo-red'
@@ -75,7 +74,7 @@ const Navbar = () => {
           <div className="hidden md:flex items-center space-x-4">
             <Link
               to="/shop"
-              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-telgo-red rounded-lg hover:bg-red-700 transition-colors"
+              className="flex items-center gap-2 px-4 py-2 text-lg font-medium text-white bg-telgo-red rounded-lg hover:bg-red-700 transition-colors"
             >
               <img 
                 src="/IMAGES/CART.png" 
@@ -94,7 +93,7 @@ const Navbar = () => {
           <div className="md:hidden flex items-center">
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className="p-2 rounded-lg text-gray-700 hover:bg-gray-100"
+              className="p-2 rounded-lg text-gray-700 hover:bg-gray-100 relative z-10"
               aria-label="Toggle menu"
             >
               {isOpen ? (
@@ -118,7 +117,7 @@ const Navbar = () => {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="md:hidden bg-white"
+            className="md:hidden bg-white border-t border-gray-200 relative z-10"
             style={{
               boxShadow: 'none',
               borderTop: 'none'
@@ -133,7 +132,7 @@ const Navbar = () => {
                   className={`block px-3 py-2 rounded-md text-base font-medium ${
                     isActive(link.path)
                       ? 'text-telgo-red bg-red-50'
-                      : 'text-gray-700 hover:bg-gray-100'
+                      : 'text-gray-700 hover:bg-gray-50'
                   }`}
                 >
                   {link.label}

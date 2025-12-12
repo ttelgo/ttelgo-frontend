@@ -240,7 +240,7 @@ const CountryPackages = () => {
       regions: bundle.countryName ? [bundle.countryName] : [country.region],
       features: [],
       popular: false,
-      bundleId: bundle.id, // Store bundle ID (which is bundle.name) for API call
+      bundleId: bundle.id, // Store bundle ID for API calls (bundle.id corresponds to bundle.name from API)
     } : {
       id: `${country.id}-${selectedDataSize}`,
       name: `${country.name} - ${selectedDataSize}`,
@@ -364,29 +364,19 @@ const CountryPackages = () => {
 
                 {!loading && (
                   <div className="space-y-4">
-                    {/* Show bundles from API if available, otherwise show mock data */}
+                    {/* Display bundles from API when available, otherwise fall back to mock data */}
                     {bundles.length > 0 ? (
                       bundles.map((bundle) => (
                         <button
                           key={bundle.id}
-                          onClick={() => setSelectedBundle(bundle)}
-                          className={`w-full flex items-center justify-between p-4 border-2 rounded-lg transition-all ${
-                            selectedBundle?.id === bundle.id
-                              ? 'border-telgo-red bg-red-50 shadow-md hover:shadow-lg'
-                              : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
-                          }`}
+                          onClick={() => handleBuyNow(bundle)}
+                          className="w-full flex items-center justify-between p-4 border-2 rounded-lg transition-all border-telgo-red bg-red-50 shadow-md hover:shadow-lg"
                         >
                           <div className="flex items-center gap-4">
-                            <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                              selectedBundle?.id === bundle.id
-                                ? 'border-telgo-red bg-telgo-red'
-                                : 'border-gray-300'
-                            }`}>
-                              {selectedBundle?.id === bundle.id && (
-                                <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                                </svg>
-                              )}
+                            <div className="w-5 h-5 rounded-full border-2 flex items-center justify-center border-telgo-red bg-telgo-red">
+                              <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                              </svg>
                             </div>
                             <div className="text-left">
                               <div className="font-semibold text-gray-900 text-lg">{bundle.data}</div>

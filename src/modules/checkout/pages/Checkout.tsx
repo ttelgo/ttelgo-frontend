@@ -411,14 +411,84 @@ const Checkout = () => {
       return
     }
     
+    // Card validation is optional since payment processing is handled by the backend
+    // The backend automatically processes payments, so frontend card validation is not required
+    
     setIsProcessing(true)
     setErrors({})
 
-    // For PayPal and Bank Transfer, show coming soon message
-    setErrors({ 
-      submit: `${paymentMethod === 'paypal' ? 'PayPal' : 'Bank Transfer'} payment is coming soon. Please use Stripe for now.` 
-    })
-    setIsProcessing(false)
+    try {
+      // Import checkout service
+      const { checkoutService } = await import('@/modules/checkout/services/checkout.service')
+      
+      // Extract bundle ID from plan data
+      // Priority order: bundleId from API response, then fallback to plan ID
+      const bundleId = (plan as any).bundleId || plan.id
+      
+      console.log('Creating order with bundleId:', bundleId)
+      
+      // Create order via API (payment handled by backend automatically)
+      const order = await checkoutService.createOrder({
+        bundleId: bundleId,
+        quantity: 1,
+        assign: true,
+        allowReassign: false,
+      })
+      
+      console.log('Order created successfully:', order)
+
+      setIsProcessing(false)
+      setShowSuccess(true)
+      
+      // Extract identifiers from response
+      // IMPORTANT: orderReference is the UUID needed for QR code endpoint
+      const orderReference = (order as any).orderReference || order.esimId // orderReference is the UUID
+      const matchingId = (order as any).matchingId // From esims array (NOT for QR code)
+      const iccid = (order as any).iccid
+      const orderId = order.orderId || orderReference || 'unknown'
+      
+      console.log('Order Reference (UUID for QR):', orderReference)
+      console.log('Order ID:', orderId)
+      console.log('Matching ID:', matchingId, '(not used for QR code)')
+      console.log('ICCID:', iccid)
+      
+      // Validate that we have orderReference (required for QR code)
+      if (!orderReference) {
+        console.error('orderReference not found in response!', order)
+        setErrors({ 
+          submit: 'Order created but QR code identifier not found. Please contact support.' 
+        })
+        alert('Order created successfully, but QR code identifier is missing. Please contact support with your order details.')
+        return
+      }
+      
+      // Redirect to My eSIM with orderReference (for QR code)
+      setTimeout(() => {
+        const params = new URLSearchParams()
+        if (orderId && orderId !== 'unknown') params.set('orderId', orderId)
+        if (orderReference) params.set('esimId', orderReference) // orderReference is the UUID for QR code
+        if (matchingId) params.set('matchingId', matchingId) // Keep for reference
+        if (iccid) params.set('iccid', iccid)
+        
+        navigate(`/my-esim?${params.toString()}`, { 
+          state: { 
+            plan, 
+            order,
+            esimId: orderReference, // orderReference (UUID) for QR code
+            matchingId: matchingId,
+            iccid: iccid,
+            success: true 
+          } 
+        })
+      }, 1500)
+    } catch (error) {
+      console.error('Order creation failed:', error)
+      setIsProcessing(false)
+      setErrors({ 
+        submit: error instanceof Error ? error.message : 'Failed to create order. Please try again.' 
+      })
+      alert(error instanceof Error ? error.message : 'Failed to create order. Please try again.')
+    }
   }
 
   // Calculate totals

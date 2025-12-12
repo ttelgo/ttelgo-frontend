@@ -1,16 +1,16 @@
 import { motion } from 'framer-motion'
 import { useState } from 'react'
 
-// Hero Background Component - HeroStyle.png background
+// Hero Background Component - Image background
 const HeroBackground = () => {
   return (
     <>
-      {/* Hero Background Image */}
+      {/* Image background */}
       <div 
         className="absolute inset-0 w-full h-full"
         style={{
           zIndex: 0,
-          backgroundImage: 'url(/IMAGES/HeroStyle.png)',
+          backgroundImage: 'url(/IMAGES/travels.jpg)',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat'
@@ -18,7 +18,7 @@ const HeroBackground = () => {
       />
       {/* Overlay for better text readability */}
       <div 
-        className="absolute inset-0 w-full h-full bg-white/50"
+        className="absolute inset-0 w-full h-full bg-black/20"
         style={{
           zIndex: 1
         }}
@@ -49,7 +49,7 @@ const Contact = () => {
     e.preventDefault()
     setIsSubmitting(true)
     
-    // Simulate API call
+    // Simulate API call for form submission
     setTimeout(() => {
       setIsSubmitting(false)
       setSubmitStatus('success')
@@ -139,61 +139,38 @@ const Contact = () => {
 
   return (
     <div className="w-full">
-      {/* Hero Section */}
-      <section className="relative py-3 md:py-5 overflow-hidden">
-        <HeroBackground />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
-            {/* Left Content */}
+      {/* Hero Section - Merged with Navbar */}
+      <section 
+        className="relative pb-36 md:pb-44 overflow-hidden bg-white"
+        style={{
+          paddingTop: '4rem' // Space for navbar
+        }}
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10" style={{ paddingTop: '4rem' }}>
+          <div className="flex items-center justify-center">
+            {/* Content */}
             <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
-              className="max-w-3xl lg:max-w-none pl-8 lg:pl-16 xl:pl-24"
+              className="max-w-[800px] relative z-20 text-center"
             >
               {/* Subtitle */}
-              <div className="mb-4 text-center lg:text-left">
-                <span className="text-xs text-gray-600 uppercase tracking-[0.2em] font-medium">
+              <div className="mb-4">
+                <span className="text-xs text-gray-600 uppercase tracking-[0.2em] font-semibold">
                   GET IN TOUCH
                 </span>
               </div>
               
               {/* Main Heading */}
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight text-center lg:text-left">
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-telgo-red mb-6 leading-tight">
                 Contact Us
-                <svg className="mt-2 mx-auto lg:mx-0" width="120" height="6" viewBox="0 0 120 6" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M2 3C2 3 15 1 30 2.5C45 4 60 2 75 3C90 4 105 2 118 3" stroke="#cc0000" strokeWidth="3" strokeLinecap="round" fill="none"/>
-                </svg>
               </h1>
               
               {/* Description */}
-              <p className="text-lg text-gray-700 mb-8 leading-relaxed font-medium text-center lg:text-left">
+              <p className="text-lg text-gray-700 mb-8 leading-relaxed font-medium">
                 Have a question or need assistance? We're here to help! Reach out to our team and we'll get back to you as soon as possible.
               </p>
-            </motion.div>
-
-            {/* Right Image */}
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="flex items-center justify-center lg:justify-end pr-8 lg:pr-16 xl:pr-24"
-            >
-              <img
-                src="/IMAGES/ABouttt.png"
-                alt="Contact Us"
-                className="w-full max-w-xl h-auto object-contain rounded-lg"
-                style={{ 
-                  position: 'relative',
-                  zIndex: 10
-                }}
-                onLoad={() => {
-                  // Image loaded successfully
-                }}
-                onError={() => {
-                  console.error('Failed to load ABouttt.png');
-                }}
-              />
             </motion.div>
           </div>
         </div>

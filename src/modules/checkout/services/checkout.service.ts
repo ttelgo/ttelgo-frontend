@@ -87,7 +87,7 @@ class CheckoutService {
       console.log('Found orderReference (UUID for QR code):', esimUuid)
     }
     
-    // PRIORITY 2: Check if response has an id field (UUID) - this is what QR code endpoint needs
+    // Priority 2: Check if response contains an id field (UUID) which is required by the QR code endpoint
     if (!esimUuid && (response as any).id) {
       esimUuid = (response as any).id
       console.log('Found eSIM UUID in response.id:', esimUuid)
@@ -115,7 +115,7 @@ class CheckoutService {
       ...response,
       orderId: response.orderReference || response.orderId || esimUuid || matchingId || iccid || '',
       esimId: esimUuid || response.orderReference || response.esimId || matchingId || iccid, // UUID for QR code (orderReference)
-      matchingId: matchingId, // Keep for reference (this is NOT the UUID for QR code)
+      matchingId: matchingId, // Retained for reference purposes (note: this is not the UUID required for QR code retrieval)
       iccid: iccid,
       qrCode: response.qrCode,
     } as CheckoutResponse

@@ -20,6 +20,7 @@ const RegionCountries = () => {
   const decodedRegionName = regionName ? decodeURIComponent(regionName) : ''
 
   // Map region names to match API region values
+  // The 'America' region in regional plans encompasses both North and South America
   const regionMapping: Record<string, string[]> = {
     'Europe': ['Europe'],
     'Asia': ['Asia'],

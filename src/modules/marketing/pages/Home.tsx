@@ -623,7 +623,7 @@ const Home = () => {
     <div className="w-full">
       {/* Hero Section - Merged with Navbar */}
       <section 
-        className="relative overflow-hidden bg-white mt-12"
+        className="relative overflow-hidden mt-0 md:mt-12 bg-white"
         style={{
           paddingTop: '3rem', // Space for navbar
           paddingBottom: '4rem' // Fixed bottom padding instead of minHeight
@@ -637,18 +637,18 @@ const Home = () => {
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6 }}
-              className="flex-1 max-w-[800px] relative z-20 pl-8 lg:pl-16 xl:pl-24"
+              className="flex-1 max-w-[800px] relative z-20 pl-0 md:pl-8 lg:pl-16 xl:pl-24 text-center md:text-left"
             >
               {/* Redeem Banner Button */}
               <motion.div 
-                className="mb-4"
+                className="mb-4 flex justify-center md:justify-start"
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
               >
                 <motion.button
                   whileTap={{ scale: 0.95 }}
-                  className="relative overflow-hidden group rounded-2xl bg-gradient-to-r from-telgo-red to-red-600 hover:bg-white transition-colors duration-300"
+                  className="relative overflow-hidden group rounded-xl md:rounded-2xl bg-gradient-to-r from-telgo-red to-red-600 hover:bg-white transition-colors duration-300"
                   onClick={() => {
                     // Handle redeem action - can navigate to a page or show modal
                     alert('Redeem 1GB - Feature coming soon!')
@@ -657,18 +657,18 @@ const Home = () => {
                     boxShadow: '0 4px 12px rgba(204, 0, 0, 0.25)'
                   }}
                 >
-                  <span className="relative z-10 text-white group-hover:text-black font-bold text-sm uppercase tracking-wide px-6 py-3 rounded-2xl inline-flex items-center gap-2 transition-colors duration-300">
+                  <span className="relative z-10 text-white group-hover:text-black font-bold text-xs md:text-sm uppercase tracking-wide px-3 py-2 md:px-6 md:py-3 rounded-xl md:rounded-2xl inline-flex items-center gap-1.5 md:gap-2 transition-colors duration-300">
                     <svg 
-                      className="w-5 h-5 group-hover:text-black transition-colors duration-300" 
+                      className="w-4 h-4 md:w-5 md:h-5 group-hover:text-black transition-colors duration-300" 
                       fill="none" 
                       stroke="currentColor" 
                       viewBox="0 0 24 24"
                     >
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
                     </svg>
-                    Redeem 1GB for your next trip
+                    <span className="whitespace-nowrap">Redeem 1GB</span>
                     <svg 
-                      className="w-4 h-4 group-hover:text-black transition-colors duration-300" 
+                      className="w-3 h-3 md:w-4 md:h-4 group-hover:text-black transition-colors duration-300" 
                       fill="none" 
                       stroke="currentColor" 
                       viewBox="0 0 24 24"
@@ -718,7 +718,7 @@ const Home = () => {
                 }}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="mb-8 inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-telgo-red to-red-600 text-white font-semibold rounded-2xl hover:from-red-700 hover:to-red-800 transition-all duration-300 shadow-lg hover:shadow-xl"
+                className="mb-8 inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-telgo-red to-red-600 text-white font-semibold rounded-2xl hover:from-red-700 hover:to-red-800 transition-all duration-300 shadow-lg hover:shadow-xl mx-auto md:mx-0"
               >
                 View All Plans
                 <svg 
@@ -732,7 +732,7 @@ const Home = () => {
               </motion.button>
               
               {/* Search Bar */}
-              <div className="relative max-w-md hero-search-container" style={{ zIndex: 9999 }}>
+              <div className="relative max-w-md hero-search-container mx-auto md:mx-0" style={{ zIndex: 9999 }}>
                 <div className="absolute left-4 top-1/2 transform -translate-y-1/2 pointer-events-none z-10">
                   <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />

@@ -128,7 +128,7 @@ const Login = () => {
   }
 
   return (
-    <div className="min-h-[calc(100vh-80px)] w-full flex items-center justify-center py-8 md:py-12">
+    <div className="min-h-screen w-full flex items-center justify-center -mt-56 -mb-72 md:py-12 px-4">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -152,40 +152,54 @@ const Login = () => {
         </div>
 
         {/* Right Panel - Form Area */}
-        <div className="w-full md:w-3/5 bg-white md:rounded-r-3xl p-6 md:p-8 flex flex-col justify-center">
-          {/* Header: Logo and Language Selector */}
-          <div className="flex justify-between items-center mb-6">
+        <div className="w-full md:w-3/5 bg-white md:rounded-r-3xl p-4 sm:p-6 md:p-8 flex flex-col justify-center -mt-56 -mb-72 md:my-0">
+          {/* Header: Logo, Language Selector, and Hamburger Menu */}
+          <div className="flex justify-between items-center mb-4 md:mb-6">
             {/* Logo */}
             <Link to="/" className="flex items-center">
               <img 
                 src="/IMAGES/LogoUpdated.png" 
                 alt="TTelGo Logo" 
-                className="h-8 md:h-10 w-auto object-contain"
+                className="h-7 sm:h-8 md:h-10 w-auto object-contain"
               />
             </Link>
             
-            {/* Language Selector */}
-            <div className="flex items-center gap-2 text-gray-700 cursor-pointer hover:text-gray-900 transition-colors">
-              <span className="text-sm font-medium">English (UK)</span>
-              <svg 
-                width="12" 
-                height="12" 
-                viewBox="0 0 12 12" 
-                fill="none" 
-                xmlns="http://www.w3.org/2000/svg"
+            {/* Right side: Language Selector and Hamburger Menu */}
+            <div className="flex items-center gap-2 sm:gap-4">
+              {/* Language Selector */}
+              <div className="flex items-center gap-1 sm:gap-2 text-gray-700 cursor-pointer hover:text-gray-900 transition-colors">
+                <span className="text-xs sm:text-sm font-medium">English (UK)</span>
+                <svg 
+                  width="10" 
+                  height="10" 
+                  viewBox="0 0 12 12" 
+                  fill="none" 
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="sm:w-3 sm:h-3"
+                >
+                  <path d="M6 9L1 4H11L6 9Z" fill="#374151"/>
+                </svg>
+              </div>
+              
+              {/* Hamburger Menu - Mobile Only */}
+              <button
+                className="md:hidden p-1.5 sm:p-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
+                aria-label="Menu"
               >
-                <path d="M6 9L1 4H11L6 9Z" fill="#374151"/>
-              </svg>
+                <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              </button>
             </div>
           </div>
 
           {/* Form Container */}
           <div className="max-w-md mx-auto w-full">
             {/* Title */}
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-8">Sign In</h1>
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-6 sm:mb-8">Sign In</h1>
 
             {step === 'email' ? (
-              <form onSubmit={handleRequestOtp} className="space-y-5">
+              <form onSubmit={handleRequestOtp} className="space-y-4 sm:space-y-5">
                 {/* Email Input */}
                 <div>
                   <input
@@ -195,8 +209,8 @@ const Login = () => {
                     value={formData.email}
                     onChange={handleChange}
                     disabled={loading}
-                    className={`w-full px-4 py-2.5 rounded-lg bg-white focus:outline-none transition-all placeholder-gray-400 text-gray-900 text-sm ${
-                      touched.email && errors.email ? 'focus:ring-2 focus:ring-red-500' : 'focus:ring-2 focus:ring-telgo-red'
+                    className={`w-full px-4 py-3 sm:py-2.5 rounded-lg bg-white focus:outline-none transition-all placeholder-gray-400 text-gray-900 text-base sm:text-sm ${
+                      touched.email && errors.email ? 'focus:ring-2 focus:ring-red-500 border border-red-300' : 'focus:ring-2 focus:ring-telgo-red border border-gray-300'
                     } ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
                     style={{
                       boxShadow: touched.email && errors.email
@@ -221,13 +235,13 @@ const Login = () => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full bg-telgo-red text-white py-2.5 rounded-lg font-semibold hover:bg-red-700 transition-colors duration-200 shadow-md hover:shadow-lg mt-8 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full bg-telgo-red text-white py-3 sm:py-2.5 rounded-lg font-semibold hover:bg-red-700 transition-colors duration-200 shadow-md hover:shadow-lg mt-6 sm:mt-8 text-base sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {loading ? 'Sending OTP...' : 'Send OTP'}
                 </button>
               </form>
             ) : (
-              <form onSubmit={handleVerifyOtp} className="space-y-5">
+              <form onSubmit={handleVerifyOtp} className="space-y-4 sm:space-y-5">
                 <div className="mb-4">
                   <p className="text-sm text-gray-600">
                     OTP sent to <strong>{formData.email}</strong>
@@ -251,8 +265,8 @@ const Login = () => {
                     onChange={handleChange}
                     maxLength={6}
                     disabled={loading}
-                    className={`w-full px-4 py-2.5 rounded-lg bg-white focus:outline-none transition-all placeholder-gray-400 text-gray-900 text-sm text-center tracking-widest ${
-                      touched.otp && errors.otp ? 'focus:ring-2 focus:ring-red-500' : 'focus:ring-2 focus:ring-telgo-red'
+                    className={`w-full px-4 py-3 sm:py-2.5 rounded-lg bg-white focus:outline-none transition-all placeholder-gray-400 text-gray-900 text-base sm:text-sm text-center tracking-widest border ${
+                      touched.otp && errors.otp ? 'focus:ring-2 focus:ring-red-500 border-red-300' : 'focus:ring-2 focus:ring-telgo-red border-gray-300'
                     } ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
                     style={{
                       boxShadow: touched.otp && errors.otp
@@ -277,7 +291,7 @@ const Login = () => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full bg-telgo-red text-white py-2.5 rounded-lg font-semibold hover:bg-red-700 transition-colors duration-200 shadow-md hover:shadow-lg mt-8 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full bg-telgo-red text-white py-3 sm:py-2.5 rounded-lg font-semibold hover:bg-red-700 transition-colors duration-200 shadow-md hover:shadow-lg mt-6 sm:mt-8 text-base sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {loading ? 'Verifying...' : 'Verify OTP'}
                 </button>
@@ -285,7 +299,7 @@ const Login = () => {
             )}
 
             {/* Sign Up Link */}
-            <div className="text-center text-gray-600 mb-6 text-sm">
+            <div className="text-center text-gray-600 mb-4 sm:mb-6 text-sm">
               Don&apos;t have an Account?{' '}
               <Link to="/signup" className="text-telgo-red font-bold hover:underline">
                 Sign up
@@ -298,7 +312,7 @@ const Login = () => {
             </div>
 
             {/* Social Login Buttons */}
-            <div className="flex flex-col sm:flex-row gap-5 justify-center">
+            <div className="flex flex-row gap-4 sm:gap-5 justify-center">
               {/* Google Signup Button */}
               <a
                 href="#"
@@ -326,7 +340,7 @@ const Login = () => {
               {/* Facebook Signup Button */}
               <a
                 href="#"
-                className="flex items-center justify-center w-12 h-12 bg-white rounded-lg hover:bg-gray-50 social-button"
+                className="flex items-center justify-center w-12 h-12 bg-[#1877F2] rounded-lg hover:bg-[#166FE5] social-button"
                 style={{
                   boxShadow: '0 6px 8px -1px rgba(0, 0, 0, 0.12), 0 3px 5px -1px rgba(0, 0, 0, 0.08), 0 -3px 5px -1px rgba(0, 0, 0, 0.08)',
                   transition: 'box-shadow 0.3s ease, background-color 0.2s ease'
@@ -340,7 +354,7 @@ const Login = () => {
                 title="Sign in with Facebook"
               >
                 <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M10 0C4.48 0 0 4.48 0 10C0 14.84 3.44 18.87 8 19.8V13H6V10H8V7.5C8 5.57 9.57 4 11.5 4H14V7H12C11.45 7 11 7.45 11 8V10H14V13H11V19.95C16.05 19.45 20 15.19 20 10C20 4.48 15.52 0 10 0Z" fill="#1877F2"/>
+                  <path d="M10 0C4.48 0 0 4.48 0 10C0 14.84 3.44 18.87 8 19.8V13H6V10H8V7.5C8 5.57 9.57 4 11.5 4H14V7H12C11.45 7 11 7.45 11 8V10H14V13H11V19.95C16.05 19.45 20 15.19 20 10C20 4.48 15.52 0 10 0Z" fill="white"/>
                 </svg>
               </a>
             </div>

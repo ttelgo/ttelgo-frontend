@@ -32,7 +32,7 @@ const Footer = () => {
 
   return (
     <footer className="bg-white border-t border-gray-200 mt-auto">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-2">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-0 pb-2">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Company Info */}
           <div className="col-span-1 md:col-span-2">
@@ -48,7 +48,7 @@ const Footer = () => {
           </div>
 
           {/* Support Column */}
-          <div>
+          <div className="-mt-4 md:mt-0">
             <h3 className="text-gray-900 font-semibold mb-4">Support</h3>
             <ul className="space-y-2">
               <li>
@@ -154,20 +154,63 @@ const Footer = () => {
             {/* App Download Section */}
             <div className="flex flex-col items-center md:items-end">
               <p className="text-gray-600 font-medium mb-3 text-sm">Discover our app</p>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 sm:gap-3 flex-wrap justify-center md:justify-end">
                 {/* App Store Buttons */}
-                <div className="flex gap-3">
-                  <a href="#" className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm">
-                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/>
-                    </svg>
-                    <span>Apple Store</span>
+                <div className="flex gap-2 sm:gap-3 flex-wrap justify-center md:justify-end">
+                  {/* Apple App Store Badge */}
+                  <a 
+                    href="#" 
+                    className="inline-block"
+                  >
+                    <div 
+                      className="bg-black rounded-md px-2 sm:px-3 py-2 sm:py-2.5 flex items-center gap-2 sm:gap-2.5 cursor-pointer h-12 sm:h-14 hover:opacity-90 transition-opacity"
+                      style={{
+                        boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)',
+                        minWidth: '140px'
+                      }}
+                    >
+                      {/* Apple Icon */}
+                      <img 
+                        src="/IMAGES/apple.png" 
+                        alt="App Store" 
+                        className="w-7 h-7 sm:w-9 sm:h-9 object-contain"
+                        onError={() => {
+                          console.error('Failed to load apple.png');
+                        }}
+                      />
+                      <div className="flex flex-col justify-center">
+                        <div className="text-[8px] sm:text-[9px] text-white/90 leading-none" style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif' }}>Download on the</div>
+                        <div className="text-[18px] sm:text-[20px] font-semibold text-white leading-none mt-0.5" style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif', letterSpacing: '-0.3px' }}>App Store</div>
+                      </div>
+                    </div>
                   </a>
-                  <a href="#" className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm">
-                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M3,20.5V3.5C3,2.91 3.34,2.39 3.84,2.15L13.69,12L3.84,21.85C3.34,21.6 3,21.09 3,20.5M16.81,15.12L6.05,21.34L14.54,12.85L16.81,15.12M20.16,10.81C20.5,11.08 20.75,11.5 20.75,12C20.75,12.5 20.53,12.9 20.18,13.18L17.89,14.5L15.39,12L17.89,9.5L20.16,10.81M6.05,2.66L16.81,8.88L14.54,11.15L6.05,2.66Z"/>
-                    </svg>
-                    <span>Google Play</span>
+                  
+                  {/* Google Play Store Badge */}
+                  <a 
+                    href="#" 
+                    className="inline-block"
+                  >
+                    <div 
+                      className="bg-black rounded-md px-2 sm:px-3 py-2 sm:py-2.5 flex items-center gap-2 sm:gap-2.5 cursor-pointer h-12 sm:h-14 hover:opacity-90 transition-opacity"
+                      style={{
+                        boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)',
+                        minWidth: '140px'
+                      }}
+                    >
+                      {/* Google Play Icon */}
+                      <img 
+                        src="/IMAGES/Playstore.png" 
+                        alt="Google Play" 
+                        className="w-7 h-7 sm:w-9 sm:h-9 object-contain"
+                        onError={() => {
+                          console.error('Failed to load Playstore.png');
+                        }}
+                      />
+                      <div className="flex flex-col justify-center">
+                        <div className="text-[8px] sm:text-[9px] text-white/90 leading-none uppercase tracking-wide" style={{ fontFamily: 'Roboto, sans-serif' }}>GET IT ON</div>
+                        <div className="text-[15px] sm:text-[16px] font-medium text-white leading-none mt-0.5" style={{ fontFamily: 'Roboto, sans-serif', letterSpacing: '-0.5px' }}>Google Play</div>
+                      </div>
+                    </div>
                   </a>
                 </div>
               </div>

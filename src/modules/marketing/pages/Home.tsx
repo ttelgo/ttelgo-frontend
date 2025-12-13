@@ -523,10 +523,10 @@ const Home = () => {
     <div className="w-full">
       {/* Hero Section - Merged with Navbar */}
       <section 
-        className="relative overflow-hidden bg-white mt-12"
+        className="relative overflow-hidden bg-white mt-4 md:mt-12"
         style={{
           paddingTop: '3rem', // Space for navbar
-          paddingBottom: '4rem' // Fixed bottom padding instead of minHeight
+          paddingBottom: '1rem' // Fixed bottom padding instead of minHeight
         }}
       >
         {/* Content Container with proper z-index */}
@@ -537,18 +537,18 @@ const Home = () => {
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6 }}
-              className="flex-1 max-w-[800px] relative z-20 pl-8 lg:pl-16 xl:pl-24"
+              className="flex-1 max-w-[800px] relative z-20 pl-0 md:pl-8 lg:pl-16 xl:pl-24 text-center md:text-left"
             >
               {/* Redeem Banner Button */}
               <motion.div 
-                className="mb-4"
+                className="mb-4 flex justify-center md:justify-start"
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
               >
                 <motion.button
                   whileTap={{ scale: 0.95 }}
-                  className="relative overflow-hidden group rounded-2xl bg-gradient-to-r from-telgo-red to-red-600 hover:bg-white transition-colors duration-300"
+                  className="relative overflow-hidden group rounded-xl md:rounded-2xl bg-gradient-to-r from-telgo-red to-red-600 hover:bg-white transition-colors duration-300"
                   onClick={() => {
                     // Handle redeem action - can navigate to a page or show modal
                     alert('Redeem 1GB - Feature coming soon!')
@@ -557,18 +557,18 @@ const Home = () => {
                     boxShadow: '0 4px 12px rgba(204, 0, 0, 0.25)'
                   }}
                 >
-                  <span className="relative z-10 text-white group-hover:text-black font-bold text-sm uppercase tracking-wide px-6 py-3 rounded-2xl inline-flex items-center gap-2 transition-colors duration-300">
+                  <span className="relative z-10 text-white group-hover:text-black font-bold text-xs md:text-sm uppercase tracking-wide px-4 py-2 md:px-6 md:py-3 rounded-xl md:rounded-2xl inline-flex items-center gap-1.5 md:gap-2 transition-colors duration-300">
                     <svg 
-                      className="w-5 h-5 group-hover:text-black transition-colors duration-300" 
+                      className="w-4 h-4 md:w-5 md:h-5 group-hover:text-black transition-colors duration-300" 
                       fill="none" 
                       stroke="currentColor" 
                       viewBox="0 0 24 24"
                     >
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
                     </svg>
-                    Redeem 1GB for your next trip
+                    <span className="whitespace-nowrap">Redeem 1GB</span>
                     <svg 
-                      className="w-4 h-4 group-hover:text-black transition-colors duration-300" 
+                      className="w-3 h-3 md:w-4 md:h-4 group-hover:text-black transition-colors duration-300" 
                       fill="none" 
                       stroke="currentColor" 
                       viewBox="0 0 24 24"
@@ -594,10 +594,9 @@ const Home = () => {
               
               {/* Main Headline */}
               <h1 className="text-3xl md:text-4xl lg:text-[3rem] xl:text-5xl font-bold text-gray-900 mb-6 leading-[1.2]">
-                <span>Stay connected</span>
+                <span>Stay connected in over</span>
                 <br />
                 <span>
-                  in over{' '}
                   <span 
                     className="text-telgo-red underline decoration-2 underline-offset-4"
                   >
@@ -618,7 +617,7 @@ const Home = () => {
                 }}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="mb-8 inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-telgo-red to-red-600 text-white font-semibold rounded-2xl hover:from-red-700 hover:to-red-800 transition-all duration-300 shadow-lg hover:shadow-xl"
+                className="mb-8 inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-telgo-red to-red-600 text-white font-semibold rounded-2xl hover:from-red-700 hover:to-red-800 transition-all duration-300 shadow-lg hover:shadow-xl mx-auto md:mx-0"
               >
                 View All Plans
                 <svg 
@@ -632,7 +631,7 @@ const Home = () => {
               </motion.button>
               
               {/* Search Bar */}
-              <div className="relative max-w-md hero-search-container" style={{ zIndex: 9999 }}>
+              <div className="relative max-w-md hero-search-container mx-auto md:mx-0" style={{ zIndex: 9999 }}>
                 <div className="absolute left-4 top-1/2 transform -translate-y-1/2 pointer-events-none z-10">
                   <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -708,7 +707,7 @@ const Home = () => {
       </section>
 
       {/* Your Journey Section */}
-      <section className="pt-4 pb-16 bg-transparent relative z-20">
+      <section className="pt-4 md:pt-4 pb-16 bg-transparent relative z-20 border-t border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -749,9 +748,9 @@ const Home = () => {
                   <div
                     key={index}
                     onClick={() => handleDestinationClick(dest)}
-                    className="flex-shrink-0 bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow cursor-pointer w-[300px]"
+                    className="flex-shrink-0 bg-white rounded-none md:rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow cursor-pointer w-[300px] relative h-[200px] md:h-auto"
                   >
-                    <div className="h-48 bg-gray-200 flex items-center justify-center">
+                    <div className="absolute inset-0 md:relative md:h-48 bg-gray-200 flex items-center justify-center">
                       {dest.image ? (
                         <img
                           src={dest.image}
@@ -773,8 +772,15 @@ const Home = () => {
                           {dest.name}
                         </div>
                       )}
+                      {/* Overlay with text on mobile */}
+                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4 md:hidden">
+                        <div className="text-white font-semibold text-sm mb-1">
+                          Starting from USD {dest.price}/GB
+                        </div>
+                        <div className="text-white font-medium text-base">{dest.name}</div>
+                      </div>
                     </div>
-                    <div className="p-4">
+                    <div className="p-4 hidden md:block">
                       <div className="text-telgo-red font-semibold mb-1">
                         Starting from USD {dest.price}/GB
                       </div>
@@ -808,7 +814,7 @@ const Home = () => {
       </section>
 
       {/* All Destinations Section */}
-      <section id="popular-destinations" className="pt-0 pb-16 bg-transparent">
+      <section id="popular-destinations" className="pt-4 pb-16 bg-transparent border-t border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -892,7 +898,7 @@ const Home = () => {
                     : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
                 }`}
               >
-                Local eSIMs
+                Local
               </button>
               <button
                 onClick={() => {
@@ -900,7 +906,7 @@ const Home = () => {
                 }}
                 className="px-6 py-2 rounded-lg font-medium transition-colors bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 hover:bg-telgo-red hover:text-white hover:border-telgo-red"
               >
-                Regional eSIMs
+                Regional
               </button>
               <button
                 onClick={() => {
@@ -913,7 +919,7 @@ const Home = () => {
                     : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
                 }`}
               >
-                Global eSIMs
+                Global
               </button>
             </div>
             
@@ -994,7 +1000,7 @@ const Home = () => {
                 ) : (
                   <div>
                     <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-2xl font-bold text-gray-900">
+                      <h3 className="text-2xl font-bold text-gray-900 text-center md:text-left">
                         {selectedRegion === 'europe' ? 'Europe' :
                          selectedRegion === 'asia' ? 'Asia' :
                          selectedRegion === 'americas' ? 'Americas' :
@@ -1110,7 +1116,7 @@ const Home = () => {
       </section>
 
       {/* Forget About Roaming Section */}
-      <section className="pt-0 pb-16 bg-transparent -mt-44">
+      <section className="pt-4 md:pt-0 pb-16 bg-transparent -mt-8 md:-mt-44 border-t border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-20 items-center">
             {/* Left Content */}
@@ -1120,7 +1126,7 @@ const Home = () => {
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
             >
-              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-8">
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-8 text-center md:text-left">
                 Why Choose Us
               </h2>
               
@@ -1162,7 +1168,7 @@ const Home = () => {
                     />
                   </div>
                   <div>
-                    <h3 className="text-xl font-semibold text-gray-900 mb-1">
+                    <h3 className="text-xl font-semibold text-gray-900 mb-1 text-left">
                       24/7 Live support
                     </h3>
                     <p className="text-gray-600">
@@ -1185,7 +1191,7 @@ const Home = () => {
                     />
                   </div>
                   <div>
-                    <h3 className="text-xl font-semibold text-gray-900 mb-1">
+                    <h3 className="text-xl font-semibold text-gray-900 mb-1 text-left">
                       Reliable and affordable connectivity
                     </h3>
                     <p className="text-gray-600">
@@ -1232,7 +1238,7 @@ const Home = () => {
       </section>
 
       {/* FAQ Section */}
-      <section id="faq" className="pt-0 pb-16 bg-transparent -mt-28">
+      <section id="faq" className="pt-4 md:pt-0 pb-16 bg-transparent -mt-8 md:-mt-28 border-t border-gray-200">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -1307,7 +1313,7 @@ const Home = () => {
       </section>
 
       {/* Testimonials Section */}
-      <section className="pt-0 pb-16 bg-transparent">
+      <section className="pt-4 pb-16 bg-transparent border-t border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-[1.1fr_1.9fr] gap-8 lg:gap-12 items-start">
             {/* Left Section - Label and Heading */}
@@ -1319,7 +1325,7 @@ const Home = () => {
                     TESTIMONIALS
                   </span>
                 </div>
-                <h2 className="text-3xl md:text-4xl font-bold text-gray-900 leading-[1.2]">
+                <h2 className="text-3xl md:text-4xl font-bold text-gray-900 leading-[1.2] text-center md:text-left">
                   <span className="block whitespace-nowrap">What People Say</span>
                   <span className="block whitespace-nowrap">About Us.</span>
                 </h2>
@@ -1510,7 +1516,7 @@ const Home = () => {
       </section>
 
       {/* Subscribe Section */}
-      <section className="pt-0 pb-16 bg-transparent relative -mt-8">
+      <section className="pt-4 pb-16 bg-transparent relative border-t border-gray-200 -mt-12">
         {/* Dots and Plus Pattern Background */}
         <div 
           className="absolute inset-0 opacity-30"
@@ -1550,7 +1556,7 @@ const Home = () => {
             
             {/* Content with relative positioning */}
             <div className="relative z-10">
-              <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-6 max-w-2xl text-center mx-auto">
+              <h2 className="text-lg md:text-2xl lg:text-3xl font-bold text-gray-900 mb-6 text-center mx-auto px-2 md:px-4 leading-relaxed">
                 Subscribe to get information, latest news and other interesting offers about TTelGo
               </h2>
             

@@ -83,13 +83,13 @@ const PlanManagement = () => {
       if (selectedRegion && selectedRegion.trim()) {
         filtered = filtered.filter(bundle => {
           // Check if any country in the bundle belongs to the selected region
-          return bundle.countryObjects?.some(c => 
+          return bundle.countryObjects?.some((c: { name: string; region: string; iso: string }) => 
             c.region?.toLowerCase() === selectedRegion.toLowerCase()
           ) || false
         })
       }
     } else if (filter === 'global') {
-      filtered = filtered.filter(bundle => bundle.type === 'Global')
+      filtered = filtered.filter(bundle => bundle.group?.some(g => g.toLowerCase().includes('global')) || false)
     }
     // 'all' shows all plans, no filter needed
 
@@ -101,7 +101,7 @@ const PlanManagement = () => {
         bundle.description?.toLowerCase().includes(searchLower) ||
         bundle.countryName?.toLowerCase().includes(searchLower) ||
         bundle.countryIso?.toLowerCase().includes(searchLower) ||
-        bundle.countryObjects?.some(c => 
+        bundle.countryObjects?.some((c: { name: string; region: string; iso: string }) => 
           c.name?.toLowerCase().includes(searchLower) ||
           c.iso?.toLowerCase().includes(searchLower) ||
           c.region?.toLowerCase().includes(searchLower)
@@ -327,7 +327,7 @@ const PlanManagement = () => {
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <span className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">
-                    {bundle.type || 'N/A'}
+                    {bundle.group?.[0] || 'N/A'}
                   </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -389,7 +389,7 @@ const PlanManagement = () => {
                 </div>
                 <div>
                   <p className="text-sm text-gray-600">Type</p>
-                  <p className="font-semibold">{selectedBundle.type || 'N/A'}</p>
+                  <p className="font-semibold">{selectedBundle.group?.[0] || 'N/A'}</p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-600">Country</p>
@@ -413,7 +413,7 @@ const PlanManagement = () => {
                 </div>
                 <div>
                   <p className="text-sm text-gray-600">Region</p>
-                  <p className="font-semibold">{selectedBundle.region || 'N/A'}</p>
+                  <p className="font-semibold">{selectedBundle.countryObjects?.[0]?.region || 'N/A'}</p>
                 </div>
               </div>
               {selectedBundle.description && (

@@ -6,36 +6,32 @@ import { plansService } from '@/modules/plans/services/plans.service'
 import { faqService } from '@/modules/faq/services/faq.service'
 import type { FAQ } from '@/shared/types'
 
-// Generate random price between 0.50 and 2.00
-const getRandomPrice = () => {
-  return (Math.random() * 1.5 + 0.5).toFixed(2)
-}
 
-// Hero Background Component - Image background
-const HeroBackground = () => {
-  return (
-    <>
-      {/* Image background */}
-      <div 
-        className="absolute inset-0 w-full h-full"
-        style={{
-          zIndex: 0,
-          backgroundImage: 'url(/IMAGES/travels.jpg)',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat'
-        }}
-      />
-      {/* Overlay for better text readability */}
-      <div 
-        className="absolute inset-0 w-full h-full bg-black/20"
-        style={{
-          zIndex: 1
-        }}
-      />
-    </>
-  )
-}
+// Hero Background Component - Image background (unused, commented out)
+// const _HeroBackground = () => {
+//   return (
+//     <>
+//       {/* Image background */}
+//       <div 
+//         className="absolute inset-0 w-full h-full"
+//         style={{
+//           zIndex: 0,
+//           backgroundImage: 'url(/IMAGES/travels.jpg)',
+//           backgroundSize: 'cover',
+//           backgroundPosition: 'center',
+//           backgroundRepeat: 'no-repeat'
+//         }}
+//       />
+//       {/* Overlay for better text readability */}
+//       <div 
+//         className="absolute inset-0 w-full h-full bg-black/20"
+//         style={{
+//           zIndex: 1
+//         }}
+//       />
+//     </>
+//   )
+// }
 
 const Home = () => {
   const navigate = useNavigate()
@@ -438,361 +434,53 @@ const Home = () => {
     navigate(`/country/${encodeURIComponent(countryName)}`)
   }
 
-  // All 200+ countries for Global eSIMs - Generated once with fixed prices
+  // All countries for Global eSIMs - Using data from countriesData
   const allCountries = useMemo(() => {
-    const countries = [
-      { name: 'United States', flag: '🇺🇸' },
-      { name: 'United Kingdom', flag: '🇬🇧' },
-      { name: 'Canada', flag: '🇨🇦' },
-      { name: 'Australia', flag: '🇦🇺' },
-      { name: 'Germany', flag: '🇩🇪' },
-      { name: 'France', flag: '🇫🇷' },
-      { name: 'Italy', flag: '🇮🇹' },
-      { name: 'Spain', flag: '🇪🇸' },
-      { name: 'Japan', flag: '🇯🇵' },
-      { name: 'South Korea', flag: '🇰🇷' },
-      { name: 'China', flag: '🇨🇳' },
-      { name: 'India', flag: '🇮🇳' },
-      { name: 'Brazil', flag: '🇧🇷' },
-      { name: 'Mexico', flag: '🇲🇽' },
-      { name: 'Argentina', flag: '🇦🇷' },
-      { name: 'Chile', flag: '🇨🇱' },
-      { name: 'Turkey', flag: '🇹🇷' },
-      { name: 'Russia', flag: '🇷🇺' },
-      { name: 'Netherlands', flag: '🇳🇱' },
-      { name: 'Belgium', flag: '🇧🇪' },
-      { name: 'Switzerland', flag: '🇨🇭' },
-      { name: 'Austria', flag: '🇦🇹' },
-      { name: 'Sweden', flag: '🇸🇪' },
-      { name: 'Norway', flag: '🇳🇴' },
-      { name: 'Denmark', flag: '🇩🇰' },
-      { name: 'Finland', flag: '🇫🇮' },
-      { name: 'Poland', flag: '🇵🇱' },
-      { name: 'Portugal', flag: '🇵🇹' },
-      { name: 'Greece', flag: '🇬🇷' },
-      { name: 'Ireland', flag: '🇮🇪' },
-      { name: 'Singapore', flag: '🇸🇬' },
-      { name: 'Malaysia', flag: '🇲🇾' },
-      { name: 'Thailand', flag: '🇹🇭' },
-      { name: 'Indonesia', flag: '🇮🇩' },
-      { name: 'Philippines', flag: '🇵🇭' },
-      { name: 'Vietnam', flag: '🇻🇳' },
-      { name: 'Taiwan', flag: '🇹🇼' },
-      { name: 'Hong Kong', flag: '🇭🇰' },
-      { name: 'New Zealand', flag: '🇳🇿' },
-      { name: 'South Africa', flag: '🇿🇦' },
-      { name: 'Egypt', flag: '🇪🇬' },
-      { name: 'Morocco', flag: '🇲🇦' },
-      { name: 'Kenya', flag: '🇰🇪' },
-      { name: 'Nigeria', flag: '🇳🇬' },
-      { name: 'UAE', flag: '🇦🇪' },
-      { name: 'Saudi Arabia', flag: '🇸🇦' },
-      { name: 'Israel', flag: '🇮🇱' },
-      { name: 'Jordan', flag: '🇯🇴' },
-      { name: 'Lebanon', flag: '🇱🇧' },
-      { name: 'Qatar', flag: '🇶🇦' },
-      { name: 'Kuwait', flag: '🇰🇼' },
-      { name: 'Bahrain', flag: '🇧🇭' },
-      { name: 'Oman', flag: '🇴🇲' },
-      { name: 'Iceland', flag: '🇮🇸' },
-      { name: 'Luxembourg', flag: '🇱🇺' },
-      { name: 'Czech Republic', flag: '🇨🇿' },
-      { name: 'Hungary', flag: '🇭🇺' },
-      { name: 'Romania', flag: '🇷🇴' },
-      { name: 'Bulgaria', flag: '🇧🇬' },
-      { name: 'Croatia', flag: '🇭🇷' },
-      { name: 'Slovenia', flag: '🇸🇮' },
-      { name: 'Slovakia', flag: '🇸🇰' },
-      { name: 'Estonia', flag: '🇪🇪' },
-      { name: 'Latvia', flag: '🇱🇻' },
-      { name: 'Lithuania', flag: '🇱🇹' },
-      { name: 'Belarus', flag: '🇧🇾' },
-      { name: 'Ukraine', flag: '🇺🇦' },
-      { name: 'Serbia', flag: '🇷🇸' },
-      { name: 'Montenegro', flag: '🇲🇪' },
-      { name: 'Bosnia', flag: '🇧🇦' },
-      { name: 'Albania', flag: '🇦🇱' },
-      { name: 'North Macedonia', flag: '🇲🇰' },
-      { name: 'Moldova', flag: '🇲🇩' },
-      { name: 'Georgia', flag: '🇬🇪' },
-      { name: 'Armenia', flag: '🇦🇲' },
-      { name: 'Azerbaijan', flag: '🇦🇿' },
-      { name: 'Kazakhstan', flag: '🇰🇿' },
-      { name: 'Uzbekistan', flag: '🇺🇿' },
-      { name: 'Kyrgyzstan', flag: '🇰🇬' },
-      { name: 'Tajikistan', flag: '🇹🇯' },
-      { name: 'Turkmenistan', flag: '🇹🇲' },
-      { name: 'Mongolia', flag: '🇲🇳' },
-      { name: 'Bangladesh', flag: '🇧🇩' },
-      { name: 'Pakistan', flag: '🇵🇰' },
-      { name: 'Sri Lanka', flag: '🇱🇰' },
-      { name: 'Nepal', flag: '🇳🇵' },
-      { name: 'Bhutan', flag: '🇧🇹' },
-      { name: 'Myanmar', flag: '🇲🇲' },
-      { name: 'Cambodia', flag: '🇰🇭' },
-      { name: 'Laos', flag: '🇱🇦' },
-      { name: 'Brunei', flag: '🇧🇳' },
-      { name: 'East Timor', flag: '🇹🇱' },
-      { name: 'Papua New Guinea', flag: '🇵🇬' },
-      { name: 'Fiji', flag: '🇫🇯' },
-      { name: 'Samoa', flag: '🇼🇸' },
-      { name: 'Tonga', flag: '🇹🇴' },
-      { name: 'Vanuatu', flag: '🇻🇺' },
-      { name: 'Solomon Islands', flag: '🇸🇧' },
-      { name: 'Peru', flag: '🇵🇪' },
-      { name: 'Colombia', flag: '🇨🇴' },
-      { name: 'Venezuela', flag: '🇻🇪' },
-      { name: 'Ecuador', flag: '🇪🇨' },
-      { name: 'Bolivia', flag: '🇧🇴' },
-      { name: 'Paraguay', flag: '🇵🇾' },
-      { name: 'Uruguay', flag: '🇺🇾' },
-      { name: 'Guyana', flag: '🇬🇾' },
-      { name: 'Suriname', flag: '🇸🇷' },
-      { name: 'French Guiana', flag: '🇬🇫' },
-      { name: 'Costa Rica', flag: '🇨🇷' },
-      { name: 'Panama', flag: '🇵🇦' },
-      { name: 'Nicaragua', flag: '🇳🇮' },
-      { name: 'Honduras', flag: '🇭🇳' },
-      { name: 'Guatemala', flag: '🇬🇹' },
-      { name: 'Belize', flag: '🇧🇿' },
-      { name: 'El Salvador', flag: '🇸🇻' },
-      { name: 'Jamaica', flag: '🇯🇲' },
-      { name: 'Trinidad and Tobago', flag: '🇹🇹' },
-      { name: 'Barbados', flag: '🇧🇧' },
-      { name: 'Bahamas', flag: '🇧🇸' },
-      { name: 'Dominican Republic', flag: '🇩🇴' },
-      { name: 'Haiti', flag: '🇭🇹' },
-      { name: 'Cuba', flag: '🇨🇺' },
-      { name: 'Puerto Rico', flag: '🇵🇷' },
-      { name: 'Algeria', flag: '🇩🇿' },
-      { name: 'Tunisia', flag: '🇹🇳' },
-      { name: 'Libya', flag: '🇱🇾' },
-      { name: 'Sudan', flag: '🇸🇩' },
-      { name: 'Ethiopia', flag: '🇪🇹' },
-      { name: 'Tanzania', flag: '🇹🇿' },
-      { name: 'Uganda', flag: '🇺🇬' },
-      { name: 'Ghana', flag: '🇬🇭' },
-      { name: 'Senegal', flag: '🇸🇳' },
-      { name: 'Ivory Coast', flag: '🇨🇮' },
-      { name: 'Cameroon', flag: '🇨🇲' },
-      { name: 'Angola', flag: '🇦🇴' },
-      { name: 'Mozambique', flag: '🇲🇿' },
-      { name: 'Madagascar', flag: '🇲🇬' },
-      { name: 'Zambia', flag: '🇿🇲' },
-      { name: 'Zimbabwe', flag: '🇿🇼' },
-      { name: 'Botswana', flag: '🇧🇼' },
-      { name: 'Namibia', flag: '🇳🇦' },
-      { name: 'Mauritius', flag: '🇲🇺' },
-      { name: 'Seychelles', flag: '🇸🇨' },
-      { name: 'Rwanda', flag: '🇷🇼' },
-      { name: 'Malawi', flag: '🇲🇼' },
-      { name: 'Lesotho', flag: '🇱🇸' },
-      { name: 'Eswatini', flag: '🇸🇿' },
-      { name: 'Malta', flag: '🇲🇹' },
-      { name: 'Cyprus', flag: '🇨🇾' },
-      { name: 'Monaco', flag: '🇲🇨' },
-      { name: 'Liechtenstein', flag: '🇱🇮' },
-      { name: 'San Marino', flag: '🇸🇲' },
-      { name: 'Vatican City', flag: '🇻🇦' },
-      { name: 'Andorra', flag: '🇦🇩' },
-      { name: 'Iraq', flag: '🇮🇶' },
-      { name: 'Iran', flag: '🇮🇷' },
-      { name: 'Afghanistan', flag: '🇦🇫' },
-      { name: 'Yemen', flag: '🇾🇪' },
-      { name: 'Syria', flag: '🇸🇾' },
-      { name: 'Palestine', flag: '🇵🇸' },
-      { name: 'Maldives', flag: '🇲🇻' },
-      { name: 'Mauritania', flag: '🇲🇷' },
-      { name: 'Niger', flag: '🇳🇪' },
-      { name: 'Mali', flag: '🇲🇱' },
-      { name: 'Burkina Faso', flag: '🇧🇫' },
-      { name: 'Benin', flag: '🇧🇯' },
-      { name: 'Togo', flag: '🇹🇬' },
-      { name: 'Guinea', flag: '🇬🇳' },
-      { name: 'Sierra Leone', flag: '🇸🇱' },
-      { name: 'Liberia', flag: '🇱🇷' },
-      { name: 'Gambia', flag: '🇬🇲' },
-      { name: 'Guinea-Bissau', flag: '🇬🇼' },
-      { name: 'Cape Verde', flag: '🇨🇻' },
-      { name: 'São Tomé and Príncipe', flag: '🇸🇹' },
-      { name: 'Equatorial Guinea', flag: '🇬🇶' },
-      { name: 'Gabon', flag: '🇬🇦' },
-      { name: 'Republic of Congo', flag: '🇨🇬' },
-      { name: 'DR Congo', flag: '🇨🇩' },
-      { name: 'Central African Republic', flag: '🇨🇫' },
-      { name: 'Chad', flag: '🇹🇩' },
-      { name: 'Eritrea', flag: '🇪🇷' },
-      { name: 'Djibouti', flag: '🇩🇯' },
-      { name: 'Somalia', flag: '🇸🇴' },
-      { name: 'Comoros', flag: '🇰🇲' },
-      { name: 'Burundi', flag: '🇧🇮' },
-      { name: 'South Sudan', flag: '🇸🇸' },
-    ]
-    return countries.map(country => ({ ...country, price: getRandomPrice() }))
+    return countriesData.map(country => ({
+      name: country.name,
+      flag: country.flag,
+      price: country.prices?.['1GB']?.toFixed(2) || '0.00'
+    }))
   }, [])
 
-  // Regional eSIMs - Organized by regions - Generated once with fixed prices
+  // Regional eSIMs - Organized by regions - Using data from countriesData
   const regionalESIMs = useMemo(() => {
-    const regionsData = {
-      europe: [
-        { name: 'United Kingdom', flag: '🇬🇧' },
-        { name: 'Germany', flag: '🇩🇪' },
-        { name: 'France', flag: '🇫🇷' },
-        { name: 'Italy', flag: '🇮🇹' },
-        { name: 'Spain', flag: '🇪🇸' },
-        { name: 'Netherlands', flag: '🇳🇱' },
-        { name: 'Belgium', flag: '🇧🇪' },
-        { name: 'Switzerland', flag: '🇨🇭' },
-        { name: 'Austria', flag: '🇦🇹' },
-        { name: 'Sweden', flag: '🇸🇪' },
-        { name: 'Norway', flag: '🇳🇴' },
-        { name: 'Denmark', flag: '🇩🇰' },
-        { name: 'Finland', flag: '🇫🇮' },
-        { name: 'Poland', flag: '🇵🇱' },
-        { name: 'Portugal', flag: '🇵🇹' },
-        { name: 'Greece', flag: '🇬🇷' },
-        { name: 'Ireland', flag: '🇮🇪' },
-        { name: 'Czech Republic', flag: '🇨🇿' },
-        { name: 'Hungary', flag: '🇭🇺' },
-        { name: 'Romania', flag: '🇷🇴' },
-        { name: 'Bulgaria', flag: '🇧🇬' },
-        { name: 'Croatia', flag: '🇭🇷' },
-        { name: 'Slovenia', flag: '🇸🇮' },
-        { name: 'Slovakia', flag: '🇸🇰' },
-        { name: 'Estonia', flag: '🇪🇪' },
-        { name: 'Latvia', flag: '🇱🇻' },
-        { name: 'Lithuania', flag: '🇱🇹' },
-        { name: 'Iceland', flag: '🇮🇸' },
-        { name: 'Luxembourg', flag: '🇱🇺' },
-        { name: 'Malta', flag: '🇲🇹' },
-        { name: 'Cyprus', flag: '🇨🇾' },
-      ],
-      asia: [
-        { name: 'Japan', flag: '🇯🇵' },
-        { name: 'South Korea', flag: '🇰🇷' },
-        { name: 'China', flag: '🇨🇳' },
-        { name: 'India', flag: '🇮🇳' },
-        { name: 'Singapore', flag: '🇸🇬' },
-        { name: 'Malaysia', flag: '🇲🇾' },
-        { name: 'Thailand', flag: '🇹🇭' },
-        { name: 'Indonesia', flag: '🇮🇩' },
-        { name: 'Philippines', flag: '🇵🇭' },
-        { name: 'Vietnam', flag: '🇻🇳' },
-        { name: 'Taiwan', flag: '🇹🇼' },
-        { name: 'Hong Kong', flag: '🇭🇰' },
-        { name: 'Bangladesh', flag: '🇧🇩' },
-        { name: 'Pakistan', flag: '🇵🇰' },
-        { name: 'Sri Lanka', flag: '🇱🇰' },
-        { name: 'Nepal', flag: '🇳🇵' },
-        { name: 'Bhutan', flag: '🇧🇹' },
-        { name: 'Myanmar', flag: '🇲🇲' },
-        { name: 'Cambodia', flag: '🇰🇭' },
-        { name: 'Laos', flag: '🇱🇦' },
-        { name: 'Brunei', flag: '🇧🇳' },
-        { name: 'Maldives', flag: '🇲🇻' },
-        { name: 'Mongolia', flag: '🇲🇳' },
-        { name: 'Kazakhstan', flag: '🇰🇿' },
-        { name: 'Uzbekistan', flag: '🇺🇿' },
-        { name: 'Kyrgyzstan', flag: '🇰🇬' },
-        { name: 'Tajikistan', flag: '🇹🇯' },
-        { name: 'Turkmenistan', flag: '🇹🇲' },
-        { name: 'Afghanistan', flag: '🇦🇫' },
-      ],
-      americas: [
-        { name: 'United States', flag: '🇺🇸' },
-        { name: 'Canada', flag: '🇨🇦' },
-        { name: 'Mexico', flag: '🇲🇽' },
-        { name: 'Brazil', flag: '🇧🇷' },
-        { name: 'Argentina', flag: '🇦🇷' },
-        { name: 'Chile', flag: '🇨🇱' },
-        { name: 'Peru', flag: '🇵🇪' },
-        { name: 'Colombia', flag: '🇨🇴' },
-        { name: 'Venezuela', flag: '🇻🇪' },
-        { name: 'Ecuador', flag: '🇪🇨' },
-        { name: 'Bolivia', flag: '🇧🇴' },
-        { name: 'Paraguay', flag: '🇵🇾' },
-        { name: 'Uruguay', flag: '🇺🇾' },
-        { name: 'Costa Rica', flag: '🇨🇷' },
-        { name: 'Panama', flag: '🇵🇦' },
-        { name: 'Nicaragua', flag: '🇳🇮' },
-        { name: 'Honduras', flag: '🇭🇳' },
-        { name: 'Guatemala', flag: '🇬🇹' },
-        { name: 'Belize', flag: '🇧🇿' },
-        { name: 'El Salvador', flag: '🇸🇻' },
-        { name: 'Jamaica', flag: '🇯🇲' },
-        { name: 'Trinidad and Tobago', flag: '🇹🇹' },
-        { name: 'Barbados', flag: '🇧🇧' },
-        { name: 'Bahamas', flag: '🇧🇸' },
-        { name: 'Dominican Republic', flag: '🇩🇴' },
-        { name: 'Haiti', flag: '🇭🇹' },
-        { name: 'Cuba', flag: '🇨🇺' },
-        { name: 'Puerto Rico', flag: '🇵🇷' },
-      ],
-      middleEast: [
-        { name: 'UAE', flag: '🇦🇪' },
-        { name: 'Saudi Arabia', flag: '🇸🇦' },
-        { name: 'Israel', flag: '🇮🇱' },
-        { name: 'Jordan', flag: '🇯🇴' },
-        { name: 'Lebanon', flag: '🇱🇧' },
-        { name: 'Qatar', flag: '🇶🇦' },
-        { name: 'Kuwait', flag: '🇰🇼' },
-        { name: 'Bahrain', flag: '🇧🇭' },
-        { name: 'Oman', flag: '🇴🇲' },
-        { name: 'Turkey', flag: '🇹🇷' },
-        { name: 'Iraq', flag: '🇮🇶' },
-        { name: 'Iran', flag: '🇮🇷' },
-        { name: 'Yemen', flag: '🇾🇪' },
-        { name: 'Syria', flag: '🇸🇾' },
-        { name: 'Palestine', flag: '🇵🇸' },
-      ],
-      africa: [
-        { name: 'South Africa', flag: '🇿🇦' },
-        { name: 'Egypt', flag: '🇪🇬' },
-        { name: 'Morocco', flag: '🇲🇦' },
-        { name: 'Kenya', flag: '🇰🇪' },
-        { name: 'Nigeria', flag: '🇳🇬' },
-        { name: 'Algeria', flag: '🇩🇿' },
-        { name: 'Tunisia', flag: '🇹🇳' },
-        { name: 'Libya', flag: '🇱🇾' },
-        { name: 'Sudan', flag: '🇸🇩' },
-        { name: 'Ethiopia', flag: '🇪🇹' },
-        { name: 'Tanzania', flag: '🇹🇿' },
-        { name: 'Uganda', flag: '🇺🇬' },
-        { name: 'Ghana', flag: '🇬🇭' },
-        { name: 'Senegal', flag: '🇸🇳' },
-        { name: 'Ivory Coast', flag: '🇨🇮' },
-        { name: 'Cameroon', flag: '🇨🇲' },
-        { name: 'Angola', flag: '🇦🇴' },
-        { name: 'Mozambique', flag: '🇲🇿' },
-        { name: 'Madagascar', flag: '🇲🇬' },
-        { name: 'Zambia', flag: '🇿🇲' },
-        { name: 'Zimbabwe', flag: '🇿🇼' },
-        { name: 'Botswana', flag: '🇧🇼' },
-        { name: 'Namibia', flag: '🇳🇦' },
-        { name: 'Mauritius', flag: '🇲🇺' },
-        { name: 'Seychelles', flag: '🇸🇨' },
-        { name: 'Rwanda', flag: '🇷🇼' },
-        { name: 'Malawi', flag: '🇲🇼' },
-      ],
-      oceania: [
-        { name: 'Australia', flag: '🇦🇺' },
-        { name: 'New Zealand', flag: '🇳🇿' },
-        { name: 'Papua New Guinea', flag: '🇵🇬' },
-        { name: 'Fiji', flag: '🇫🇯' },
-        { name: 'Samoa', flag: '🇼🇸' },
-        { name: 'Tonga', flag: '🇹🇴' },
-        { name: 'Vanuatu', flag: '🇻🇺' },
-        { name: 'Solomon Islands', flag: '🇸🇧' },
-      ],
+    const regionMap: Record<string, string> = {
+      europe: 'Europe',
+      asia: 'Asia',
+      americas: 'North America',
+      middleEast: 'Middle East',
+      africa: 'Africa',
+      oceania: 'Oceania'
     }
     
-    // Add prices to all regions
-    const regionsWithPrices: Record<string, Array<{ name: string; flag: string; price: string }>> = {}
-    Object.keys(regionsData).forEach(region => {
-      regionsWithPrices[region] = regionsData[region as keyof typeof regionsData].map(country => ({
-        ...country,
-        price: getRandomPrice()
-      }))
+    const regionsWithPrices: Record<string, Array<{ name: string; flag: string; price: string }>> = {
+      europe: [],
+      asia: [],
+      americas: [],
+      middleEast: [],
+      africa: [],
+      oceania: []
+    }
+    
+    // Map countries by region from countriesData
+    countriesData.forEach(country => {
+      let regionKey: string | undefined
+      
+      // Handle special cases
+      if (country.region === 'North America' || country.region === 'South America') {
+        regionKey = 'americas'
+      } else {
+        regionKey = Object.keys(regionMap).find(key => country.region === regionMap[key])
+      }
+      
+      if (regionKey) {
+        regionsWithPrices[regionKey].push({
+          name: country.name,
+          flag: country.flag,
+          price: country.prices?.['1GB']?.toFixed(2) || '0.00'
+        })
+      }
     })
     
     return regionsWithPrices

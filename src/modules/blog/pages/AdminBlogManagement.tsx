@@ -74,7 +74,7 @@ const AdminBlogManagement = () => {
       authorName: post.authorName || '',
       metaTitle: post.metaTitle || '',
       metaDescription: post.metaDescription || '',
-      tags: post.tags || ''
+      tags: Array.isArray(post.tags) ? post.tags.join(', ') : (post.tags || '')
     })
     setShowForm(true)
   }

@@ -196,3 +196,132 @@ export interface OrderResponse {
   createdAt?: string
   updatedAt?: string
 }
+
+// Bundle Types (re-exported from plans service for convenience)
+export interface Bundle {
+  id: string
+  name: string
+  description: string
+  price: number
+  currency: string
+  data: string
+  validity: string
+  countries?: string[]
+  countryObjects?: Array<{ name: string; region: string; iso: string }>
+  countryIso?: string
+  countryName?: string
+  duration: number
+  dataAmount: number
+  unlimited: boolean
+  imageUrl?: string
+  group?: string[] | null
+  roamingEnabled?: boolean
+  [key: string]: unknown
+}
+
+// eSIM Plan Types
+export interface eSIMPlan {
+  id: string
+  name: string
+  description: string
+  price: number
+  currency: string
+  data: string
+  validity: string
+  regions: string[]
+  features: string[]
+  popular?: boolean
+  bundleId?: string
+}
+
+export interface eSIMProfile {
+  id: string
+  esimId: string
+  matchingId?: string
+  iccid?: string
+  qrCode?: string
+  activationCode?: string
+  status: string
+  plan?: eSIMPlan
+  orderId?: string
+}
+
+// Auth Types
+export interface LoginForm {
+  email: string
+  password: string
+}
+
+export interface SignUpForm {
+  email: string
+  password: string
+  confirmPassword: string
+  firstName?: string
+  lastName?: string
+}
+
+export interface User {
+  id: number
+  email: string
+  phone?: string
+  firstName?: string
+  lastName?: string
+  role?: string
+  createdAt?: string
+  updatedAt?: string
+}
+
+// Blog Types
+export interface BlogPost {
+  id: number
+  title: string
+  content: string
+  excerpt?: string
+  author?: string
+  authorName?: string
+  imageUrl?: string
+  image?: string
+  featuredImage?: string
+  publishedAt?: string
+  createdAt?: string
+  updatedAt?: string
+  tags?: string[] | string
+  category?: string
+  isPublished?: boolean
+  isFeatured?: boolean
+  slug?: string
+  readTime?: string
+  metaTitle?: string
+  metaDescription?: string
+}
+
+// API Response Types
+export interface ApiResponse<T = unknown> {
+  success: boolean
+  data?: T
+  message?: string
+  error?: string
+}
+
+// KYC Types
+export interface KYCSubmission {
+  userId: number
+  documentType: string
+  documentNumber: string
+  documentImage?: string
+  status?: string
+  submittedAt?: string
+}
+
+// Support Types
+export interface SupportTicket {
+  id: number
+  userId?: number
+  email: string
+  subject: string
+  message: string
+  status?: string
+  priority?: string
+  createdAt?: string
+  updatedAt?: string
+}

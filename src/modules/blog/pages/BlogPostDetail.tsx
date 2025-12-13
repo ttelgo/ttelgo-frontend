@@ -82,7 +82,7 @@ const BlogPostDetail = () => {
     }
     
     // Otherwise, treat as plain text with line breaks
-    return post.content.split('\n').map((paragraph, index) => {
+    return post.content.split('\n').map((paragraph: string, index: number) => {
       if (paragraph.trim() === '') return null
       
       // Check if it's a heading (starts with #)

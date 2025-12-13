@@ -241,12 +241,6 @@ const HelpCentre = () => {
     },
   ]
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    alert('Thank you for subscribing!')
-    setEmail('')
-  }
-
   const handleTopicToggle = (topicId: number) => {
     setExpandedTopic(prevExpanded => prevExpanded === topicId ? null : topicId)
   }
@@ -255,19 +249,19 @@ const HelpCentre = () => {
     <div className="w-full">
       {/* Hero Section - Merged with Navbar */}
       <section 
-        className="relative pb-8 md:pb-16 overflow-hidden bg-white -mt-16"
+        className="relative pb-0 md:pb-8 overflow-hidden bg-white -mt-16"
         style={{
           paddingTop: '4rem' // Space for navbar
         }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10" style={{ paddingTop: '4rem' }}>
-          <div className="flex items-center justify-between gap-8">
+          <div className="flex flex-col md:flex-row items-center justify-center md:justify-between gap-8">
             {/* Left Content */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
-              className="flex-1 relative z-20 text-left -mt-8"
+              className="flex-1 relative z-20 text-center md:text-left -mt-8"
             >
               {/* Subtitle */}
               <div className="mb-4">
@@ -309,7 +303,7 @@ const HelpCentre = () => {
       </section>
 
       {/* Main Content - Help Topics */}
-      <section className="pt-0 pb-16 bg-transparent mt-4">
+      <section className="pt-4 pb-16 bg-transparent border-t border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Section Title */}
           <motion.div
@@ -399,7 +393,7 @@ const HelpCentre = () => {
       </section>
 
       {/* Subscription Section */}
-      <section className="pt-8 pb-16 bg-transparent relative">
+      <section className="pt-4 pb-16 bg-transparent relative border-t border-gray-200">
         {/* Dots and Plus Pattern Background */}
         <div 
           className="absolute inset-0 opacity-30"
@@ -425,57 +419,65 @@ const HelpCentre = () => {
               boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)'
             }}
           >
-            {/* Purple Paper Airplane Icon */}
+            {/* Paper Airplane Icon - Positioned in corner */}
             <div className="absolute -top-2 -right-2 w-20 h-20 opacity-50 z-20">
-              <img
-                src="/IMAGES/PaperAirplane.png"
-                alt="Paper Airplane"
+              <img 
+                src="/IMAGES/PaperAirplane.png" 
+                alt="Paper Airplane" 
                 className="w-full h-full object-contain"
                 style={{
                   filter: 'hue-rotate(240deg) saturate(1.5) brightness(1.1)'
                 }}
-                onError={(e) => {
-                  const target = e.target as HTMLImageElement
-                  target.style.display = 'none'
-                }}
               />
             </div>
-
-            {/* Heading */}
-            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-8 text-center">
-              Subscribe to get information, latest news and other interesting offers about TTelGo
-            </h2>
-
-            {/* Email Input and Subscribe Button */}
-            <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-4 max-w-2xl mx-auto">
-              <div className="flex-1 relative">
-                <div className="absolute left-4 top-1/2 transform -translate-y-1/2 pointer-events-none">
-                  <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                  </svg>
-                </div>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Your email"
-                  required
-                  className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-telgo-red focus:border-transparent bg-white text-gray-900"
-                  style={{
-                    boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)'
-                  }}
-                />
-              </div>
-              <button
-                type="submit"
-                className="px-6 py-3 bg-telgo-red text-white rounded-lg font-semibold hover:bg-red-700 transition-colors whitespace-nowrap"
-                style={{
-                  boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+            
+            {/* Content with relative positioning */}
+            <div className="relative z-10">
+              <h2 className="text-lg md:text-2xl lg:text-3xl font-bold text-gray-900 mb-6 text-center mx-auto px-2 md:px-4 leading-relaxed">
+                Subscribe to get information, latest news and other interesting offers about TTelGo
+              </h2>
+            
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault()
+                  alert('Thank you for subscribing!')
+                  setEmail('')
                 }}
+                className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto"
               >
-                Subscribe
-              </button>
-            </form>
+                <div className="relative flex-1">
+                  <div className="absolute left-4 top-1/2 transform -translate-y-1/2 pointer-events-none z-10">
+                    <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                  </div>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="Your email"
+                    className="w-full pl-12 pr-4 py-2.5 rounded-lg bg-white focus:outline-none transition-all placeholder-gray-400 text-gray-900 text-sm focus:ring-2 focus:ring-telgo-red"
+                    style={{
+                      boxShadow: '0 6px 8px -1px rgba(0, 0, 0, 0.12), 0 3px 5px -1px rgba(0, 0, 0, 0.08), 0 -3px 5px -1px rgba(0, 0, 0, 0.08)',
+                      transition: 'box-shadow 0.3s ease'
+                    }}
+                    onFocus={(e) => {
+                      e.currentTarget.style.boxShadow = '0 12px 16px -2px rgba(0, 0, 0, 0.15), 0 6px 8px -2px rgba(0, 0, 0, 0.1), 0 -6px 8px -2px rgba(0, 0, 0, 0.1)'
+                    }}
+                    onBlur={(e) => {
+                      e.currentTarget.style.boxShadow = '0 6px 8px -1px rgba(0, 0, 0, 0.12), 0 3px 5px -1px rgba(0, 0, 0, 0.08), 0 -3px 5px -1px rgba(0, 0, 0, 0.08)'
+                    }}
+                    required
+                  />
+                </div>
+                <button
+                  type="submit"
+                  className="px-6 py-2.5 bg-telgo-red text-white rounded-lg font-semibold hover:bg-red-700 transition-colors duration-200 shadow-md hover:shadow-lg whitespace-nowrap text-sm"
+                >
+                  Subscribe
+                </button>
+              </form>
+            </div>
           </motion.div>
         </div>
       </section>

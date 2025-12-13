@@ -29,22 +29,12 @@ const HeroBackground = () => {
 
 const DownloadApp = () => {
   const [email, setEmail] = useState('')
-  const [submitted, setSubmitted] = useState(false)
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    setSubmitted(true)
-    setTimeout(() => {
-      setSubmitted(false)
-      setEmail('')
-    }, 3000)
-  }
 
   return (
     <div className="w-full">
       {/* Hero Section - Merged with Navbar */}
       <section 
-        className="relative pb-20 md:pb-28 overflow-hidden bg-white mt-0"
+        className="relative pb-4 md:pb-12 overflow-hidden bg-white mt-8"
         style={{
           paddingTop: '0rem' // Space for navbar
         }}
@@ -56,7 +46,7 @@ const DownloadApp = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
-              className="flex-1 relative z-20 text-left"
+              className="flex-1 relative z-20 text-center"
             >
             {/* Subtitle */}
             <div className="mb-4">
@@ -98,7 +88,7 @@ const DownloadApp = () => {
       </section>
 
       {/* Download the TTelGo App Section */}
-      <section className="pt-8 pb-16 bg-transparent -mt-8">
+      <section className="pt-4 pb-4 bg-transparent border-t border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -126,7 +116,7 @@ const DownloadApp = () => {
             </div>
 
             {/* QR Code */}
-            <div className="mb-8 flex justify-center">
+            <div className="mb-8 flex justify-center -mt-12">
               <div className="relative">
                 {/* QR Code Image */}
                 <img
@@ -141,7 +131,7 @@ const DownloadApp = () => {
             </div>
 
             {/* App Store Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center -mt-8 mb-8">
               {/* Google Play Store Badge */}
               <motion.a
                 href="https://play.google.com/store/apps"
@@ -163,6 +153,7 @@ const DownloadApp = () => {
                     src="/IMAGES/Playstore.png" 
                     alt="Google Play" 
                     className="w-9 h-9 object-contain"
+                    style={{ width: '36px', height: '36px' }}
                     onError={() => {
                       console.error('Failed to load Playstore.png');
                     }}
@@ -195,6 +186,7 @@ const DownloadApp = () => {
                     src="/IMAGES/apple.png" 
                     alt="App Store" 
                     className="w-9 h-9 object-contain"
+                    style={{ width: '36px', height: '36px' }}
                     onError={() => {
                       console.error('Failed to load apple.png');
                     }}
@@ -211,7 +203,7 @@ const DownloadApp = () => {
       </section>
 
       {/* Subscription Section */}
-      <section className="pt-0 pb-16 bg-transparent relative -mt-20">
+      <section className="pt-4 pb-16 bg-transparent relative border-t border-gray-200">
         {/* Dots and Plus Pattern Background */}
         <div 
           className="absolute inset-0 opacity-30"
@@ -254,51 +246,53 @@ const DownloadApp = () => {
               />
             </div>
 
-            {/* Heading */}
-            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-8 text-center">
-              Subscribe to get information, latest news and other interesting offers about TTelGo
-            </h2>
-
-            {/* Email Input and Subscribe Button */}
-            <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-4 max-w-2xl mx-auto">
-              <div className="flex-1 relative">
-                <div className="absolute left-4 top-1/2 transform -translate-y-1/2 pointer-events-none">
-                  <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                  </svg>
-                </div>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Your email"
-                  required
-                  className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-telgo-red focus:border-transparent bg-white text-gray-900"
-                  style={{
-                    boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)'
-                  }}
-                />
-              </div>
-              <button
-                type="submit"
-                className="px-6 py-3 bg-telgo-red text-white rounded-lg font-semibold hover:bg-red-700 transition-colors whitespace-nowrap"
-                style={{
-                  boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+            {/* Content with relative positioning */}
+            <div className="relative z-10">
+              <h2 className="text-lg md:text-2xl lg:text-3xl font-bold text-gray-900 mb-6 text-center mx-auto px-2 md:px-4 leading-relaxed">
+                Subscribe to get information, latest news and other interesting offers about TTelGo
+              </h2>
+            
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault()
+                  alert('Thank you for subscribing!')
+                  setEmail('')
                 }}
+                className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto"
               >
-                Subscribe
-              </button>
-            </form>
-
-            {submitted && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="mt-4 text-center text-green-600 font-medium"
-              >
-                Thank you for subscribing!
-              </motion.div>
-            )}
+                <div className="relative flex-1">
+                  <div className="absolute left-4 top-1/2 transform -translate-y-1/2 pointer-events-none z-10">
+                    <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                  </div>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="Your email"
+                    className="w-full pl-12 pr-4 py-2.5 rounded-lg bg-white focus:outline-none transition-all placeholder-gray-400 text-gray-900 text-sm focus:ring-2 focus:ring-telgo-red"
+                    style={{
+                      boxShadow: '0 6px 8px -1px rgba(0, 0, 0, 0.12), 0 3px 5px -1px rgba(0, 0, 0, 0.08), 0 -3px 5px -1px rgba(0, 0, 0, 0.08)',
+                      transition: 'box-shadow 0.3s ease'
+                    }}
+                    onFocus={(e) => {
+                      e.currentTarget.style.boxShadow = '0 12px 16px -2px rgba(0, 0, 0, 0.15), 0 6px 8px -2px rgba(0, 0, 0, 0.1), 0 -6px 8px -2px rgba(0, 0, 0, 0.1)'
+                    }}
+                    onBlur={(e) => {
+                      e.currentTarget.style.boxShadow = '0 6px 8px -1px rgba(0, 0, 0, 0.12), 0 3px 5px -1px rgba(0, 0, 0, 0.08), 0 -3px 5px -1px rgba(0, 0, 0, 0.08)'
+                    }}
+                    required
+                  />
+                </div>
+                <button
+                  type="submit"
+                  className="px-6 py-2.5 bg-telgo-red text-white rounded-lg font-semibold hover:bg-red-700 transition-colors duration-200 shadow-md hover:shadow-lg whitespace-nowrap text-sm"
+                >
+                  Subscribe
+                </button>
+              </form>
+            </div>
           </motion.div>
         </div>
       </section>

@@ -878,7 +878,7 @@ const Home = () => {
                     >
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
                     </svg>
-                    <span className="whitespace-nowrap">Redeem 1GB</span>
+                    <span className="whitespace-nowrap">Redeem 1GB Free For your next Trip</span>
                     <svg 
                       className="w-3 h-3 md:w-4 md:h-4 group-hover:text-black transition-colors duration-300" 
                       fill="none" 
@@ -906,17 +906,15 @@ const Home = () => {
               
               {/* Main Headline */}
               <h1 className="text-3xl md:text-4xl lg:text-[3rem] xl:text-5xl font-bold text-gray-900 mb-6 leading-[1.2]">
-                <span>Stay connected in over</span>
-                <br />
-                <span>
+                <span className="block">Stay connected in over</span>
+                <span className="block">
                   <span 
                     className="text-telgo-red underline decoration-2 underline-offset-4"
                   >
                     200+ destinations
                   </span>
                 </span>
-                <br />
-                <span>worldwide</span>
+                <span className="block">worldwide</span>
               </h1>
               
               {/* View All Plans Button */}

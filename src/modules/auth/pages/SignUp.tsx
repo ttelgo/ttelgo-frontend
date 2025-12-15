@@ -135,7 +135,7 @@ const SignUp = () => {
   }
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center -mt-56 -mb-72 md:py-12 px-4">
+    <div className="min-h-screen w-full flex items-center justify-center -mt-48 -mb-52 md:py-12 px-4">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -159,7 +159,7 @@ const SignUp = () => {
         </div>
 
         {/* Right Panel - Form Area */}
-        <div className="w-full md:w-3/5 bg-white md:rounded-r-3xl p-4 sm:p-6 md:p-8 flex flex-col justify-center -mt-56 -mb-72 md:my-0">
+        <div className="w-full md:w-3/5 bg-white md:rounded-r-3xl p-4 sm:p-6 md:p-8 flex flex-col justify-center -mt-48 -mb-52 md:my-0">
           {/* Header: Logo, Language Selector, and Hamburger Menu */}
           <div className="flex justify-between items-center mb-4 md:mb-6">
             {/* Logo */}

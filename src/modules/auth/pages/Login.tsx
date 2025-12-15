@@ -128,7 +128,7 @@ const Login = () => {
   }
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center -mt-48 -mb-52 md:py-12 px-4">
+    <div className="min-h-screen w-full flex items-center justify-center -mt-48 -mb-52 md:mt-0 md:mb-0 md:py-0 md:-mt-48 md:-mb-44 px-4">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}

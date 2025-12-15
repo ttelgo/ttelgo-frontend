@@ -1,13 +1,13 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useMemo, memo } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { loadStripe, StripeElementsOptions } from '@stripe/stripe-js'
+import { loadStripe, StripeElementsOptions, Stripe } from '@stripe/stripe-js'
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js'
 import { eSIMPlan } from '@/shared/types'
 import { paymentService, type CreatePaymentIntentRequest } from '@/modules/payment/services/payment.service'
 
 // Stripe promise - will be initialized with publishable key
-let stripePromise: Promise<any> | null = null
+let stripePromise: Promise<Stripe | null> | null = null
 
 const Checkout = () => {
   const navigate = useNavigate()
@@ -63,6 +63,7 @@ const Checkout = () => {
   const [orderId, setOrderId] = useState<number | null>(null)
   const [stripePublishableKey, setStripePublishableKey] = useState<string | null>(null)
   const [isLoadingPaymentIntent, setIsLoadingPaymentIntent] = useState(false)
+  const [stripeLoaded, setStripeLoaded] = useState(false)
 
   // Format currency symbol
   const getCurrencySymbol = (currency: string) => {
@@ -91,19 +92,15 @@ const Checkout = () => {
     }
   }, [paymentMethod])
 
-  // Create payment intent when Stripe is selected and email is available
+  // Create payment intent immediately when Stripe is selected (don't wait for email)
   useEffect(() => {
     // Only proceed if Stripe is selected
     if (paymentMethod !== 'stripe') {
       return
     }
 
-    // Debounce email validation to prevent too many API calls
-    const email = billingData.email?.trim() || ''
-    const isValidEmail = email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
-    
-    // Don't create if email is invalid or payment intent already exists
-    if (!isValidEmail || paymentIntent) {
+    // Don't create if payment intent already exists
+    if (paymentIntent) {
       return
     }
 
@@ -117,13 +114,16 @@ const Checkout = () => {
         setIsLoadingPaymentIntent(true)
         const bundleId = (plan as any).bundleId || plan.id
         
+        // Use email if available, otherwise use placeholder (will be updated later)
+        const email = billingData.email?.trim() || 'customer@example.com'
+        
         const request: CreatePaymentIntentRequest = {
           amount: plan.price,
           currency: plan.currency?.toLowerCase() || 'usd',
           bundleId: bundleId,
           bundleName: plan.name,
           quantity: 1,
-          customerEmail: billingData.email,
+          customerEmail: email,
         }
 
         const response = await paymentService.createPaymentIntent(request)
@@ -143,6 +143,17 @@ const Checkout = () => {
         // Initialize Stripe with publishable key
         if (!stripePromise && response.publishableKey) {
           stripePromise = loadStripe(response.publishableKey)
+          stripePromise.then(() => {
+            setStripeLoaded(true)
+          }).catch((err) => {
+            console.error('Failed to load Stripe:', err)
+            setErrors({ submit: 'Failed to load payment processor. Please refresh the page.' })
+          })
+        } else if (stripePromise) {
+          // If promise already exists, check if it's resolved
+          stripePromise.then(() => {
+            setStripeLoaded(true)
+          })
         }
         
         // Clear any previous errors
@@ -164,16 +175,13 @@ const Checkout = () => {
       }
     }
 
-    // Debounce the API call - wait 800ms after user stops typing
-    const timeoutId = setTimeout(() => {
-      createPaymentIntent()
-    }, 800)
+    // Create payment intent immediately (no debounce)
+    createPaymentIntent()
 
     return () => {
       isCancelled = true
-      clearTimeout(timeoutId)
     }
-  }, [plan.id, billingData.email, paymentMethod]) // Removed paymentIntent from dependencies to prevent loops
+  }, [paymentMethod]) // Only recreate when payment method changes, not on plan or email changes
 
   const validateBilling = () => {
     const newErrors: Record<string, string> = {}
@@ -228,8 +236,8 @@ const Checkout = () => {
   // Card number and expiry handlers removed - not used in current implementation
 
   // Stripe payment handler (used by StripeCheckoutForm component)
-  const handleStripePayment = async (stripe: any, elements: any, cardElement?: any) => {
-    if (!stripe || !elements || !paymentIntent || !orderId) {
+  const handleStripePayment = async (stripe: any, cardElement: any) => {
+    if (!stripe || !cardElement || !paymentIntent || !orderId) {
       throw new Error('Payment not initialized. Please wait a moment and try again.')
     }
 
@@ -251,34 +259,17 @@ const Checkout = () => {
         return
       }
 
-      // Get card element - use provided element or get it fresh
-      let cardElementToUse = cardElement
-      
-      // If element not provided, get it fresh from elements
-      if (!cardElementToUse) {
-        try {
-          cardElementToUse = elements.getElement(CardElement) || elements.getElement('card')
-        } catch (e) {
-          console.error('Error getting card element:', e)
-        }
-      }
-      
       // Verify element is valid
-      if (!cardElementToUse) {
-        throw new Error('Card element is not accessible. Please ensure the card form is fully loaded and try again.')
-      }
-      
-      // Additional validation: ensure element is actually mounted
-      if (typeof cardElementToUse !== 'object' || cardElementToUse === null) {
+      if (!cardElement || typeof cardElement !== 'object' || cardElement === null) {
         throw new Error('Card element is invalid. Please refresh the page and try again.')
       }
 
-      // Confirm payment with Stripe
+      // Confirm payment with Stripe - use the element directly from onReady callback
       const { error: confirmError, paymentIntent: confirmedPayment } = await stripe.confirmCardPayment(
         paymentIntent.clientSecret,
         {
           payment_method: {
-            card: cardElementToUse,
+            card: cardElement,
             billing_details: {
               name: `${billingData.firstName} ${billingData.lastName}`,
               email: billingData.email,
@@ -456,27 +447,34 @@ const Checkout = () => {
   const processingFee = 0 // No fee for demo
   const total = subtotal + tax + processingFee
 
-  // Stripe Elements options - only when we have a client secret
-  const elementsOptions: StripeElementsOptions | undefined = paymentIntent?.clientSecret
-    ? {
-        clientSecret: paymentIntent.clientSecret,
-        appearance: {
-          theme: 'stripe' as const,
-        },
-      }
-    : undefined
+  // Stripe Elements options - memoized to prevent re-renders
+  const elementsOptions: StripeElementsOptions | undefined = useMemo(() => {
+    if (!paymentIntent?.clientSecret) {
+      return undefined
+    }
+    return {
+      clientSecret: paymentIntent.clientSecret,
+      appearance: {
+        theme: 'stripe' as const,
+      },
+    }
+  }, [paymentIntent?.clientSecret]) // Only recreate if clientSecret changes
 
   // Stripe Checkout Form Component (inline) - handles card input and payment only
-  const StripeCheckoutForm = () => {
+  // Memoized to prevent re-renders when parent re-renders
+  const StripeCheckoutForm = memo(() => {
     const stripe = useStripe()
     const elements = useElements()
     const [cardElementReady, setCardElementReady] = useState(false)
-
-    // Note: We don't need to store the element in a ref
-    // The onReady callback will tell us when it's ready
-    // We'll get it fresh from elements when needed
+    const cardElementRef = useRef<any>(null)
+    const isProcessingRef = useRef(false)
 
     const handlePayment = async () => {
+      // Prevent double submission
+      if (isProcessingRef.current || isProcessing) {
+        return
+      }
+
       if (!stripe || !elements || !paymentIntent) {
         setErrors({ submit: 'Payment not initialized. Please wait a moment and try again.' })
         return
@@ -488,26 +486,34 @@ const Checkout = () => {
         return
       }
 
-      // Always get the element fresh from elements - don't use stored ref
-      // This ensures we're using the current mounted element
-      let cardElement = null
-      try {
-        cardElement = elements.getElement(CardElement) || elements.getElement('card')
-      } catch (e) {
-        console.error('Error getting card element:', e)
-      }
-
-      if (!cardElement) {
+      // Use the element from ref (set in onReady) - this is the most reliable way
+      const cardElementToUse = cardElementRef.current
+      
+      if (!cardElementToUse) {
         setErrors({ submit: 'Card element is not accessible. Please refresh the page and try again.' })
         return
       }
 
-      // Call the parent handler with the fresh element reference
+      // Verify element is valid
+      if (typeof cardElementToUse !== 'object' || cardElementToUse === null) {
+        setErrors({ submit: 'Card element is invalid. Please refresh the page and try again.' })
+        return
+      }
+
+      isProcessingRef.current = true
+
+      // Call the parent handler with the element directly from onReady
       try {
-        await handleStripePayment(stripe, elements, cardElement)
+        await handleStripePayment(stripe, cardElementToUse)
       } catch (error: any) {
         // Error is already handled in handleStripePayment
         console.error('Payment error:', error)
+        // Set error message if not already set
+        if (error?.message && !errors.submit) {
+          setErrors({ submit: error.message })
+        }
+      } finally {
+        isProcessingRef.current = false
       }
     }
 
@@ -549,9 +555,31 @@ const Checkout = () => {
                     },
                   },
                 }}
-                onReady={() => {
-                  // Element is ready - we can now use it
-                  setCardElementReady(true)
+                onReady={(element) => {
+                  // Store element reference and mark as ready
+                  if (element) {
+                    cardElementRef.current = element
+                    setCardElementReady(true)
+                    console.log('Card element ready:', element)
+                  }
+                }}
+                onChange={(event) => {
+                  // Handle card element changes if needed
+                  if (event.error) {
+                    console.error('Card element error:', event.error)
+                  }
+                  // Keep element reference updated - element is available via elements API
+                }}
+                onBlur={() => {
+                  // Ensure element is still accessible on blur
+                  try {
+                    const el = elements?.getElement(CardElement) || elements?.getElement('card')
+                    if (el) {
+                      cardElementRef.current = el
+                    }
+                  } catch (e) {
+                    console.warn('Could not refresh element on blur:', e)
+                  }
                 }}
               />
             </div>
@@ -561,7 +589,13 @@ const Checkout = () => {
         {/* Submit Button */}
         <button
           type="button"
-          onClick={handlePayment}
+          onClick={(e) => {
+            e.preventDefault()
+            e.stopPropagation()
+            if (!isProcessing && stripe && elements && paymentIntent && cardElementReady) {
+              handlePayment()
+            }
+          }}
           disabled={isProcessing || !stripe || !elements || !paymentIntent || !cardElementReady}
           className="w-full py-4 bg-telgo-red text-white rounded-lg font-semibold hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-lg mt-6"
           style={{
@@ -581,7 +615,7 @@ const Checkout = () => {
         )}
       </div>
     )
-  }
+  })
 
   return (
     <div className="w-full min-h-screen py-8 md:py-12">
@@ -766,33 +800,36 @@ const Checkout = () => {
               {/* Payment Forms */}
               <form onSubmit={handleSubmit} className="space-y-6">
                 {/* Stripe Card Form */}
-                {paymentMethod === 'stripe' && stripePublishableKey && stripePromise && elementsOptions && paymentIntent?.clientSecret && (
-                  <Elements 
-                    stripe={stripePromise} 
-                    options={elementsOptions}
-                  >
-                    <StripeCheckoutForm />
-                  </Elements>
-                )}
-                
-                {paymentMethod === 'stripe' && !stripePublishableKey && (
-                  <div className="space-y-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                    <div className="flex items-center justify-center py-8">
-                      {isLoadingPaymentIntent ? (
-                        <>
-                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-telgo-red"></div>
-                          <span className="ml-3 text-gray-600">Initializing secure payment...</span>
-                        </>
-                      ) : (
-                        <div className="text-center">
-                          <p className="text-gray-600 mb-2">Please enter your email address above to initialize payment.</p>
-                          {errors.submit && (
-                            <p className="text-sm text-red-600 mt-2">{errors.submit}</p>
+                {paymentMethod === 'stripe' && (
+                  <>
+                    {stripePublishableKey && stripePromise && stripeLoaded && elementsOptions && paymentIntent?.clientSecret ? (
+                      <Elements 
+                        stripe={stripePromise} 
+                        options={elementsOptions}
+                        key={`stripe-elements-${paymentIntent.paymentIntentId}`}
+                      >
+                        <StripeCheckoutForm />
+                      </Elements>
+                    ) : (
+                      <div className="space-y-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                        <div className="flex items-center justify-center py-8">
+                          {isLoadingPaymentIntent ? (
+                            <>
+                              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-telgo-red"></div>
+                              <span className="ml-3 text-gray-600">Initializing secure payment...</span>
+                            </>
+                          ) : (
+                            <div className="text-center">
+                              <p className="text-gray-600 mb-2">Loading payment form...</p>
+                              {errors.submit && (
+                                <p className="text-sm text-red-600 mt-2">{errors.submit}</p>
+                              )}
+                            </div>
                           )}
                         </div>
-                      )}
-                    </div>
-                  </div>
+                      </div>
+                    )}
+                  </>
                 )}
 
                 {/* PayPal Form */}

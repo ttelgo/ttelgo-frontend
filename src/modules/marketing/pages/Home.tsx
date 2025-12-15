@@ -1,9 +1,9 @@
 import { useState, useMemo, useEffect, useRef } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { allCountries as countriesData } from '@/modules/countries/utils/countriesData'
 import { plansService } from '@/modules/plans/services/plans.service'
 import { faqService } from '@/modules/faq/services/faq.service'
+import { getCountryFlag } from '@/shared/utils/countryFlags'
 import type { FAQ } from '@/shared/types'
 
 
@@ -283,17 +283,12 @@ const Home = () => {
 
         // Convert to array and map to country format with flags
         const countriesFromApi = Array.from(countryMap.values()).map(country => {
-          const countryData = countriesData.find(c => 
-            c.name.toLowerCase() === country.countryName.toLowerCase() ||
-            c.id.toLowerCase() === country.countryIso.toLowerCase()
-          )
-
           return {
             name: country.countryName,
             countryIso: country.countryIso,
-            flag: countryData?.flag || '🌍',
+            flag: getCountryFlag(country.countryIso),
             price: country.minPricePerGB.toFixed(2),
-            region: country.region || countryData?.region,
+            region: country.region || 'Unknown',
           }
         })
 
@@ -303,17 +298,8 @@ const Home = () => {
         setLocalDestinationsFromApi(countriesFromApi)
       } catch (error) {
         console.error('Error fetching local destinations from API:', error)
-        // Fallback to hardcoded data if API fails
-        const fallback = countriesData
-          .filter(country => country.status === 'Open Now')
-          .map(country => ({
-            name: country.name,
-            flag: country.flag,
-            price: country.prices['1GB'].toFixed(2),
-            countryIso: country.id,
-            region: country.region,
-          }))
-        setLocalDestinationsFromApi(fallback)
+        // No fallback - show empty state if API fails
+        setLocalDestinationsFromApi([])
       } finally {
         setLocalDestinationsLoading(false)
       }
@@ -346,27 +332,33 @@ const Home = () => {
       name: dest.name,
       flag: dest.flag,
       price: dest.price,
-      country: countriesData.find(c => c.id === dest.countryIso || c.name === dest.name) || {
+      country: {
         id: dest.countryIso,
         name: dest.name,
         flag: dest.flag,
-        region: dest.region,
+        region: dest.region || 'Unknown',
         status: 'Open Now' as const,
         prices: { '1GB': parseFloat(dest.price) }
       },
     }))
   }, [localDestinationsFromApi])
 
-  // All countries for search (including Coming Soon)
+  // All countries for search - Use API data from localDestinationsFromApi
   const allCountriesForSearch = useMemo(() => {
-    return countriesData.map(country => ({
-      name: country.name,
-      flag: country.flag,
-      price: country.prices?.['1GB']?.toFixed(2) || 'N/A', // Price per GB from 1GB plan, or N/A if no prices
-      country: country, // Keep full country object for navigation
-      status: country.status,
+    return localDestinationsFromApi.map(dest => ({
+      name: dest.name,
+      flag: dest.flag,
+      price: dest.price,
+      country: {
+        id: dest.countryIso,
+        name: dest.name,
+        flag: dest.flag,
+        region: dest.region || 'Unknown',
+        status: 'Open Now' as const,
+      },
+      status: 'Open Now' as const,
     }))
-  }, [])
+  }, [localDestinationsFromApi])
 
   // Filter countries for hero search (includes all countries)
   const heroSearchResults = useMemo(() => {
@@ -434,16 +426,16 @@ const Home = () => {
     navigate(`/country/${encodeURIComponent(countryName)}`)
   }
 
-  // All countries for Global eSIMs - Using data from countriesData
+  // All countries for Global eSIMs - Using API data
   const allCountries = useMemo(() => {
-    return countriesData.map(country => ({
-      name: country.name,
-      flag: country.flag,
-      price: country.prices?.['1GB']?.toFixed(2) || '0.00'
+    return localDestinationsFromApi.map(dest => ({
+      name: dest.name,
+      flag: dest.flag,
+      price: dest.price
     }))
-  }, [])
+  }, [localDestinationsFromApi])
 
-  // Regional eSIMs - Organized by regions - Using data from countriesData
+  // Regional eSIMs - Organized by regions - Using API data
   const regionalESIMs = useMemo(() => {
     const regionMap: Record<string, string> = {
       europe: 'Europe',
@@ -463,28 +455,29 @@ const Home = () => {
       oceania: []
     }
     
-    // Map countries by region from countriesData
-    countriesData.forEach(country => {
+    // Map countries by region from API data
+    localDestinationsFromApi.forEach(dest => {
       let regionKey: string | undefined
+      const region = dest.region || 'Unknown'
       
       // Handle special cases
-      if (country.region === 'North America' || country.region === 'South America') {
+      if (region === 'North America' || region === 'South America') {
         regionKey = 'americas'
       } else {
-        regionKey = Object.keys(regionMap).find(key => country.region === regionMap[key])
+        regionKey = Object.keys(regionMap).find(key => region === regionMap[key])
       }
       
       if (regionKey) {
         regionsWithPrices[regionKey].push({
-          name: country.name,
-          flag: country.flag,
-          price: country.prices?.['1GB']?.toFixed(2) || '0.00'
+          name: dest.name,
+          flag: dest.flag,
+          price: dest.price
         })
       }
     })
     
     return regionsWithPrices
-  }, [])
+  }, [localDestinationsFromApi])
 
   const handleScroll = (direction: 'left' | 'right', ref?: React.RefObject<HTMLDivElement>) => {
     const container = ref?.current || scrollContainerRef.current
@@ -661,7 +654,7 @@ const Home = () => {
                         <div className="text-2xl">{result.flag}</div>
                         <div className="flex-1">
                           <div className="text-gray-900 font-medium">{result.name}</div>
-                          {result.status === 'Coming Soon' || result.price === 'N/A' || result.price === '0.00' ? (
+                          {result.price === 'N/A' || result.price === '0.00' ? (
                             <div className="text-sm text-orange-600 font-medium">Coming Soon</div>
                           ) : (
                             <div className="text-sm text-gray-500">From ${result.price}/GB</div>
@@ -863,7 +856,7 @@ const Home = () => {
                       <div className="text-2xl">{result.flag}</div>
                       <div className="flex-1">
                         <div className="text-gray-900 font-medium">{result.name}</div>
-                        {result.status === 'Coming Soon' || result.price === 'N/A' || result.price === '0.00' ? (
+                        {result.price === 'N/A' || result.price === '0.00' ? (
                           <div className="text-sm text-orange-600 font-medium">Coming Soon</div>
                         ) : (
                           <div className="text-sm text-gray-500">From ${result.price}/GB</div>

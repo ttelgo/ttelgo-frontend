@@ -34,7 +34,7 @@ class BlogService {
 
     const query = queryParams.toString()
     const response = await apiClient.get<ApiResponse<BlogPostsResponse>>(`/blog${query ? `?${query}` : ''}`)
-    return response.data
+    return response.data || { posts: [], total: 0, page: 1, totalPages: 0, limit: 10 }
   }
 
   /**
@@ -42,6 +42,7 @@ class BlogService {
    */
   async getPostBySlug(slug: string): Promise<BlogPost> {
     const response = await apiClient.get<ApiResponse<BlogPost>>(`/blog/${slug}`)
+    if (!response.data) throw new Error('Blog post not found')
     return response.data
   }
 
@@ -51,7 +52,7 @@ class BlogService {
   async getFeaturedPosts(limit?: number): Promise<BlogPost[]> {
     const query = limit ? `?limit=${limit}` : ''
     const response = await apiClient.get<ApiResponse<BlogPost[]>>(`/blog/featured${query}`)
-    return response.data
+    return response.data || []
   }
 
   /**
@@ -64,7 +65,7 @@ class BlogService {
     if (limit !== undefined) queryParams.append('limit', limit.toString())
 
     const response = await apiClient.get<ApiResponse<BlogPostsResponse>>(`/blog/search?${queryParams.toString()}`)
-    return response.data
+    return response.data || { posts: [], total: 0, page: 1, totalPages: 0, limit: 10 }
   }
 
   // ========== Admin Methods ==========
@@ -79,7 +80,7 @@ class BlogService {
 
     const query = queryParams.toString()
     const response = await apiClient.get<ApiResponse<BlogPostsResponse>>(`/blog/admin/all${query ? `?${query}` : ''}`)
-    return response.data
+    return response.data || { posts: [], total: 0, page: 1, totalPages: 0, limit: 10 }
   }
 
   /**
@@ -87,6 +88,7 @@ class BlogService {
    */
   async getPostById(id: number): Promise<BlogPost> {
     const response = await apiClient.get<ApiResponse<BlogPost>>(`/blog/admin/${id}`)
+    if (!response.data) throw new Error('Blog post not found')
     return response.data
   }
 
@@ -110,6 +112,7 @@ class BlogService {
     tags?: string
   }): Promise<BlogPost> {
     const response = await apiClient.post<ApiResponse<BlogPost>>('/blog', post)
+    if (!response.data) throw new Error('Failed to create blog post')
     return response.data
   }
 
@@ -132,6 +135,7 @@ class BlogService {
     tags?: string
   }): Promise<BlogPost> {
     const response = await apiClient.put<ApiResponse<BlogPost>>(`/blog/${id}`, post)
+    if (!response.data) throw new Error('Failed to update blog post')
     return response.data
   }
 

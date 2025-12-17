@@ -4,32 +4,6 @@ import { motion } from 'framer-motion'
 import { esimService } from '@/modules/esim/services/esim.service'
 import { processQRCodeData } from '@/shared/utils/qrCodeUtils'
 
-// Hero Background Component - Image background
-const HeroBackground = () => {
-  return (
-    <>
-      {/* Image background */}
-      <div 
-        className="absolute inset-0 w-full h-full"
-        style={{
-          zIndex: 0,
-          backgroundImage: 'url(/IMAGES/travels.jpg)',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat'
-        }}
-      />
-      {/* Overlay for better text readability */}
-      <div 
-        className="absolute inset-0 w-full h-full bg-black/20"
-        style={{
-          zIndex: 1
-        }}
-      />
-    </>
-  )
-}
-
 const MyeSIM = () => {
   const [searchParams] = useSearchParams()
   const orderId = searchParams.get('orderId')

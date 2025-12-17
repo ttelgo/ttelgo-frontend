@@ -83,7 +83,7 @@ const PlanManagement = () => {
       if (selectedRegion && selectedRegion.trim()) {
         filtered = filtered.filter(bundle => {
           // Check if any country in the bundle belongs to the selected region
-          return bundle.countryObjects?.some(c => 
+          return bundle.countryObjects?.some((c: { name: string; region?: string; iso: string }) => 
             c.region?.toLowerCase() === selectedRegion.toLowerCase()
           ) || false
         })
@@ -101,7 +101,7 @@ const PlanManagement = () => {
         bundle.description?.toLowerCase().includes(searchLower) ||
         bundle.countryName?.toLowerCase().includes(searchLower) ||
         bundle.countryIso?.toLowerCase().includes(searchLower) ||
-        bundle.countryObjects?.some(c => 
+        bundle.countryObjects?.some((c: { name: string; region?: string; iso: string }) => 
           c.name?.toLowerCase().includes(searchLower) ||
           c.iso?.toLowerCase().includes(searchLower) ||
           c.region?.toLowerCase().includes(searchLower)

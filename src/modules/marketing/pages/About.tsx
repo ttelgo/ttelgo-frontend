@@ -2,32 +2,6 @@ import { motion } from 'framer-motion'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
-// Hero Background Component - Image background
-const HeroBackground = () => {
-  return (
-    <>
-      {/* Image background */}
-      <div 
-        className="absolute inset-0 w-full h-full"
-        style={{
-          zIndex: 0,
-          backgroundImage: 'url(/IMAGES/travels.jpg)',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat'
-        }}
-      />
-      {/* Overlay for better text readability */}
-      <div 
-        className="absolute inset-0 w-full h-full bg-black/20"
-        style={{
-          zIndex: 1
-        }}
-      />
-    </>
-  )
-}
-
 const About = () => {
   const navigate = useNavigate()
   const [email, setEmail] = useState('')

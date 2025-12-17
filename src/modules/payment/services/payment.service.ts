@@ -40,12 +40,13 @@ class PaymentService {
         if ('success' in response && !response.success) {
           throw new Error((response as any).message || 'Failed to create payment intent')
         }
-        if ('data' in response) {
+        if ('data' in response && response.data) {
           return response.data
         }
       }
       // Fallback: assume response is the data directly
-      return response as CreatePaymentIntentResponse
+      if (!response) throw new Error('Failed to create payment intent')
+      return response as unknown as CreatePaymentIntentResponse
     } catch (error: any) {
       // Extract error message from API response
       const errorMessage = error.message || 

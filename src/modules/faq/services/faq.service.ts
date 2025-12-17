@@ -13,7 +13,7 @@ class FaqService {
   async getFaqs(category?: string): Promise<FAQ[]> {
     const query = category ? `?category=${category}` : ''
     const response = await apiClient.get<ApiResponse<FAQ[]>>(`/faq${query}`)
-    return response.data
+    return response.data || []
   }
 
   /**
@@ -21,7 +21,7 @@ class FaqService {
    */
   async getCategories(): Promise<string[]> {
     const response = await apiClient.get<ApiResponse<string[]>>('/faq/categories')
-    return response.data
+    return response.data || []
   }
 
   // ========== Admin Methods ==========
@@ -31,7 +31,7 @@ class FaqService {
    */
   async getAllFaqsAdmin(): Promise<FAQ[]> {
     const response = await apiClient.get<ApiResponse<FAQ[]>>('/faq/admin/all')
-    return response.data
+    return response.data || []
   }
 
   /**
@@ -39,6 +39,7 @@ class FaqService {
    */
   async getFaqById(id: number): Promise<FAQ> {
     const response = await apiClient.get<ApiResponse<FAQ>>(`/faq/admin/${id}`)
+    if (!response.data) throw new Error('FAQ not found')
     return response.data
   }
 
@@ -53,6 +54,7 @@ class FaqService {
     category?: string
   }): Promise<FAQ> {
     const response = await apiClient.post<ApiResponse<FAQ>>('/faq', faq)
+    if (!response.data) throw new Error('Failed to create FAQ')
     return response.data
   }
 
@@ -67,6 +69,7 @@ class FaqService {
     category?: string
   }): Promise<FAQ> {
     const response = await apiClient.put<ApiResponse<FAQ>>(`/faq/${id}`, faq)
+    if (!response.data) throw new Error('Failed to update FAQ')
     return response.data
   }
 

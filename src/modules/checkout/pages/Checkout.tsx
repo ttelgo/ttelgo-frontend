@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { loadStripe, StripeElementsOptions } from '@stripe/stripe-js'
@@ -45,12 +45,13 @@ const Checkout = () => {
     : defaultPlan
 
   const [paymentMethod, setPaymentMethod] = useState<'stripe' | 'paypal' | 'bank'>('stripe')
-  const [cardData, setCardData] = useState({
-    cardNumber: '',
-    expiryDate: '',
-    cvv: '',
-    cardholderName: '',
-  })
+  // Unused - kept for potential future use
+  // const [cardData, setCardData] = useState({
+  //   cardNumber: '',
+  //   expiryDate: '',
+  //   cvv: '',
+  //   cardholderName: '',
+  // })
   const [billingData, setBillingData] = useState({
     email: '',
     firstName: '',
@@ -81,28 +82,29 @@ const Checkout = () => {
     return symbols[currency] || currency
   }
 
-  const formatCardNumber = (value: string) => {
-    const v = value.replace(/\s+/g, '').replace(/[^0-9]/gi, '')
-    const matches = v.match(/\d{4,16}/g)
-    const match = (matches && matches[0]) || ''
-    const parts = []
-    for (let i = 0, len = match.length; i < len; i += 4) {
-      parts.push(match.substring(i, i + 4))
-    }
-    if (parts.length) {
-      return parts.join(' ')
-    } else {
-      return v
-    }
-  }
+  // Unused format functions - kept for potential future use
+  // const formatCardNumber = (value: string) => {
+  //   const v = value.replace(/\s+/g, '').replace(/[^0-9]/gi, '')
+  //   const matches = v.match(/\d{4,16}/g)
+  //   const match = (matches && matches[0]) || ''
+  //   const parts = []
+  //   for (let i = 0, len = match.length; i < len; i += 4) {
+  //     parts.push(match.substring(i, i + 4))
+  //   }
+  //   if (parts.length) {
+  //     return parts.join(' ')
+  //   } else {
+  //     return v
+  //   }
+  // }
 
-  const formatExpiryDate = (value: string) => {
-    const v = value.replace(/\s+/g, '').replace(/[^0-9]/gi, '')
-    if (v.length >= 2) {
-      return v.substring(0, 2) + '/' + v.substring(2, 4)
-    }
-    return v
-  }
+  // const formatExpiryDate = (value: string) => {
+  //   const v = value.replace(/\s+/g, '').replace(/[^0-9]/gi, '')
+  //   if (v.length >= 2) {
+  //     return v.substring(0, 2) + '/' + v.substring(2, 4)
+  //   }
+  //   return v
+  // }
 
   // Reset payment intent when payment method changes away from Stripe
   useEffect(() => {
@@ -252,21 +254,22 @@ const Checkout = () => {
     return newErrors
   }
 
-  const handleCardNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const formatted = formatCardNumber(e.target.value)
-    setCardData({ ...cardData, cardNumber: formatted })
-    if (errors.cardNumber) {
-      setErrors({ ...errors, cardNumber: '' })
-    }
-  }
+  // Unused handlers - kept for potential future use
+  // const handleCardNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   const formatted = formatCardNumber(e.target.value)
+  //   setCardData({ ...cardData, cardNumber: formatted })
+  //   if (errors.cardNumber) {
+  //     setErrors({ ...errors, cardNumber: '' })
+  //   }
+  // }
 
-  const handleExpiryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const formatted = formatExpiryDate(e.target.value)
-    setCardData({ ...cardData, expiryDate: formatted })
-    if (errors.expiryDate) {
-      setErrors({ ...errors, expiryDate: '' })
-    }
-  }
+  // const handleExpiryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   const formatted = formatExpiryDate(e.target.value)
+  //   setCardData({ ...cardData, expiryDate: formatted })
+  //   if (errors.expiryDate) {
+  //     setErrors({ ...errors, expiryDate: '' })
+  //   }
+  // }
 
   // Stripe payment handler (used by StripeCheckoutForm component)
   const handleStripePayment = async (stripe: any, elements: any, cardElement?: any) => {
@@ -512,7 +515,7 @@ const Checkout = () => {
     const stripe = useStripe()
     const elements = useElements()
     const [cardElementReady, setCardElementReady] = useState(false)
-    const cardElementRef = useRef<any>(null)
+    // const cardElementRef = useRef<any>(null) // Unused
 
     // Note: We don't need to store the element in a ref
     // The onReady callback will tell us when it's ready
@@ -1256,7 +1259,7 @@ const Checkout = () => {
                     <div className="text-sm text-gray-600 mb-2">{plan.description}</div>
                     {plan.regions && plan.regions.length > 0 && (
                       <div className="flex flex-wrap gap-2 mb-2">
-                        {plan.regions.map((region, idx) => (
+                        {plan.regions.map((region: string, idx: number) => (
                           <span key={idx} className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded">
                             {region}
                           </span>

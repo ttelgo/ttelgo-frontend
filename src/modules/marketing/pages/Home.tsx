@@ -11,32 +11,6 @@ const getRandomPrice = () => {
   return (Math.random() * 1.5 + 0.5).toFixed(2)
 }
 
-// Hero Background Component - Image background
-const HeroBackground = () => {
-  return (
-    <>
-      {/* Image background */}
-      <div 
-        className="absolute inset-0 w-full h-full"
-        style={{
-          zIndex: 0,
-          backgroundImage: 'url(/IMAGES/travels.jpg)',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat'
-        }}
-      />
-      {/* Overlay for better text readability */}
-      <div 
-        className="absolute inset-0 w-full h-full bg-black/20"
-        style={{
-          zIndex: 1
-        }}
-      />
-    </>
-  )
-}
-
 const Home = () => {
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState('local')

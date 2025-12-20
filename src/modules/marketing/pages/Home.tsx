@@ -94,113 +94,60 @@ const Home = () => {
     }
   }, [destinationsSearchQuery])
   const [selectedRegion, setSelectedRegion] = useState<string | null>(null)
-  const [destinations, setDestinations] = useState<Array<{ name: string; price: string; image: string }>>([])
-  const [destinationsLoading, setDestinationsLoading] = useState(true)
-
-  // Fetch destinations with countries and prices from API (NO HARDCODED DATA)
-  useEffect(() => {
-    const fetchDestinations = async () => {
-      try {
-        setDestinationsLoading(true)
-        
-        // Fetch all bundles from API
-        const allBundles = await plansService.getBundles()
-        
-        // Group bundles by country and calculate min price per GB
-        const countryMap = new Map<string, {
-          countryName: string
-          countryIso: string
-          bundles: typeof allBundles
-          minPricePerGB: number
-        }>()
-
-        allBundles.forEach(bundle => {
-          if (!bundle.countryName || !bundle.countryIso) return
-
-          const existing = countryMap.get(bundle.countryIso)
-          
-          // Calculate price per GB for this bundle (from API data only)
-          let pricePerGB: number | null = null
-          
-          // Handle unlimited bundles - skip for price per GB calculation
-          if (bundle.unlimited || bundle.dataAmount === -1) {
-            // For unlimited bundles, we can't calculate price per GB
-            // Skip them for the carousel as we need "per GB" pricing
-            return
-          }
-          
-          // For limited data bundles, calculate price per GB from API data
-          if (bundle.dataAmount && bundle.dataAmount > 0) {
-            // Convert MB to GB
-            const dataGB = bundle.dataAmount / 1000
-            if (dataGB > 0 && bundle.price) {
-              pricePerGB = bundle.price / dataGB
-            }
-          } else {
-            // Fallback: try to parse from bundle.data string if dataAmount not available
-            const dataMatch = bundle.data?.match(/(\d+(?:\.\d+)?)/)
-            if (dataMatch) {
-              const dataGB = parseFloat(dataMatch[1])
-              if (dataGB > 0 && bundle.price) {
-                pricePerGB = bundle.price / dataGB
-              }
-            }
-          }
-          
-          // Only process bundles with valid price per GB
-          if (!pricePerGB || pricePerGB <= 0) return
-
-          if (existing) {
-            existing.bundles.push(bundle)
-            existing.minPricePerGB = Math.min(existing.minPricePerGB, pricePerGB)
-          } else {
-            countryMap.set(bundle.countryIso, {
-              countryName: bundle.countryName,
-              countryIso: bundle.countryIso,
-              bundles: [bundle],
-              minPricePerGB: pricePerGB,
-            })
-          }
-        })
-
-        // Convert to array and sort by bundle count (most popular) or price
-        const countries = Array.from(countryMap.values())
-          .sort((a, b) => {
-            // Sort by bundle count (descending), then by price (ascending)
-            if (b.bundles.length !== a.bundles.length) {
-              return b.bundles.length - a.bundles.length
-            }
-            return a.minPricePerGB - b.minPricePerGB
-          })
-          .slice(0, 12) // Take top 12 countries
-
-        // Map to destinations - use ONLY API data (no hardcoded data)
-        const destinationsWithPrices = countries.map(country => {
-          // Get imageUrl from API bundles (priority: first bundle with imageUrl)
-          const bundleWithImage = country.bundles.find(b => b.imageUrl)
-          const apiImageUrl = bundleWithImage?.imageUrl
-          
-          // Use country name directly from API (no city mapping)
-          // If no imageUrl from API, use a placeholder or empty string
-          return {
-            name: country.countryName, // Use country name from API directly
-            price: country.minPricePerGB.toFixed(2), // Price from API calculation
-            image: apiImageUrl || '', // Only use API imageUrl, no hardcoded fallback
-          }
-        })
-
-        setDestinations(destinationsWithPrices)
-      } catch (error) {
-        console.error('Error fetching destinations from API:', error)
-        // Fallback: show empty array or minimal fallback
-        setDestinations([])
-      } finally {
-        setDestinationsLoading(false)
-      }
+  // Top 10 Destinations - Hardcoded popular destinations with local images
+  const [destinations] = useState<Array<{ name: string; price: string; image: string }>>([
+    {
+      name: 'United Kingdom',
+      price: '1.36',
+      image: '/IMAGES/Cities/London.jpg'
+    },
+    {
+      name: 'France',
+      price: '1.25',
+      image: '/IMAGES/Cities/Paris.jpg'
+    },
+    {
+      name: 'Italy',
+      price: '1.18',
+      image: '/IMAGES/Cities/Rome.jpg'
+    },
+    {
+      name: 'Spain',
+      price: '1.22',
+      image: '/IMAGES/Cities/Barcelona.jpg'
+    },
+    {
+      name: 'United Arab Emirates',
+      price: '1.45',
+      image: '/IMAGES/Cities/Dubai.jpg'
+    },
+    {
+      name: 'Singapore',
+      price: '1.50',
+      image: '/IMAGES/Cities/Singapore.jpg'
+    },
+    {
+      name: 'Australia',
+      price: '1.40',
+      image: '/IMAGES/Cities/Sydney.jpg'
+    },
+    {
+      name: 'United States',
+      price: '1.55',
+      image: '/IMAGES/Cities/NewYork.jpg'
+    },
+    {
+      name: 'Netherlands',
+      price: '1.30',
+      image: '/IMAGES/Cities/Amsterdam.jpg'
+    },
+    {
+      name: 'Thailand',
+      price: '1.15',
+      image: '/IMAGES/Cities/Thailand.jpg'
     }
-
-    fetchDestinations()
-  }, [])
+  ])
+  const [destinationsLoading] = useState(false)
 
   // Local eSIMs - Fetch from API (same as Shop page)
   const [localDestinationsFromApi, setLocalDestinationsFromApi] = useState<Array<{
@@ -1034,39 +981,51 @@ const Home = () => {
                   <div
                     key={index}
                     onClick={() => handleDestinationClick(dest)}
-                    className="flex-shrink-0 bg-white rounded-none md:rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow cursor-pointer w-[300px] relative h-[200px] md:h-auto"
+                    className="flex-shrink-0 bg-white rounded-none md:rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow cursor-pointer w-[300px] flex flex-col"
                   >
-                    <div className="absolute inset-0 md:relative md:h-48 bg-gray-200 flex items-center justify-center">
+                    <div 
+                      className="relative w-full h-[200px] md:h-48 overflow-hidden flex-shrink-0"
+                      style={{ backgroundColor: 'transparent' }}
+                    >
                       {dest.image ? (
                         <img
                           src={dest.image}
                           alt={dest.name}
-                          className="w-full h-full object-cover"
+                          className="absolute inset-0 w-full h-full object-cover object-center"
+                          style={{ 
+                            width: '100%', 
+                            height: '100%',
+                            objectFit: 'cover',
+                            objectPosition: 'center',
+                            display: 'block',
+                            margin: 0,
+                            padding: 0
+                          }}
                           onError={(e) => {
                             const target = e.target as HTMLImageElement
                             target.style.display = 'none'
                             if (!target.nextElementSibling) {
                               const placeholder = document.createElement('div')
-                              placeholder.className = 'w-full h-full bg-gradient-to-br from-gray-300 to-gray-400 flex items-center justify-center text-gray-500 text-sm px-2'
+                              placeholder.className = 'absolute inset-0 w-full h-full bg-gradient-to-br from-gray-300 to-gray-400 flex items-center justify-center text-gray-500 text-sm px-2'
                               placeholder.textContent = dest.name
                               target.parentNode?.appendChild(placeholder)
                             }
                           }}
                         />
                       ) : (
-                        <div className="w-full h-full bg-gradient-to-br from-gray-300 to-gray-400 flex items-center justify-center text-gray-500 text-sm px-2 text-center">
+                        <div className="absolute inset-0 w-full h-full bg-gradient-to-br from-gray-300 to-gray-400 flex items-center justify-center text-gray-500 text-sm px-2 text-center">
                           {dest.name}
                         </div>
                       )}
                       {/* Overlay with text on mobile */}
-                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4 md:hidden">
+                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4 md:hidden z-10">
                         <div className="text-white font-semibold text-sm mb-1">
                           Starting from USD {dest.price}/GB
                         </div>
                         <div className="text-white font-medium text-base">{dest.name}</div>
                       </div>
                     </div>
-                    <div className="p-4 hidden md:block">
+                    <div className="p-4 hidden md:block flex-shrink-0">
                       <div className="text-telgo-red font-semibold mb-1">
                         Starting from USD {dest.price}/GB
                       </div>

@@ -25,7 +25,7 @@ export interface CreatePaymentIntentResponse {
 class PaymentService {
   /**
    * Create a payment intent for checkout
-   * POST /api/payments/intent
+   * POST /api/v1/payments/intent
    */
   async createPaymentIntent(
     request: CreatePaymentIntentRequest
@@ -60,7 +60,7 @@ class PaymentService {
 
   /**
    * Confirm payment (usually called after client-side confirmation)
-   * POST /api/payments/confirm?paymentIntentId=pi_xxx
+   * POST /api/v1/payments/confirm?paymentIntentId=pi_xxx
    */
   async confirmPayment(paymentIntentId: string): Promise<void> {
     await apiClient.post(`/payments/confirm?paymentIntentId=${paymentIntentId}`)
@@ -68,10 +68,10 @@ class PaymentService {
 
   /**
    * Activate eSIM after payment confirmation
-   * POST /api/esims/activate-after-payment?orderId=123
+   * POST /api/v1/orders/{orderId}/esims
    */
   async activateEsimAfterPayment(orderId: number): Promise<any> {
-    return apiClient.post(`/esims/activate-after-payment?orderId=${orderId}`)
+    return apiClient.post(`/orders/${orderId}/esims`)
   }
 }
 

@@ -19,7 +19,7 @@ export interface OrderDetails {
 class DashboardService {
   /**
    * Get order details
-   * GET /api/esims/orders/{orderId}
+   * GET /api/v1/esim-orders/{orderId}
    */
   async getOrderDetails(orderId: string): Promise<OrderDetails> {
     return esimService.getOrderDetails(orderId)
@@ -27,7 +27,7 @@ class DashboardService {
 
   /**
    * Get QR code for eSIM
-   * GET /api/esims/qr/{esimId}
+   * GET /api/v1/esims/{matchingId}/qr
    */
   async getQRCode(esimId: string): Promise<{ qrCode: string }> {
     const response = await esimService.getQRCode(esimId)
@@ -43,7 +43,7 @@ class DashboardService {
   }
 
   async getUserOrders(): Promise<OrderDetails[]> {
-    // TODO: Implement when backend adds /esims/orders endpoint
+    // TODO: Implement when backend adds /orders endpoint for current user
     return []
   }
 }

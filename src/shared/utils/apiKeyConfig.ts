@@ -53,13 +53,18 @@ export const apiKeyConfig = {
    * This is the API key provided by the user for ttelgo frontend
    */
   initialize(): void {
-    // If no API key is set, try to use the default one
-    if (!this.hasApiKey()) {
-      const defaultKey = import.meta.env.VITE_API_KEY || 'ttelgo_Vu9gQIlJBTxSXoHwP_SidRYF-BWbX9S-zUox9KmBwSQ'
-      if (defaultKey) {
-        this.setApiKey(defaultKey)
-        console.log('API key initialized from environment/default')
+    // Always use the latest default API key
+    const defaultKey = import.meta.env.VITE_API_KEY || 'ttelgo_t0q-2yHn5iliqp1q02NxXZuQzKPkTFzBQ388DaiVI4A'
+    const currentKey = this.getApiKey()
+    
+    // If no key or key doesn't match the default, update it
+    if (!currentKey || currentKey.trim() === '' || currentKey.trim() !== defaultKey.trim()) {
+      if (defaultKey && defaultKey.trim()) {
+        this.setApiKey(defaultKey.trim())
+        console.log('API key updated to:', defaultKey.substring(0, 20) + '...')
       }
+    } else {
+      console.log('API key already configured correctly:', currentKey.substring(0, 20) + '...')
     }
   }
 }

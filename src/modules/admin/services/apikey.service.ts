@@ -1,26 +1,29 @@
 import { ApiClient } from '@/shared/services/api/client'
-import type { ApiKey, CreateApiKeyRequest, UpdateApiKeyRequest, ApiUsageStats } from '@/shared/types'
+import type { ApiKey, CreateApiKeyRequest, UpdateApiKeyRequest, ApiUsageStats, ApiResponse } from '@/shared/types'
 
 const apiClient = new ApiClient()
 
 class ApiKeyService {
   async getAllApiKeys(): Promise<ApiKey[]> {
-    const response = await apiClient.get<{ data: ApiKey[] }>('/admin/api-keys')
-    return response.data
+    const response = await apiClient.get<ApiResponse<ApiKey[]>>('/admin/api-keys')
+    return response.data || []
   }
 
   async getApiKeyById(id: number): Promise<ApiKey> {
-    const response = await apiClient.get<{ data: ApiKey }>(`/admin/api-keys/${id}`)
+    const response = await apiClient.get<ApiResponse<ApiKey>>(`/admin/api-keys/${id}`)
+    if (!response.data) throw new Error('API key not found')
     return response.data
   }
 
   async createApiKey(request: CreateApiKeyRequest): Promise<ApiKey> {
-    const response = await apiClient.post<{ data: ApiKey }>('/admin/api-keys', request)
+    const response = await apiClient.post<ApiResponse<ApiKey>>('/admin/api-keys', request)
+    if (!response.data) throw new Error('Failed to create API key')
     return response.data
   }
 
   async updateApiKey(id: number, request: UpdateApiKeyRequest): Promise<ApiKey> {
-    const response = await apiClient.put<{ data: ApiKey }>(`/admin/api-keys/${id}`, request)
+    const response = await apiClient.put<ApiResponse<ApiKey>>(`/admin/api-keys/${id}`, request)
+    if (!response.data) throw new Error('Failed to update API key')
     return response.data
   }
 
@@ -29,12 +32,16 @@ class ApiKeyService {
   }
 
   async regenerateApiKey(id: number): Promise<ApiKey> {
-    const response = await apiClient.post<{ data: ApiKey }>(`/admin/api-keys/${id}/regenerate`)
+    const response = await apiClient.post<ApiResponse<ApiKey>>(`/admin/api-keys/${id}/regenerations`)
+    if (!response.data) throw new Error('Failed to regenerate API key')
     return response.data
   }
 
   async getUsageStats(id: number, days: number = 30): Promise<ApiUsageStats> {
-    const response = await apiClient.get<{ data: ApiUsageStats }>(`/admin/api-keys/${id}/usage?days=${days}`)
+    const response = await apiClient.get<ApiResponse<ApiUsageStats>>(
+      `/admin/api-keys/${id}/usage?days=${days}`
+    )
+    if (!response.data) throw new Error('Failed to load usage stats')
     return response.data
   }
 }

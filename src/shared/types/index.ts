@@ -300,7 +300,8 @@ export interface ApiResponse<T = unknown> {
   success: boolean
   data?: T
   message?: string
-  error?: string
+  errors?: unknown
+  meta?: unknown
 }
 
 // KYC Types

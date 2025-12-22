@@ -41,12 +41,6 @@ const ShopPlans = () => {
         setEsimType(tab)
         // Clear search query when tab changes from URL
         setSearchQuery('')
-      } else if (tab === 'local') {
-        // If already on local tab, ensure search is cleared
-        if (searchQuery.trim()) {
-          console.log('Already on local tab, clearing search query')
-          setSearchQuery('')
-        }
       }
     } else if (!tab) {
       // If no tab in URL, default to local
@@ -57,7 +51,7 @@ const ShopPlans = () => {
         setSearchQuery('')
       }
     }
-  }, [searchParams, esimType, searchQuery, apiCountries.length])
+  }, [searchParams, esimType, apiCountries.length])
 
   // Fetch local bundles (single country) from API - ONLY ONCE on mount
   useEffect(() => {
@@ -157,58 +151,52 @@ const ShopPlans = () => {
     fetchLocalBundles()
   }, []) // Empty deps - only run once on mount // Only fetch once on mount
 
-  // Fetch regional bundles from API
-  // Since eSIMGo API returns mostly single-country bundles, we'll use local bundles
-  // and group them by region to create regional views
+  // Reuse local bundles for regional grouping (no separate API call needed)
   useEffect(() => {
-    const fetchRegionalBundles = async () => {
-      try {
-        setRegionalLoading(true)
-        // Get all local bundles and we'll group them by region in the UI
-        const bundles = await plansService.getLocalBundles()
-        console.log('Fetched bundles for regional grouping:', bundles.length, bundles)
-        setRegionalBundles(bundles)
-      } catch (error) {
-        console.error('Error fetching bundles for regional grouping:', error)
-        setRegionalBundles([])
-      } finally {
-        setRegionalLoading(false)
-      }
+    // Wait for local bundles to load, then use them for regional grouping
+    if (apiCountriesLoadedRef.current && apiCountries.length > 0) {
+      console.log('Reusing local bundles for regional grouping')
+      // We'll fetch regional bundles only when the regional tab is active
+      setRegionalLoading(false)
     }
+  }, [apiCountries])
 
-    fetchRegionalBundles()
-  }, [])
-
-  // Fetch global bundles from API
-  // Since eSIMGo API may not have true global bundles, we'll check for:
-  // 1. Bundles with roamingEnabled=true
-  // 2. Bundles with group containing "global"
-  // 3. If none found, we can create a global view from all regions
+  // Fetch regional and global bundles only when their tabs are accessed
   useEffect(() => {
-    const fetchGlobalBundles = async () => {
-      try {
-        setGlobalLoading(true)
-        const bundles = await plansService.getGlobalBundles()
-        console.log('Fetched global bundles:', bundles.length, bundles)
-        
-        // If no global bundles found, we can use all bundles to create global plans
-        // by grouping them differently (showing all regions combined)
-        if (bundles.length === 0) {
-          console.log('No true global bundles found, will create global view from all bundles')
-          // For now, return empty - we'll handle this in the UI
+    if (esimType === 'regional' && regionalBundles.length === 0 && !regionalLoading) {
+      const fetchRegionalBundles = async () => {
+        try {
+          setRegionalLoading(true)
+          const bundles = await plansService.getLocalBundles()
+          console.log('Fetched bundles for regional grouping:', bundles.length)
+          setRegionalBundles(bundles)
+        } catch (error) {
+          console.error('Error fetching bundles for regional grouping:', error)
+          setRegionalBundles([])
+        } finally {
+          setRegionalLoading(false)
         }
-        
-        setGlobalBundles(bundles)
-      } catch (error) {
-        console.error('Error fetching global bundles from API:', error)
-        setGlobalBundles([])
-      } finally {
-        setGlobalLoading(false)
       }
+      fetchRegionalBundles()
     }
 
-    fetchGlobalBundles()
-  }, [])
+    if (esimType === 'global' && globalBundles.length === 0 && !globalLoading) {
+      const fetchGlobalBundles = async () => {
+        try {
+          setGlobalLoading(true)
+          const bundles = await plansService.getGlobalBundles()
+          console.log('Fetched global bundles:', bundles.length)
+          setGlobalBundles(bundles)
+        } catch (error) {
+          console.error('Error fetching global bundles from API:', error)
+          setGlobalBundles([])
+        } finally {
+          setGlobalLoading(false)
+        }
+      }
+      fetchGlobalBundles()
+    }
+  }, [esimType, regionalBundles.length, globalBundles.length, regionalLoading, globalLoading])
 
   const handleRegionClick = (regionName: string) => {
     // Navigate to the country selection page for the selected region
@@ -794,6 +782,8 @@ const ShopPlans = () => {
                 <div className="text-center py-12">
                   <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-telgo-red"></div>
                   <p className="mt-4 text-gray-600">Loading countries...</p>
+                  <p className="mt-2 text-gray-500 text-sm">First load may take up to 60 seconds while fetching all available destinations</p>
+                  <p className="mt-1 text-gray-400 text-xs">Subsequent loads will be instant (cached for 1 hour)</p>
                 </div>
               ) : (
                 <>

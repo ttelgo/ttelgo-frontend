@@ -1,5 +1,5 @@
 import { ApiClient } from '@/shared/services/api/client'
-import type { OrderResponse } from '@/shared/types'
+import type { OrderResponse, ApiResponse } from '@/shared/types'
 
 const apiClient = new ApiClient()
 
@@ -9,12 +9,13 @@ class AdminOrderService {
     if (status) {
       url += `&status=${status}`
     }
-    const response = await apiClient.get<{ data: OrderResponse[] }>(url)
-    return response.data
+    const response = await apiClient.get<ApiResponse<OrderResponse[]>>(url)
+    return response.data || []
   }
 
   async getOrderById(id: number): Promise<OrderResponse> {
-    const response = await apiClient.get<{ data: OrderResponse }>(`/admin/orders/${id}`)
+    const response = await apiClient.get<ApiResponse<OrderResponse>>(`/admin/orders/${id}`)
+    if (!response.data) throw new Error('Order not found')
     return response.data
   }
 }

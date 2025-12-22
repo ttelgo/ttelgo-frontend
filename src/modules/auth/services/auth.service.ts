@@ -20,11 +20,24 @@ export interface SignUpResponse {
 export interface OTPRequest {
   email: string
   phone?: string
+  purpose?: string // LOGIN, REGISTER, RESET_PASSWORD, etc.
 }
 
 export interface OTPVerify {
   email: string
   otp: string
+}
+
+export interface AdminRegisterRequest {
+  email: string
+  password: string
+  firstName?: string
+  lastName?: string
+}
+
+export interface AdminLoginRequest {
+  email: string
+  password: string
 }
 
 class AuthService {
@@ -82,6 +95,28 @@ class AuthService {
    */
   async refreshToken(): Promise<{ token: string }> {
     return apiClient.post<{ token: string }>('/auth/refresh')
+  }
+
+  /**
+   * Admin registration with email and password
+   */
+  async adminRegister(data: AdminRegisterRequest): Promise<LoginResponse> {
+    const response = await apiClient.post<{ data?: LoginResponse; success?: boolean }>('/auth/admin/register', data)
+    if (response.data) {
+      return response.data
+    }
+    throw new Error('Invalid response format')
+  }
+
+  /**
+   * Admin login with email and password
+   */
+  async adminLogin(data: AdminLoginRequest): Promise<LoginResponse> {
+    const response = await apiClient.post<{ data?: LoginResponse; success?: boolean }>('/auth/admin/login', data)
+    if (response.data) {
+      return response.data
+    }
+    throw new Error('Invalid response format')
   }
 }
 

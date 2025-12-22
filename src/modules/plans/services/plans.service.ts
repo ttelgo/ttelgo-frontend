@@ -5,6 +5,7 @@
  */
 
 import { apiClient } from '@/shared/services/api/client'
+import type { ApiResponse } from '@/shared/types'
 
 /**
  * Raw bundle response from API
@@ -114,26 +115,30 @@ function transformBundle(apiBundle: ApiBundle): Bundle {
 class PlansService {
   /**
    * Get all bundles/plans
-   * GET /api/plans/bundles
+   * GET /api/v1/bundles
+   * Requests all bundles by using a large size parameter
    */
   async getBundles(): Promise<Bundle[]> {
-    const response = await apiClient.get<BundlesResponse>('/plans/bundles')
-    const apiBundles = response.bundles || []
+    // Request all bundles by using a large size (backend returns all if size >= 1000)
+    const response = await apiClient.get<ApiResponse<BundlesResponse>>('/bundles?size=10000')
+    const apiBundles = response.data?.bundles || []
     return apiBundles.map(transformBundle)
   }
 
   /**
    * Get bundles by country
-   * GET /api/plans/bundles/country?countryIso={code}
+   * GET /api/v1/bundles?countryIso={code}
    */
   async getBundlesByCountry(countryIso: string): Promise<Bundle[]> {
     try {
       console.log('Fetching bundles for country ISO:', countryIso)
-      const response = await apiClient.get<BundlesResponse>(`/plans/bundles/country?countryIso=${countryIso}`)
+      const response = await apiClient.get<ApiResponse<BundlesResponse>>(
+        `/bundles?countryIso=${countryIso}`
+      )
       console.log('Raw API response:', response)
       
       // Handle response structure
-      const apiBundles = response?.bundles || []
+      const apiBundles = response?.data?.bundles || []
       console.log('Extracted bundles array:', apiBundles)
       
       if (apiBundles.length === 0) {
@@ -151,40 +156,47 @@ class PlansService {
 
   /**
    * Get bundle details by ID (name)
-   * GET /api/plans/bundles/{bundleId}
+   * GET /api/v1/bundles/{bundleId}
    */
   async getBundleById(bundleId: string): Promise<Bundle> {
-    const apiBundle = await apiClient.get<ApiBundle>(`/plans/bundles/${bundleId}`)
-    return transformBundle(apiBundle)
+    const response = await apiClient.get<ApiResponse<ApiBundle>>(`/bundles/${bundleId}`)
+    if (!response.data) throw new Error('Bundle not found')
+    return transformBundle(response.data)
   }
 
   /**
    * Get local eSIM bundles (single country)
-   * GET /api/plans/bundles/local
+   * GET /api/v1/bundles?type=local
+   * Requests all bundles by using a large size parameter
    */
   async getLocalBundles(): Promise<Bundle[]> {
-    const response = await apiClient.get<BundlesResponse>('/plans/bundles/local')
-    const apiBundles = response.bundles || []
+    // Request all bundles by using a large size (backend returns all if size >= 1000)
+    const response = await apiClient.get<ApiResponse<BundlesResponse>>('/bundles?type=local&size=10000')
+    const apiBundles = response.data?.bundles || []
     return apiBundles.map(transformBundle)
   }
 
   /**
    * Get regional eSIM bundles (multiple countries in a region)
-   * GET /api/plans/bundles/regional
+   * GET /api/v1/bundles?type=regional
+   * Requests all bundles by using a large size parameter
    */
   async getRegionalBundles(): Promise<Bundle[]> {
-    const response = await apiClient.get<BundlesResponse>('/plans/bundles/regional')
-    const apiBundles = response.bundles || []
+    // Request all bundles by using a large size (backend returns all if size >= 1000)
+    const response = await apiClient.get<ApiResponse<BundlesResponse>>('/bundles?type=regional&size=10000')
+    const apiBundles = response.data?.bundles || []
     return apiBundles.map(transformBundle)
   }
 
   /**
    * Get global eSIM bundles (many countries globally)
-   * GET /api/plans/bundles/global
+   * GET /api/v1/bundles?type=global
+   * Requests all bundles by using a large size parameter
    */
   async getGlobalBundles(): Promise<Bundle[]> {
-    const response = await apiClient.get<BundlesResponse>('/plans/bundles/global')
-    const apiBundles = response.bundles || []
+    // Request all bundles by using a large size (backend returns all if size >= 1000)
+    const response = await apiClient.get<ApiResponse<BundlesResponse>>('/bundles?type=global&size=10000')
+    const apiBundles = response.data?.bundles || []
     return apiBundles.map(transformBundle)
   }
 

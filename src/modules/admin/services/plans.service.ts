@@ -4,6 +4,7 @@
  */
 
 import { apiClient } from '@/shared/services/api/client'
+import type { ApiResponse } from '@/shared/types'
 import type { Bundle } from '@/shared/types'
 
 export interface PaginatedBundlesResponse {
@@ -14,12 +15,10 @@ export interface PaginatedBundlesResponse {
 class AdminPlansService {
   /**
    * Get all plans complete (loads all plans for client-side filtering)
-   * GET /api/admin/plans/all
+   * GET /api/v1/admin/bundles?all=true
    */
   async getAllPlansComplete(): Promise<PaginatedBundlesResponse> {
-    const response = await apiClient.get<{ data: { bundles: any[] } }>(
-      '/admin/plans/all'
-    )
+    const response = await apiClient.get<ApiResponse<{ bundles: any[] }>>('/admin/bundles?all=true')
 
     // Transform API bundles to frontend Bundle format
     const bundles = (response.data?.bundles || []).map(this.transformBundle)
@@ -28,10 +27,10 @@ class AdminPlansService {
 
   /**
    * Get all plans with pagination and search (legacy endpoint)
-   * GET /api/admin/plans?page=1&perPage=20&search=term
+   * GET /api/v1/admin/bundles?page=0&perPage=20&search=term
    */
   async getAllPlans(
-    page: number = 1,
+    page: number = 0,
     perPage: number = 20,
     direction: string = 'asc',
     orderBy?: string,
@@ -49,8 +48,8 @@ class AdminPlansService {
       params.append('search', search.trim())
     }
 
-    const response = await apiClient.get<{ data: { bundles: any[] } }>(
-      `/admin/plans?${params.toString()}`
+    const response = await apiClient.get<ApiResponse<{ bundles: any[] }>>(
+      `/admin/bundles?${params.toString()}`
     )
 
     // Transform API bundles to frontend Bundle format
@@ -60,16 +59,15 @@ class AdminPlansService {
 
   /**
    * Get regional bundles filtered by region
-   * GET /api/admin/plans/regional?region=Europe
+   * GET /api/v1/admin/bundles?type=regional&region=Europe
    */
   async getRegionalBundlesByRegion(region?: string): Promise<PaginatedBundlesResponse> {
     const params = new URLSearchParams()
-    if (region && region.trim()) {
-      params.append('region', region.trim())
-    }
+    params.append('type', 'regional')
+    if (region && region.trim()) params.append('region', region.trim())
 
-    const response = await apiClient.get<{ data: { bundles: any[] } }>(
-      `/admin/plans/regional?${params.toString()}`
+    const response = await apiClient.get<ApiResponse<{ bundles: any[] }>>(
+      `/admin/bundles?${params.toString()}`
     )
 
     const bundles = (response.data?.bundles || []).map(this.transformBundle)
@@ -78,10 +76,10 @@ class AdminPlansService {
 
   /**
    * Get list of available regions
-   * GET /api/admin/plans/regions
+   * GET /api/v1/admin/bundles/regions
    */
   async getAvailableRegions(): Promise<string[]> {
-    const response = await apiClient.get<{ data: string[] }>('/admin/plans/regions')
+    const response = await apiClient.get<ApiResponse<string[]>>('/admin/bundles/regions')
     return response.data || []
   }
 

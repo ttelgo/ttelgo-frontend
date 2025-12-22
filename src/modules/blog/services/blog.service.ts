@@ -30,10 +30,10 @@ class BlogService {
     if (params?.limit !== undefined) queryParams.append('limit', params.limit.toString())
     if (params?.category) queryParams.append('category', params.category)
     if (params?.tag) queryParams.append('tag', params.tag)
-    if (params?.search) queryParams.append('search', params.search)
+    if (params?.search) queryParams.append('q', params.search)
 
     const query = queryParams.toString()
-    const response = await apiClient.get<ApiResponse<BlogPostsResponse>>(`/blog${query ? `?${query}` : ''}`)
+    const response = await apiClient.get<ApiResponse<BlogPostsResponse>>(`/posts${query ? `?${query}` : ''}`)
     return response.data || { posts: [], total: 0, page: 1, limit: 10, totalPages: 0 }
   }
 
@@ -41,7 +41,7 @@ class BlogService {
    * Get blog post by slug
    */
   async getPostBySlug(slug: string): Promise<BlogPost> {
-    const response = await apiClient.get<ApiResponse<BlogPost>>(`/blog/${slug}`)
+    const response = await apiClient.get<ApiResponse<BlogPost>>(`/posts/${slug}`)
     if (!response.data) throw new Error('Blog post not found')
     return response.data
   }
@@ -50,9 +50,12 @@ class BlogService {
    * Get featured posts
    */
   async getFeaturedPosts(limit?: number): Promise<BlogPost[]> {
-    const query = limit ? `?limit=${limit}` : ''
-    const response = await apiClient.get<ApiResponse<BlogPost[]>>(`/blog/featured${query}`)
-    return response.data || []
+    const queryParams = new URLSearchParams()
+    queryParams.append('featured', 'true')
+    if (limit !== undefined) queryParams.append('limit', limit.toString())
+
+    const response = await apiClient.get<ApiResponse<BlogPostsResponse>>(`/posts?${queryParams.toString()}`)
+    return response.data?.posts || []
   }
 
   /**
@@ -64,7 +67,7 @@ class BlogService {
     if (page !== undefined) queryParams.append('page', page.toString())
     if (limit !== undefined) queryParams.append('limit', limit.toString())
 
-    const response = await apiClient.get<ApiResponse<BlogPostsResponse>>(`/blog/search?${queryParams.toString()}`)
+    const response = await apiClient.get<ApiResponse<BlogPostsResponse>>(`/posts?${queryParams.toString()}`)
     return response.data || { posts: [], total: 0, page: 1, limit: 10, totalPages: 0 }
   }
 
@@ -79,7 +82,7 @@ class BlogService {
     if (limit !== undefined) queryParams.append('limit', limit.toString())
 
     const query = queryParams.toString()
-    const response = await apiClient.get<ApiResponse<BlogPostsResponse>>(`/blog/admin/all${query ? `?${query}` : ''}`)
+    const response = await apiClient.get<ApiResponse<BlogPostsResponse>>(`/admin/posts${query ? `?${query}` : ''}`)
     return response.data || { posts: [], total: 0, page: 1, limit: 10, totalPages: 0 }
   }
 
@@ -87,7 +90,7 @@ class BlogService {
    * Get blog post by ID (admin only)
    */
   async getPostById(id: number): Promise<BlogPost> {
-    const response = await apiClient.get<ApiResponse<BlogPost>>(`/blog/admin/${id}`)
+    const response = await apiClient.get<ApiResponse<BlogPost>>(`/admin/posts/${id}`)
     if (!response.data) throw new Error('Blog post not found')
     return response.data
   }
@@ -111,7 +114,7 @@ class BlogService {
     metaDescription?: string
     tags?: string
   }): Promise<BlogPost> {
-    const response = await apiClient.post<ApiResponse<BlogPost>>('/blog', post)
+    const response = await apiClient.post<ApiResponse<BlogPost>>('/admin/posts', post)
     if (!response.data) throw new Error('Failed to create blog post')
     return response.data
   }
@@ -134,7 +137,7 @@ class BlogService {
     metaDescription?: string
     tags?: string
   }): Promise<BlogPost> {
-    const response = await apiClient.put<ApiResponse<BlogPost>>(`/blog/${id}`, post)
+    const response = await apiClient.put<ApiResponse<BlogPost>>(`/admin/posts/${id}`, post)
     if (!response.data) throw new Error('Failed to update blog post')
     return response.data
   }
@@ -143,7 +146,7 @@ class BlogService {
    * Delete blog post (admin only)
    */
   async deletePost(id: number): Promise<void> {
-    await apiClient.delete(`/blog/${id}`)
+    await apiClient.delete(`/admin/posts/${id}`)
   }
 }
 

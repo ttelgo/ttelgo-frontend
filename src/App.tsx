@@ -41,6 +41,7 @@ import AdminFaqManagement from '@/modules/faq/pages/AdminFaqManagement'
 
 // Admin module
 import AdminLayout from '@/modules/admin/components/AdminLayout'
+import AdminLogin from '@/modules/admin/pages/AdminLogin'
 import AdminDashboard from '@/modules/admin/pages/AdminDashboard'
 import ApiKeyManagement from '@/modules/admin/pages/ApiKeyManagement'
 import UserManagement from '@/modules/admin/pages/UserManagement'
@@ -52,7 +53,10 @@ function App() {
   return (
     <Router>
       <Routes>
-        {/* Admin routes - Separate layout (no frontend navbar/footer) */}
+        {/* Admin Login - Separate from layout */}
+        <Route path="/admin/login" element={<AdminLogin />} />
+        
+        {/* Admin routes - Protected layout (requires authentication) */}
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<AdminDashboard />} />
           <Route path="dashboard" element={<AdminDashboard />} />

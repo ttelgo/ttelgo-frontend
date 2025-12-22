@@ -41,7 +41,7 @@ export interface CheckoutResponse {
 class CheckoutService {
   /**
    * Create order (checkout) - Uses activate bundle endpoint
-   * POST /api/esims/activate
+   * POST /api/v1/esim-orders
    */
   async createOrder(data: CheckoutRequest): Promise<CheckoutResponse> {
     // Get userId from localStorage if user is logged in
@@ -123,7 +123,7 @@ class CheckoutService {
 
   /**
    * Get order details
-   * GET /api/esims/orders/{orderId}
+   * GET /api/v1/esim-orders/{orderId}
    */
   async getOrder(orderId: string) {
     return esimService.getOrderDetails(orderId)

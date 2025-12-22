@@ -1,4 +1,5 @@
 import { ApiClient } from '@/shared/services/api/client'
+import type { ApiResponse } from '@/shared/types'
 
 const apiClient = new ApiClient()
 
@@ -25,12 +26,13 @@ class AdminEsimService {
     if (status) {
       url += `&status=${status}`
     }
-    const response = await apiClient.get<{ data: EsimResponse[] }>(url)
-    return response.data
+    const response = await apiClient.get<ApiResponse<EsimResponse[]>>(url)
+    return response.data || []
   }
 
   async getEsimById(id: number): Promise<EsimResponse> {
-    const response = await apiClient.get<{ data: EsimResponse }>(`/admin/esims/${id}`)
+    const response = await apiClient.get<ApiResponse<EsimResponse>>(`/admin/esims/${id}`)
+    if (!response.data) throw new Error('eSIM not found')
     return response.data
   }
 }

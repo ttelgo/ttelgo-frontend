@@ -17,11 +17,22 @@ export default defineConfig({
     port: 5173,
     strictPort: true,
     proxy: {
-      '/api': {
+      '/api/v1': {
         target: 'http://localhost:8080',
         changeOrigin: true,
         secure: false,
-        // Vite proxy will forward /api requests to http://localhost:8080/api
+        configure: (proxy, _options) => {
+          proxy.on('proxyReq', (proxyReq, req, _res) => {
+            // Ensure all headers are forwarded, especially X-API-Key
+            if (req.headers['x-api-key']) {
+              proxyReq.setHeader('X-API-Key', req.headers['x-api-key']);
+            }
+            if (req.headers['x-api-secret']) {
+              proxyReq.setHeader('X-API-Secret', req.headers['x-api-secret']);
+            }
+          });
+        },
+        // Vite proxy will forward /api/v1 requests to http://localhost:8080/api/v1
       },
     },
   },

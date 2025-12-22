@@ -422,7 +422,7 @@ const ApiKeyManagement = () => {
               
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Scopes/Permissions (Optional)</label>
-                <p className="text-xs text-gray-500 mb-2">Enter one scope per line. Format: METHOD:/api/endpoint/** or use * for all endpoints.</p>
+                <p className="text-xs text-gray-500 mb-2">Enter one scope per line. Format: METHOD:/api/v1/endpoint/** or use * for all endpoints.</p>
                 <textarea
                   value={formData.scopes?.join('\n') || ''}
                   onChange={(e) => setFormData({ 
@@ -431,7 +431,7 @@ const ApiKeyManagement = () => {
                   })}
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 font-mono text-sm"
                   rows={4}
-                  placeholder="GET:/api/plans/**&#10;POST:/api/orders/**&#10;*"
+                  placeholder="GET:/api/v1/plans/**&#10;POST:/api/v1/orders/**&#10;*"
                 />
               </div>
               

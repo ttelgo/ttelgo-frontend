@@ -5,6 +5,7 @@
  */
 
 import { apiClient } from '@/shared/services/api/client'
+import type { ApiResponse } from '@/shared/types'
 
 export interface ActivateBundleRequest {
   type: 'transaction'
@@ -68,27 +69,33 @@ export interface OrderDetails {
 
 class ESIMService {
   /**
-   * Activate bundle (Create Order)
-   * POST /api/esims/activate
+   * Create an eSIM order (legacy direct provisioning)
+   * POST /api/v1/esim-orders
    */
   async activateBundle(data: ActivateBundleRequest): Promise<ActivateBundleResponse> {
-    return apiClient.post<ActivateBundleResponse>('/esims/activate', data)
+    const response = await apiClient.post<ApiResponse<ActivateBundleResponse>>('/esim-orders', data)
+    if (!response.data) throw new Error('Failed to create eSIM order')
+    return response.data
   }
 
   /**
    * Get QR code for eSIM
-   * GET /api/esims/qr/{esimId}
+   * GET /api/v1/esims/{matchingId}/qr
    */
   async getQRCode(esimId: string): Promise<QRCodeResponse> {
-    return apiClient.get<QRCodeResponse>(`/esims/qr/${esimId}`)
+    const response = await apiClient.get<ApiResponse<QRCodeResponse>>(`/esims/${esimId}/qr`)
+    if (!response.data) throw new Error('Failed to load QR code')
+    return response.data
   }
 
   /**
    * Get order details
-   * GET /api/esims/orders/{orderId}
+   * GET /api/v1/esim-orders/{orderId}
    */
   async getOrderDetails(orderId: string): Promise<OrderDetails> {
-    return apiClient.get<OrderDetails>(`/esims/orders/${orderId}`)
+    const response = await apiClient.get<ApiResponse<OrderDetails>>(`/esim-orders/${orderId}`)
+    if (!response.data) throw new Error('Failed to load order details')
+    return response.data
   }
 
   /**

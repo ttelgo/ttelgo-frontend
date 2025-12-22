@@ -7,10 +7,10 @@
 import { apiKeyConfig } from '@/shared/utils/apiKeyConfig'
 
 // Use proxy in development (via Vite), full URL in production
-// When using Vite proxy, use relative path '/api'
-// When not using proxy, use full URL 'http://localhost:8080/api'
+// When using Vite proxy, use relative path '/api/v1'
+// When not using proxy, use full URL 'http://localhost:8080/api/v1'
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 
-  (import.meta.env.DEV ? '/api' : 'http://localhost:8080/api')
+  (import.meta.env.DEV ? '/api/v1' : 'http://localhost:8080/api/v1')
 
 export interface ApiError {
   message: string
@@ -59,9 +59,11 @@ export class ApiClient {
         throw error
       }
       
+      // Ensure API key is properly trimmed and set
+      const trimmedKey = apiKey.trim()
       config.headers = {
         ...config.headers,
-        'X-API-Key': apiKey,
+        'X-API-Key': trimmedKey,
       }
       
       if (apiSecret) {
@@ -86,8 +88,42 @@ export class ApiClient {
       
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}))
+        // Handle ApiResponse error format: { success: false, message: "...", errors: {...} }
+        let errorMessage = response.statusText
+        
+        // First, try to get message from ApiResponse.message
+        if (errorData.message) {
+          errorMessage = errorData.message
+        }
+        
+        // If errors object exists, try to extract more specific error info
+        if (errorData.errors) {
+          if (typeof errorData.errors === 'string') {
+            errorMessage = errorData.errors
+          } else if (errorData.errors.message) {
+            errorMessage = errorData.errors.message
+          } else if (errorData.errors.details) {
+            // Handle validation errors with fieldErrors
+            if (errorData.errors.details.fieldErrors) {
+              const fieldErrors = errorData.errors.details.fieldErrors
+              if (Array.isArray(fieldErrors) && fieldErrors.length > 0) {
+                // Extract first field error message
+                const firstError = fieldErrors[0]
+                if (firstError.message) {
+                  errorMessage = `${firstError.field}: ${firstError.message}`
+                } else if (firstError.field) {
+                  errorMessage = `Validation error in ${firstError.field}`
+                }
+              }
+            } else {
+              // Fallback to stringify if no fieldErrors
+              errorMessage = JSON.stringify(errorData.errors.details)
+            }
+          }
+        }
+        
         throw {
-          message: errorData.message || response.statusText,
+          message: errorMessage,
           status: response.status,
           errors: errorData.errors,
         } as ApiError

@@ -12,7 +12,7 @@ class FaqService {
    */
   async getFaqs(category?: string): Promise<FAQ[]> {
     const query = category ? `?category=${category}` : ''
-    const response = await apiClient.get<ApiResponse<FAQ[]>>(`/faq${query}`)
+    const response = await apiClient.get<ApiResponse<FAQ[]>>(`/faqs${query}`)
     return response.data || []
   }
 
@@ -20,7 +20,7 @@ class FaqService {
    * Get all FAQ categories
    */
   async getCategories(): Promise<string[]> {
-    const response = await apiClient.get<ApiResponse<string[]>>('/faq/categories')
+    const response = await apiClient.get<ApiResponse<string[]>>('/faqs/categories')
     return response.data || []
   }
 
@@ -30,7 +30,7 @@ class FaqService {
    * Get all FAQs including inactive (admin only)
    */
   async getAllFaqsAdmin(): Promise<FAQ[]> {
-    const response = await apiClient.get<ApiResponse<FAQ[]>>('/faq/admin/all')
+    const response = await apiClient.get<ApiResponse<FAQ[]>>('/admin/faqs')
     return response.data || []
   }
 
@@ -38,7 +38,7 @@ class FaqService {
    * Get FAQ by ID (admin only)
    */
   async getFaqById(id: number): Promise<FAQ> {
-    const response = await apiClient.get<ApiResponse<FAQ>>(`/faq/admin/${id}`)
+    const response = await apiClient.get<ApiResponse<FAQ>>(`/admin/faqs/${id}`)
     if (!response.data) throw new Error('FAQ not found')
     return response.data
   }
@@ -53,7 +53,7 @@ class FaqService {
     isActive?: boolean
     category?: string
   }): Promise<FAQ> {
-    const response = await apiClient.post<ApiResponse<FAQ>>('/faq', faq)
+    const response = await apiClient.post<ApiResponse<FAQ>>('/admin/faqs', faq)
     if (!response.data) throw new Error('Failed to create FAQ')
     return response.data
   }
@@ -68,7 +68,7 @@ class FaqService {
     isActive?: boolean
     category?: string
   }): Promise<FAQ> {
-    const response = await apiClient.put<ApiResponse<FAQ>>(`/faq/${id}`, faq)
+    const response = await apiClient.put<ApiResponse<FAQ>>(`/admin/faqs/${id}`, faq)
     if (!response.data) throw new Error('Failed to update FAQ')
     return response.data
   }
@@ -77,7 +77,7 @@ class FaqService {
    * Delete FAQ (admin only)
    */
   async deleteFaq(id: number): Promise<void> {
-    await apiClient.delete(`/faq/${id}`)
+    await apiClient.delete(`/admin/faqs/${id}`)
   }
 }
 

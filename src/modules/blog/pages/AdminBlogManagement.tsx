@@ -44,7 +44,7 @@ const AdminBlogManagement = () => {
     e.preventDefault()
     try {
       if (editingPost) {
-        await blogService.updatePost(editingPost.id, formData)
+        await blogService.updatePost(typeof editingPost.id === 'number' ? editingPost.id : parseInt(String(editingPost.id)), formData)
       } else {
         await blogService.createPost(formData)
       }
@@ -68,7 +68,7 @@ const AdminBlogManagement = () => {
       content: post.content || '',
       featuredImage: post.featuredImage || '',
       category: post.category || '',
-      readTime: post.readTime || '',
+      readTime: typeof post.readTime === 'number' ? String(post.readTime) : (post.readTime || ''),
       isFeatured: post.isFeatured || false,
       isPublished: post.isPublished || false,
       authorName: post.authorName || '',
@@ -435,7 +435,7 @@ const AdminBlogManagement = () => {
                         Edit
                       </button>
                       <button
-                        onClick={() => handleDelete(post.id)}
+                        onClick={() => handleDelete(typeof post.id === 'number' ? post.id : parseInt(String(post.id)))}
                         className="text-red-600 hover:text-red-800"
                       >
                         Delete

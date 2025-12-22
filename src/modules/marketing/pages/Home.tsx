@@ -1,37 +1,15 @@
 import { useState, useMemo, useEffect, useRef } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
+import { allCountries as countriesData } from '@/modules/countries/utils/countriesData'
 import { plansService } from '@/modules/plans/services/plans.service'
 import { faqService } from '@/modules/faq/services/faq.service'
-import { getCountryFlag } from '@/shared/utils/countryFlags'
 import type { FAQ } from '@/shared/types'
 
-
-// Hero Background Component - Image background (unused, commented out)
-// const _HeroBackground = () => {
-//   return (
-//     <>
-//       {/* Image background */}
-//       <div 
-//         className="absolute inset-0 w-full h-full"
-//         style={{
-//           zIndex: 0,
-//           backgroundImage: 'url(/IMAGES/travels.jpg)',
-//           backgroundSize: 'cover',
-//           backgroundPosition: 'center',
-//           backgroundRepeat: 'no-repeat'
-//         }}
-//       />
-//       {/* Overlay for better text readability */}
-//       <div 
-//         className="absolute inset-0 w-full h-full bg-black/20"
-//         style={{
-//           zIndex: 1
-//         }}
-//       />
-//     </>
-//   )
-// }
+// Generate random price between 0.50 and 2.00
+const getRandomPrice = () => {
+  return (Math.random() * 1.5 + 0.5).toFixed(2)
+}
 
 const Home = () => {
   const navigate = useNavigate()
@@ -116,113 +94,60 @@ const Home = () => {
     }
   }, [destinationsSearchQuery])
   const [selectedRegion, setSelectedRegion] = useState<string | null>(null)
-  const [destinations, setDestinations] = useState<Array<{ name: string; price: string; image: string }>>([])
-  const [destinationsLoading, setDestinationsLoading] = useState(true)
-
-  // Fetch destinations with countries and prices from API (NO HARDCODED DATA)
-  useEffect(() => {
-    const fetchDestinations = async () => {
-      try {
-        setDestinationsLoading(true)
-        
-        // Fetch all bundles from API
-        const allBundles = await plansService.getBundles()
-        
-        // Group bundles by country and calculate min price per GB
-        const countryMap = new Map<string, {
-          countryName: string
-          countryIso: string
-          bundles: typeof allBundles
-          minPricePerGB: number
-        }>()
-
-        allBundles.forEach(bundle => {
-          if (!bundle.countryName || !bundle.countryIso) return
-
-          const existing = countryMap.get(bundle.countryIso)
-          
-          // Calculate price per GB for this bundle (from API data only)
-          let pricePerGB: number | null = null
-          
-          // Handle unlimited bundles - skip for price per GB calculation
-          if (bundle.unlimited || bundle.dataAmount === -1) {
-            // For unlimited bundles, we can't calculate price per GB
-            // Skip them for the carousel as we need "per GB" pricing
-            return
-          }
-          
-          // For limited data bundles, calculate price per GB from API data
-          if (bundle.dataAmount && bundle.dataAmount > 0) {
-            // Convert MB to GB
-            const dataGB = bundle.dataAmount / 1000
-            if (dataGB > 0 && bundle.price) {
-              pricePerGB = bundle.price / dataGB
-            }
-          } else {
-            // Fallback: try to parse from bundle.data string if dataAmount not available
-            const dataMatch = bundle.data?.match(/(\d+(?:\.\d+)?)/)
-            if (dataMatch) {
-              const dataGB = parseFloat(dataMatch[1])
-              if (dataGB > 0 && bundle.price) {
-                pricePerGB = bundle.price / dataGB
-              }
-            }
-          }
-          
-          // Only process bundles with valid price per GB
-          if (!pricePerGB || pricePerGB <= 0) return
-
-          if (existing) {
-            existing.bundles.push(bundle)
-            existing.minPricePerGB = Math.min(existing.minPricePerGB, pricePerGB)
-          } else {
-            countryMap.set(bundle.countryIso, {
-              countryName: bundle.countryName,
-              countryIso: bundle.countryIso,
-              bundles: [bundle],
-              minPricePerGB: pricePerGB,
-            })
-          }
-        })
-
-        // Convert to array and sort by bundle count (most popular) or price
-        const countries = Array.from(countryMap.values())
-          .sort((a, b) => {
-            // Sort by bundle count (descending), then by price (ascending)
-            if (b.bundles.length !== a.bundles.length) {
-              return b.bundles.length - a.bundles.length
-            }
-            return a.minPricePerGB - b.minPricePerGB
-          })
-          .slice(0, 12) // Take top 12 countries
-
-        // Map to destinations - use ONLY API data (no hardcoded data)
-        const destinationsWithPrices = countries.map(country => {
-          // Get imageUrl from API bundles (priority: first bundle with imageUrl)
-          const bundleWithImage = country.bundles.find(b => b.imageUrl)
-          const apiImageUrl = bundleWithImage?.imageUrl
-          
-          // Use country name directly from API (no city mapping)
-          // If no imageUrl from API, use a placeholder or empty string
-          return {
-            name: country.countryName, // Use country name from API directly
-            price: country.minPricePerGB.toFixed(2), // Price from API calculation
-            image: apiImageUrl || '', // Only use API imageUrl, no hardcoded fallback
-          }
-        })
-
-        setDestinations(destinationsWithPrices)
-      } catch (error) {
-        console.error('Error fetching destinations from API:', error)
-        // Fallback: show empty array or minimal fallback
-        setDestinations([])
-      } finally {
-        setDestinationsLoading(false)
-      }
+  // Top 10 Destinations - Hardcoded popular destinations with local images
+  const [destinations] = useState<Array<{ name: string; price: string; image: string }>>([
+    {
+      name: 'United Kingdom',
+      price: '1.36',
+      image: '/IMAGES/Cities/London.jpg'
+    },
+    {
+      name: 'France',
+      price: '1.25',
+      image: '/IMAGES/Cities/Paris.jpg'
+    },
+    {
+      name: 'Italy',
+      price: '1.18',
+      image: '/IMAGES/Cities/Rome.jpg'
+    },
+    {
+      name: 'Spain',
+      price: '1.22',
+      image: '/IMAGES/Cities/Barcelona.jpg'
+    },
+    {
+      name: 'United Arab Emirates',
+      price: '1.45',
+      image: '/IMAGES/Cities/Dubai.jpg'
+    },
+    {
+      name: 'Singapore',
+      price: '1.50',
+      image: '/IMAGES/Cities/Singapore.jpg'
+    },
+    {
+      name: 'Australia',
+      price: '1.40',
+      image: '/IMAGES/Cities/Sydney.jpg'
+    },
+    {
+      name: 'United States',
+      price: '1.55',
+      image: '/IMAGES/Cities/NewYork.jpg'
+    },
+    {
+      name: 'Netherlands',
+      price: '1.30',
+      image: '/IMAGES/Cities/Amsterdam.jpg'
+    },
+    {
+      name: 'Thailand',
+      price: '1.15',
+      image: '/IMAGES/Cities/Thailand.jpg'
     }
-
-    fetchDestinations()
-  }, [])
+  ])
+  const [destinationsLoading] = useState(false)
 
   // Local eSIMs - Fetch from API (same as Shop page)
   const [localDestinationsFromApi, setLocalDestinationsFromApi] = useState<Array<{
@@ -283,12 +208,17 @@ const Home = () => {
 
         // Convert to array and map to country format with flags
         const countriesFromApi = Array.from(countryMap.values()).map(country => {
+          const countryData = countriesData.find(c => 
+            c.name.toLowerCase() === country.countryName.toLowerCase() ||
+            c.id.toLowerCase() === country.countryIso.toLowerCase()
+          )
+
           return {
             name: country.countryName,
             countryIso: country.countryIso,
-            flag: getCountryFlag(country.countryIso),
+            flag: countryData?.flag || '🌍',
             price: country.minPricePerGB.toFixed(2),
-            region: country.region || 'Unknown',
+            region: country.region || countryData?.region,
           }
         })
 
@@ -298,8 +228,17 @@ const Home = () => {
         setLocalDestinationsFromApi(countriesFromApi)
       } catch (error) {
         console.error('Error fetching local destinations from API:', error)
-        // No fallback - show empty state if API fails
-        setLocalDestinationsFromApi([])
+        // Fallback to hardcoded data if API fails
+        const fallback = countriesData
+          .filter(country => country.status === 'Open Now')
+          .map(country => ({
+            name: country.name,
+            flag: country.flag,
+            price: country.prices['1GB'].toFixed(2),
+            countryIso: country.id,
+            region: country.region,
+          }))
+        setLocalDestinationsFromApi(fallback)
       } finally {
         setLocalDestinationsLoading(false)
       }
@@ -332,33 +271,27 @@ const Home = () => {
       name: dest.name,
       flag: dest.flag,
       price: dest.price,
-      country: {
+      country: countriesData.find(c => c.id === dest.countryIso || c.name === dest.name) || {
         id: dest.countryIso,
         name: dest.name,
         flag: dest.flag,
-        region: dest.region || 'Unknown',
+        region: dest.region,
         status: 'Open Now' as const,
         prices: { '1GB': parseFloat(dest.price) }
       },
     }))
   }, [localDestinationsFromApi])
 
-  // All countries for search - Use API data from localDestinationsFromApi
+  // All countries for search (including Coming Soon)
   const allCountriesForSearch = useMemo(() => {
-    return localDestinationsFromApi.map(dest => ({
-      name: dest.name,
-      flag: dest.flag,
-      price: dest.price,
-      country: {
-        id: dest.countryIso,
-        name: dest.name,
-        flag: dest.flag,
-        region: dest.region || 'Unknown',
-        status: 'Open Now' as const,
-      },
-      status: 'Open Now' as const,
+    return countriesData.map(country => ({
+      name: country.name,
+      flag: country.flag,
+      price: country.prices?.['1GB']?.toFixed(2) || 'N/A', // Price per GB from 1GB plan, or N/A if no prices
+      country: country, // Keep full country object for navigation
+      status: country.status,
     }))
-  }, [localDestinationsFromApi])
+  }, [])
 
   // Filter countries for hero search (includes all countries)
   const heroSearchResults = useMemo(() => {
@@ -426,58 +359,365 @@ const Home = () => {
     navigate(`/country/${encodeURIComponent(countryName)}`)
   }
 
-  // All countries for Global eSIMs - Using API data
+  // All 200+ countries for Global eSIMs - Generated once with fixed prices
   const allCountries = useMemo(() => {
-    return localDestinationsFromApi.map(dest => ({
-      name: dest.name,
-      flag: dest.flag,
-      price: dest.price
-    }))
-  }, [localDestinationsFromApi])
+    const countries = [
+      { name: 'United States', flag: '🇺🇸' },
+      { name: 'United Kingdom', flag: '🇬🇧' },
+      { name: 'Canada', flag: '🇨🇦' },
+      { name: 'Australia', flag: '🇦🇺' },
+      { name: 'Germany', flag: '🇩🇪' },
+      { name: 'France', flag: '🇫🇷' },
+      { name: 'Italy', flag: '🇮🇹' },
+      { name: 'Spain', flag: '🇪🇸' },
+      { name: 'Japan', flag: '🇯🇵' },
+      { name: 'South Korea', flag: '🇰🇷' },
+      { name: 'China', flag: '🇨🇳' },
+      { name: 'India', flag: '🇮🇳' },
+      { name: 'Brazil', flag: '🇧🇷' },
+      { name: 'Mexico', flag: '🇲🇽' },
+      { name: 'Argentina', flag: '🇦🇷' },
+      { name: 'Chile', flag: '🇨🇱' },
+      { name: 'Turkey', flag: '🇹🇷' },
+      { name: 'Russia', flag: '🇷🇺' },
+      { name: 'Netherlands', flag: '🇳🇱' },
+      { name: 'Belgium', flag: '🇧🇪' },
+      { name: 'Switzerland', flag: '🇨🇭' },
+      { name: 'Austria', flag: '🇦🇹' },
+      { name: 'Sweden', flag: '🇸🇪' },
+      { name: 'Norway', flag: '🇳🇴' },
+      { name: 'Denmark', flag: '🇩🇰' },
+      { name: 'Finland', flag: '🇫🇮' },
+      { name: 'Poland', flag: '🇵🇱' },
+      { name: 'Portugal', flag: '🇵🇹' },
+      { name: 'Greece', flag: '🇬🇷' },
+      { name: 'Ireland', flag: '🇮🇪' },
+      { name: 'Singapore', flag: '🇸🇬' },
+      { name: 'Malaysia', flag: '🇲🇾' },
+      { name: 'Thailand', flag: '🇹🇭' },
+      { name: 'Indonesia', flag: '🇮🇩' },
+      { name: 'Philippines', flag: '🇵🇭' },
+      { name: 'Vietnam', flag: '🇻🇳' },
+      { name: 'Taiwan', flag: '🇹🇼' },
+      { name: 'Hong Kong', flag: '🇭🇰' },
+      { name: 'New Zealand', flag: '🇳🇿' },
+      { name: 'South Africa', flag: '🇿🇦' },
+      { name: 'Egypt', flag: '🇪🇬' },
+      { name: 'Morocco', flag: '🇲🇦' },
+      { name: 'Kenya', flag: '🇰🇪' },
+      { name: 'Nigeria', flag: '🇳🇬' },
+      { name: 'UAE', flag: '🇦🇪' },
+      { name: 'Saudi Arabia', flag: '🇸🇦' },
+      { name: 'Israel', flag: '🇮🇱' },
+      { name: 'Jordan', flag: '🇯🇴' },
+      { name: 'Lebanon', flag: '🇱🇧' },
+      { name: 'Qatar', flag: '🇶🇦' },
+      { name: 'Kuwait', flag: '🇰🇼' },
+      { name: 'Bahrain', flag: '🇧🇭' },
+      { name: 'Oman', flag: '🇴🇲' },
+      { name: 'Iceland', flag: '🇮🇸' },
+      { name: 'Luxembourg', flag: '🇱🇺' },
+      { name: 'Czech Republic', flag: '🇨🇿' },
+      { name: 'Hungary', flag: '🇭🇺' },
+      { name: 'Romania', flag: '🇷🇴' },
+      { name: 'Bulgaria', flag: '🇧🇬' },
+      { name: 'Croatia', flag: '🇭🇷' },
+      { name: 'Slovenia', flag: '🇸🇮' },
+      { name: 'Slovakia', flag: '🇸🇰' },
+      { name: 'Estonia', flag: '🇪🇪' },
+      { name: 'Latvia', flag: '🇱🇻' },
+      { name: 'Lithuania', flag: '🇱🇹' },
+      { name: 'Belarus', flag: '🇧🇾' },
+      { name: 'Ukraine', flag: '🇺🇦' },
+      { name: 'Serbia', flag: '🇷🇸' },
+      { name: 'Montenegro', flag: '🇲🇪' },
+      { name: 'Bosnia', flag: '🇧🇦' },
+      { name: 'Albania', flag: '🇦🇱' },
+      { name: 'North Macedonia', flag: '🇲🇰' },
+      { name: 'Moldova', flag: '🇲🇩' },
+      { name: 'Georgia', flag: '🇬🇪' },
+      { name: 'Armenia', flag: '🇦🇲' },
+      { name: 'Azerbaijan', flag: '🇦🇿' },
+      { name: 'Kazakhstan', flag: '🇰🇿' },
+      { name: 'Uzbekistan', flag: '🇺🇿' },
+      { name: 'Kyrgyzstan', flag: '🇰🇬' },
+      { name: 'Tajikistan', flag: '🇹🇯' },
+      { name: 'Turkmenistan', flag: '🇹🇲' },
+      { name: 'Mongolia', flag: '🇲🇳' },
+      { name: 'Bangladesh', flag: '🇧🇩' },
+      { name: 'Pakistan', flag: '🇵🇰' },
+      { name: 'Sri Lanka', flag: '🇱🇰' },
+      { name: 'Nepal', flag: '🇳🇵' },
+      { name: 'Bhutan', flag: '🇧🇹' },
+      { name: 'Myanmar', flag: '🇲🇲' },
+      { name: 'Cambodia', flag: '🇰🇭' },
+      { name: 'Laos', flag: '🇱🇦' },
+      { name: 'Brunei', flag: '🇧🇳' },
+      { name: 'East Timor', flag: '🇹🇱' },
+      { name: 'Papua New Guinea', flag: '🇵🇬' },
+      { name: 'Fiji', flag: '🇫🇯' },
+      { name: 'Samoa', flag: '🇼🇸' },
+      { name: 'Tonga', flag: '🇹🇴' },
+      { name: 'Vanuatu', flag: '🇻🇺' },
+      { name: 'Solomon Islands', flag: '🇸🇧' },
+      { name: 'Peru', flag: '🇵🇪' },
+      { name: 'Colombia', flag: '🇨🇴' },
+      { name: 'Venezuela', flag: '🇻🇪' },
+      { name: 'Ecuador', flag: '🇪🇨' },
+      { name: 'Bolivia', flag: '🇧🇴' },
+      { name: 'Paraguay', flag: '🇵🇾' },
+      { name: 'Uruguay', flag: '🇺🇾' },
+      { name: 'Guyana', flag: '🇬🇾' },
+      { name: 'Suriname', flag: '🇸🇷' },
+      { name: 'French Guiana', flag: '🇬🇫' },
+      { name: 'Costa Rica', flag: '🇨🇷' },
+      { name: 'Panama', flag: '🇵🇦' },
+      { name: 'Nicaragua', flag: '🇳🇮' },
+      { name: 'Honduras', flag: '🇭🇳' },
+      { name: 'Guatemala', flag: '🇬🇹' },
+      { name: 'Belize', flag: '🇧🇿' },
+      { name: 'El Salvador', flag: '🇸🇻' },
+      { name: 'Jamaica', flag: '🇯🇲' },
+      { name: 'Trinidad and Tobago', flag: '🇹🇹' },
+      { name: 'Barbados', flag: '🇧🇧' },
+      { name: 'Bahamas', flag: '🇧🇸' },
+      { name: 'Dominican Republic', flag: '🇩🇴' },
+      { name: 'Haiti', flag: '🇭🇹' },
+      { name: 'Cuba', flag: '🇨🇺' },
+      { name: 'Puerto Rico', flag: '🇵🇷' },
+      { name: 'Algeria', flag: '🇩🇿' },
+      { name: 'Tunisia', flag: '🇹🇳' },
+      { name: 'Libya', flag: '🇱🇾' },
+      { name: 'Sudan', flag: '🇸🇩' },
+      { name: 'Ethiopia', flag: '🇪🇹' },
+      { name: 'Tanzania', flag: '🇹🇿' },
+      { name: 'Uganda', flag: '🇺🇬' },
+      { name: 'Ghana', flag: '🇬🇭' },
+      { name: 'Senegal', flag: '🇸🇳' },
+      { name: 'Ivory Coast', flag: '🇨🇮' },
+      { name: 'Cameroon', flag: '🇨🇲' },
+      { name: 'Angola', flag: '🇦🇴' },
+      { name: 'Mozambique', flag: '🇲🇿' },
+      { name: 'Madagascar', flag: '🇲🇬' },
+      { name: 'Zambia', flag: '🇿🇲' },
+      { name: 'Zimbabwe', flag: '🇿🇼' },
+      { name: 'Botswana', flag: '🇧🇼' },
+      { name: 'Namibia', flag: '🇳🇦' },
+      { name: 'Mauritius', flag: '🇲🇺' },
+      { name: 'Seychelles', flag: '🇸🇨' },
+      { name: 'Rwanda', flag: '🇷🇼' },
+      { name: 'Malawi', flag: '🇲🇼' },
+      { name: 'Lesotho', flag: '🇱🇸' },
+      { name: 'Eswatini', flag: '🇸🇿' },
+      { name: 'Malta', flag: '🇲🇹' },
+      { name: 'Cyprus', flag: '🇨🇾' },
+      { name: 'Monaco', flag: '🇲🇨' },
+      { name: 'Liechtenstein', flag: '🇱🇮' },
+      { name: 'San Marino', flag: '🇸🇲' },
+      { name: 'Vatican City', flag: '🇻🇦' },
+      { name: 'Andorra', flag: '🇦🇩' },
+      { name: 'Iraq', flag: '🇮🇶' },
+      { name: 'Iran', flag: '🇮🇷' },
+      { name: 'Afghanistan', flag: '🇦🇫' },
+      { name: 'Yemen', flag: '🇾🇪' },
+      { name: 'Syria', flag: '🇸🇾' },
+      { name: 'Palestine', flag: '🇵🇸' },
+      { name: 'Maldives', flag: '🇲🇻' },
+      { name: 'Mauritania', flag: '🇲🇷' },
+      { name: 'Niger', flag: '🇳🇪' },
+      { name: 'Mali', flag: '🇲🇱' },
+      { name: 'Burkina Faso', flag: '🇧🇫' },
+      { name: 'Benin', flag: '🇧🇯' },
+      { name: 'Togo', flag: '🇹🇬' },
+      { name: 'Guinea', flag: '🇬🇳' },
+      { name: 'Sierra Leone', flag: '🇸🇱' },
+      { name: 'Liberia', flag: '🇱🇷' },
+      { name: 'Gambia', flag: '🇬🇲' },
+      { name: 'Guinea-Bissau', flag: '🇬🇼' },
+      { name: 'Cape Verde', flag: '🇨🇻' },
+      { name: 'São Tomé and Príncipe', flag: '🇸🇹' },
+      { name: 'Equatorial Guinea', flag: '🇬🇶' },
+      { name: 'Gabon', flag: '🇬🇦' },
+      { name: 'Republic of Congo', flag: '🇨🇬' },
+      { name: 'DR Congo', flag: '🇨🇩' },
+      { name: 'Central African Republic', flag: '🇨🇫' },
+      { name: 'Chad', flag: '🇹🇩' },
+      { name: 'Eritrea', flag: '🇪🇷' },
+      { name: 'Djibouti', flag: '🇩🇯' },
+      { name: 'Somalia', flag: '🇸🇴' },
+      { name: 'Comoros', flag: '🇰🇲' },
+      { name: 'Burundi', flag: '🇧🇮' },
+      { name: 'South Sudan', flag: '🇸🇸' },
+    ]
+    return countries.map(country => ({ ...country, price: getRandomPrice() }))
+  }, [])
 
-  // Regional eSIMs - Organized by regions - Using API data
+  // Regional eSIMs - Organized by regions - Generated once with fixed prices
   const regionalESIMs = useMemo(() => {
-    const regionMap: Record<string, string> = {
-      europe: 'Europe',
-      asia: 'Asia',
-      americas: 'North America',
-      middleEast: 'Middle East',
-      africa: 'Africa',
-      oceania: 'Oceania'
+    const regionsData = {
+      europe: [
+        { name: 'United Kingdom', flag: '🇬🇧' },
+        { name: 'Germany', flag: '🇩🇪' },
+        { name: 'France', flag: '🇫🇷' },
+        { name: 'Italy', flag: '🇮🇹' },
+        { name: 'Spain', flag: '🇪🇸' },
+        { name: 'Netherlands', flag: '🇳🇱' },
+        { name: 'Belgium', flag: '🇧🇪' },
+        { name: 'Switzerland', flag: '🇨🇭' },
+        { name: 'Austria', flag: '🇦🇹' },
+        { name: 'Sweden', flag: '🇸🇪' },
+        { name: 'Norway', flag: '🇳🇴' },
+        { name: 'Denmark', flag: '🇩🇰' },
+        { name: 'Finland', flag: '🇫🇮' },
+        { name: 'Poland', flag: '🇵🇱' },
+        { name: 'Portugal', flag: '🇵🇹' },
+        { name: 'Greece', flag: '🇬🇷' },
+        { name: 'Ireland', flag: '🇮🇪' },
+        { name: 'Czech Republic', flag: '🇨🇿' },
+        { name: 'Hungary', flag: '🇭🇺' },
+        { name: 'Romania', flag: '🇷🇴' },
+        { name: 'Bulgaria', flag: '🇧🇬' },
+        { name: 'Croatia', flag: '🇭🇷' },
+        { name: 'Slovenia', flag: '🇸🇮' },
+        { name: 'Slovakia', flag: '🇸🇰' },
+        { name: 'Estonia', flag: '🇪🇪' },
+        { name: 'Latvia', flag: '🇱🇻' },
+        { name: 'Lithuania', flag: '🇱🇹' },
+        { name: 'Iceland', flag: '🇮🇸' },
+        { name: 'Luxembourg', flag: '🇱🇺' },
+        { name: 'Malta', flag: '🇲🇹' },
+        { name: 'Cyprus', flag: '🇨🇾' },
+      ],
+      asia: [
+        { name: 'Japan', flag: '🇯🇵' },
+        { name: 'South Korea', flag: '🇰🇷' },
+        { name: 'China', flag: '🇨🇳' },
+        { name: 'India', flag: '🇮🇳' },
+        { name: 'Singapore', flag: '🇸🇬' },
+        { name: 'Malaysia', flag: '🇲🇾' },
+        { name: 'Thailand', flag: '🇹🇭' },
+        { name: 'Indonesia', flag: '🇮🇩' },
+        { name: 'Philippines', flag: '🇵🇭' },
+        { name: 'Vietnam', flag: '🇻🇳' },
+        { name: 'Taiwan', flag: '🇹🇼' },
+        { name: 'Hong Kong', flag: '🇭🇰' },
+        { name: 'Bangladesh', flag: '🇧🇩' },
+        { name: 'Pakistan', flag: '🇵🇰' },
+        { name: 'Sri Lanka', flag: '🇱🇰' },
+        { name: 'Nepal', flag: '🇳🇵' },
+        { name: 'Bhutan', flag: '🇧🇹' },
+        { name: 'Myanmar', flag: '🇲🇲' },
+        { name: 'Cambodia', flag: '🇰🇭' },
+        { name: 'Laos', flag: '🇱🇦' },
+        { name: 'Brunei', flag: '🇧🇳' },
+        { name: 'Maldives', flag: '🇲🇻' },
+        { name: 'Mongolia', flag: '🇲🇳' },
+        { name: 'Kazakhstan', flag: '🇰🇿' },
+        { name: 'Uzbekistan', flag: '🇺🇿' },
+        { name: 'Kyrgyzstan', flag: '🇰🇬' },
+        { name: 'Tajikistan', flag: '🇹🇯' },
+        { name: 'Turkmenistan', flag: '🇹🇲' },
+        { name: 'Afghanistan', flag: '🇦🇫' },
+      ],
+      americas: [
+        { name: 'United States', flag: '🇺🇸' },
+        { name: 'Canada', flag: '🇨🇦' },
+        { name: 'Mexico', flag: '🇲🇽' },
+        { name: 'Brazil', flag: '🇧🇷' },
+        { name: 'Argentina', flag: '🇦🇷' },
+        { name: 'Chile', flag: '🇨🇱' },
+        { name: 'Peru', flag: '🇵🇪' },
+        { name: 'Colombia', flag: '🇨🇴' },
+        { name: 'Venezuela', flag: '🇻🇪' },
+        { name: 'Ecuador', flag: '🇪🇨' },
+        { name: 'Bolivia', flag: '🇧🇴' },
+        { name: 'Paraguay', flag: '🇵🇾' },
+        { name: 'Uruguay', flag: '🇺🇾' },
+        { name: 'Costa Rica', flag: '🇨🇷' },
+        { name: 'Panama', flag: '🇵🇦' },
+        { name: 'Nicaragua', flag: '🇳🇮' },
+        { name: 'Honduras', flag: '🇭🇳' },
+        { name: 'Guatemala', flag: '🇬🇹' },
+        { name: 'Belize', flag: '🇧🇿' },
+        { name: 'El Salvador', flag: '🇸🇻' },
+        { name: 'Jamaica', flag: '🇯🇲' },
+        { name: 'Trinidad and Tobago', flag: '🇹🇹' },
+        { name: 'Barbados', flag: '🇧🇧' },
+        { name: 'Bahamas', flag: '🇧🇸' },
+        { name: 'Dominican Republic', flag: '🇩🇴' },
+        { name: 'Haiti', flag: '🇭🇹' },
+        { name: 'Cuba', flag: '🇨🇺' },
+        { name: 'Puerto Rico', flag: '🇵🇷' },
+      ],
+      middleEast: [
+        { name: 'UAE', flag: '🇦🇪' },
+        { name: 'Saudi Arabia', flag: '🇸🇦' },
+        { name: 'Israel', flag: '🇮🇱' },
+        { name: 'Jordan', flag: '🇯🇴' },
+        { name: 'Lebanon', flag: '🇱🇧' },
+        { name: 'Qatar', flag: '🇶🇦' },
+        { name: 'Kuwait', flag: '🇰🇼' },
+        { name: 'Bahrain', flag: '🇧🇭' },
+        { name: 'Oman', flag: '🇴🇲' },
+        { name: 'Turkey', flag: '🇹🇷' },
+        { name: 'Iraq', flag: '🇮🇶' },
+        { name: 'Iran', flag: '🇮🇷' },
+        { name: 'Yemen', flag: '🇾🇪' },
+        { name: 'Syria', flag: '🇸🇾' },
+        { name: 'Palestine', flag: '🇵🇸' },
+      ],
+      africa: [
+        { name: 'South Africa', flag: '🇿🇦' },
+        { name: 'Egypt', flag: '🇪🇬' },
+        { name: 'Morocco', flag: '🇲🇦' },
+        { name: 'Kenya', flag: '🇰🇪' },
+        { name: 'Nigeria', flag: '🇳🇬' },
+        { name: 'Algeria', flag: '🇩🇿' },
+        { name: 'Tunisia', flag: '🇹🇳' },
+        { name: 'Libya', flag: '🇱🇾' },
+        { name: 'Sudan', flag: '🇸🇩' },
+        { name: 'Ethiopia', flag: '🇪🇹' },
+        { name: 'Tanzania', flag: '🇹🇿' },
+        { name: 'Uganda', flag: '🇺🇬' },
+        { name: 'Ghana', flag: '🇬🇭' },
+        { name: 'Senegal', flag: '🇸🇳' },
+        { name: 'Ivory Coast', flag: '🇨🇮' },
+        { name: 'Cameroon', flag: '🇨🇲' },
+        { name: 'Angola', flag: '🇦🇴' },
+        { name: 'Mozambique', flag: '🇲🇿' },
+        { name: 'Madagascar', flag: '🇲🇬' },
+        { name: 'Zambia', flag: '🇿🇲' },
+        { name: 'Zimbabwe', flag: '🇿🇼' },
+        { name: 'Botswana', flag: '🇧🇼' },
+        { name: 'Namibia', flag: '🇳🇦' },
+        { name: 'Mauritius', flag: '🇲🇺' },
+        { name: 'Seychelles', flag: '🇸🇨' },
+        { name: 'Rwanda', flag: '🇷🇼' },
+        { name: 'Malawi', flag: '🇲🇼' },
+      ],
+      oceania: [
+        { name: 'Australia', flag: '🇦🇺' },
+        { name: 'New Zealand', flag: '🇳🇿' },
+        { name: 'Papua New Guinea', flag: '🇵🇬' },
+        { name: 'Fiji', flag: '🇫🇯' },
+        { name: 'Samoa', flag: '🇼🇸' },
+        { name: 'Tonga', flag: '🇹🇴' },
+        { name: 'Vanuatu', flag: '🇻🇺' },
+        { name: 'Solomon Islands', flag: '🇸🇧' },
+      ],
     }
     
-    const regionsWithPrices: Record<string, Array<{ name: string; flag: string; price: string }>> = {
-      europe: [],
-      asia: [],
-      americas: [],
-      middleEast: [],
-      africa: [],
-      oceania: []
-    }
-    
-    // Map countries by region from API data
-    localDestinationsFromApi.forEach(dest => {
-      let regionKey: string | undefined
-      const region = dest.region || 'Unknown'
-      
-      // Handle special cases
-      if (region === 'North America' || region === 'South America') {
-        regionKey = 'americas'
-      } else {
-        regionKey = Object.keys(regionMap).find(key => region === regionMap[key])
-      }
-      
-      if (regionKey) {
-        regionsWithPrices[regionKey].push({
-          name: dest.name,
-          flag: dest.flag,
-          price: dest.price
-        })
-      }
+    // Add prices to all regions
+    const regionsWithPrices: Record<string, Array<{ name: string; flag: string; price: string }>> = {}
+    Object.keys(regionsData).forEach(region => {
+      regionsWithPrices[region] = regionsData[region as keyof typeof regionsData].map(country => ({
+        ...country,
+        price: getRandomPrice()
+      }))
     })
     
     return regionsWithPrices
-  }, [localDestinationsFromApi])
+  }, [])
 
   const handleScroll = (direction: 'left' | 'right', ref?: React.RefObject<HTMLDivElement>) => {
     const container = ref?.current || scrollContainerRef.current
@@ -516,10 +756,11 @@ const Home = () => {
     <div className="w-full">
       {/* Hero Section - Merged with Navbar */}
       <section 
-        className="relative overflow-hidden bg-white mt-4 md:mt-12"
+        className="relative overflow-visible bg-white mt-4 md:mt-12"
         style={{
           paddingTop: '3rem', // Space for navbar
-          paddingBottom: '1rem' // Fixed bottom padding instead of minHeight
+          paddingBottom: '1rem', // Fixed bottom padding instead of minHeight
+          zIndex: 30
         }}
       >
         {/* Content Container with proper z-index */}
@@ -641,7 +882,8 @@ const Home = () => {
                 {heroSearchQuery.trim() && heroSearchResults.length > 0 && (
                   <div
                     ref={searchResultsRef}
-                    className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-2xl max-h-96 overflow-y-auto z-50"
+                    className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-2xl max-h-96 overflow-y-auto"
+                    style={{ zIndex: 99999 }}
                   >
                     {heroSearchResults.map((result) => (
                       <div
@@ -652,7 +894,7 @@ const Home = () => {
                         <div className="text-2xl">{result.flag}</div>
                         <div className="flex-1">
                           <div className="text-gray-900 font-medium">{result.name}</div>
-                          {result.price === 'N/A' || result.price === '0.00' ? (
+                          {result.status === 'Coming Soon' || result.price === 'N/A' || result.price === '0.00' ? (
                             <div className="text-sm text-orange-600 font-medium">Coming Soon</div>
                           ) : (
                             <div className="text-sm text-gray-500">From ${result.price}/GB</div>
@@ -668,7 +910,7 @@ const Home = () => {
                 
                 {/* No Results Message - Positioned absolutely relative to search container */}
                 {heroSearchQuery.trim() && heroSearchResults.length === 0 && (
-                  <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-2xl p-4 z-50">
+                  <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-2xl p-4" style={{ zIndex: 99999 }}>
                     <p className="text-gray-500 text-center">No countries found. Try a different search.</p>
                   </div>
                 )}
@@ -739,39 +981,51 @@ const Home = () => {
                   <div
                     key={index}
                     onClick={() => handleDestinationClick(dest)}
-                    className="flex-shrink-0 bg-white rounded-none md:rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow cursor-pointer w-[300px] relative h-[200px] md:h-auto"
+                    className="flex-shrink-0 bg-white rounded-none md:rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow cursor-pointer w-[300px] flex flex-col"
                   >
-                    <div className="absolute inset-0 md:relative md:h-48 bg-gray-200 flex items-center justify-center">
+                    <div 
+                      className="relative w-full h-[200px] md:h-48 overflow-hidden flex-shrink-0"
+                      style={{ backgroundColor: 'transparent' }}
+                    >
                       {dest.image ? (
                         <img
                           src={dest.image}
                           alt={dest.name}
-                          className="w-full h-full object-cover"
+                          className="absolute inset-0 w-full h-full object-cover object-center"
+                          style={{ 
+                            width: '100%', 
+                            height: '100%',
+                            objectFit: 'cover',
+                            objectPosition: 'center',
+                            display: 'block',
+                            margin: 0,
+                            padding: 0
+                          }}
                           onError={(e) => {
                             const target = e.target as HTMLImageElement
                             target.style.display = 'none'
                             if (!target.nextElementSibling) {
                               const placeholder = document.createElement('div')
-                              placeholder.className = 'w-full h-full bg-gradient-to-br from-gray-300 to-gray-400 flex items-center justify-center text-gray-500 text-sm px-2'
+                              placeholder.className = 'absolute inset-0 w-full h-full bg-gradient-to-br from-gray-300 to-gray-400 flex items-center justify-center text-gray-500 text-sm px-2'
                               placeholder.textContent = dest.name
                               target.parentNode?.appendChild(placeholder)
                             }
                           }}
                         />
                       ) : (
-                        <div className="w-full h-full bg-gradient-to-br from-gray-300 to-gray-400 flex items-center justify-center text-gray-500 text-sm px-2 text-center">
+                        <div className="absolute inset-0 w-full h-full bg-gradient-to-br from-gray-300 to-gray-400 flex items-center justify-center text-gray-500 text-sm px-2 text-center">
                           {dest.name}
                         </div>
                       )}
                       {/* Overlay with text on mobile */}
-                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4 md:hidden">
+                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4 md:hidden z-10">
                         <div className="text-white font-semibold text-sm mb-1">
                           Starting from USD {dest.price}/GB
                         </div>
                         <div className="text-white font-medium text-base">{dest.name}</div>
                       </div>
                     </div>
-                    <div className="p-4 hidden md:block">
+                    <div className="p-4 hidden md:block flex-shrink-0">
                       <div className="text-telgo-red font-semibold mb-1">
                         Starting from USD {dest.price}/GB
                       </div>
@@ -854,7 +1108,7 @@ const Home = () => {
                       <div className="text-2xl">{result.flag}</div>
                       <div className="flex-1">
                         <div className="text-gray-900 font-medium">{result.name}</div>
-                        {result.price === 'N/A' || result.price === '0.00' ? (
+                        {result.status === 'Coming Soon' || result.price === 'N/A' || result.price === '0.00' ? (
                           <div className="text-sm text-orange-600 font-medium">Coming Soon</div>
                         ) : (
                           <div className="text-sm text-gray-500">From ${result.price}/GB</div>

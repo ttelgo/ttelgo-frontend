@@ -1,0 +1,13 @@
+========================================
+  TTelGo Web Development Server
+========================================
+
+Localhost URL: http://localhost:5173
+
+Quick Access:
+- Double-click "start-dev.bat" to start server and open browser
+- Or run "start-dev.ps1" in PowerShell
+- Or run "npm run dev" and manually open: http://localhost:5173
+
+========================================
+

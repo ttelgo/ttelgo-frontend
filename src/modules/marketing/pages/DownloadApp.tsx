@@ -46,7 +46,7 @@ const DownloadApp = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
-              className="flex-1 relative z-20 text-center"
+              className="flex-1 relative z-20 text-left"
             >
             {/* Subtitle */}
             <div className="mb-4">
@@ -61,8 +61,8 @@ const DownloadApp = () => {
             </h1>
             
             {/* Description */}
-            <p className="text-lg text-gray-700 mb-6 leading-relaxed font-medium">
-              Download the TTelGo app today from the Play Store or App Store for instant eSIM activation and seamless support – global connectivity is just a tap away.
+            <p className="text-lg text-gray-700 mb-6 leading-relaxed font-medium text-justify">
+              Experience seamless global connectivity at your fingertips. Download the TTelGo app from the Play Store or App Store to activate eSIMs instantly, manage your plans effortlessly, and stay connected worldwide with just one tap. Access real-time data usage, receive instant notifications, get 24/7 customer support, and enjoy exclusive app-only discounts. Whether you're traveling for business or leisure, TTelGo empowers you to stay connected in over 190+ countries without the hassle of physical SIM cards. Your journey to borderless connectivity starts here.
             </p>
             </motion.div>
             

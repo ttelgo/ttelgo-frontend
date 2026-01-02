@@ -7,8 +7,8 @@ const Logo = () => {
 
   if (imgError) {
     return (
-      <div className="w-20 h-20 bg-telgo-red rounded-lg flex items-center justify-center">
-        <span className="text-white font-bold text-2xl">T</span>
+      <div className="w-16 h-16 bg-telgo-red rounded-lg flex items-center justify-center">
+        <span className="text-white font-bold text-xl">T</span>
       </div>
     )
   }
@@ -17,7 +17,7 @@ const Logo = () => {
     <img 
       src="/IMAGES/LogoUpdated.png" 
       alt="TTelGo Logo" 
-      className="h-12 md:h-14 w-auto object-contain"
+      className="h-10 md:h-12 w-auto object-contain"
       onError={() => setImgError(true)}
     />
   )
@@ -47,7 +47,7 @@ const Navbar = () => {
       }}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div className="flex justify-between items-center h-16">
+        <div className="flex justify-between items-center h-14">
           {/* Logo */}
           <Link to="/" className="flex items-center">
             <Logo />
@@ -59,7 +59,7 @@ const Navbar = () => {
               <Link
                 key={link.path}
                 to={link.path}
-                className={`px-3 py-2 text-lg font-medium transition-colors relative z-10 ${
+                className={`px-3 py-1.5 text-sm font-medium transition-colors relative z-10 ${
                   isActive(link.path)
                     ? 'text-telgo-red border-b-2 border-telgo-red'
                     : 'text-gray-700 hover:text-telgo-red'
@@ -74,7 +74,7 @@ const Navbar = () => {
           <div className="hidden md:flex items-center space-x-4">
             <Link
               to="/shop"
-              className="flex items-center gap-2 px-4 py-2 text-lg font-medium text-white bg-telgo-red rounded-lg hover:bg-red-700 transition-colors"
+              className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-white bg-telgo-red rounded-lg hover:bg-red-700 transition-colors"
             >
               <img 
                 src="/IMAGES/CART.png" 
@@ -129,7 +129,7 @@ const Navbar = () => {
                   key={link.path}
                   to={link.path}
                   onClick={() => setIsOpen(false)}
-                  className={`block px-3 py-2 rounded-md text-base font-medium ${
+                  className={`block px-3 py-2 rounded-md text-sm font-medium ${
                     isActive(link.path)
                       ? 'text-telgo-red bg-red-50'
                       : 'text-gray-700 hover:bg-gray-50'
@@ -142,7 +142,7 @@ const Navbar = () => {
                 <Link
                   to="/shop"
                   onClick={() => setIsOpen(false)}
-                  className="flex items-center justify-center gap-2 px-3 py-2 rounded-md text-base font-medium text-white bg-telgo-red hover:bg-red-700"
+                  className="flex items-center justify-center gap-2 px-3 py-2 rounded-md text-sm font-medium text-white bg-telgo-red hover:bg-red-700"
                 >
                   <img 
                     src="/IMAGES/CART.png" 

@@ -276,8 +276,8 @@ const HelpCentre = () => {
               </h1>
               
               {/* Description */}
-              <p className="text-lg text-gray-700 mb-8 leading-relaxed font-medium">
-                Our support team is available 24/7 – and we&apos;re always happy to help you stay connected.
+              <p className="text-lg text-gray-700 mb-8 leading-relaxed font-medium text-justify">
+                Our dedicated support team is available 24/7 across all time zones to ensure you stay connected wherever you go. Whether you need help with eSIM activation, plan management, troubleshooting, or have questions about coverage, our expert support specialists are ready to assist you via live chat, email, or phone. We're committed to providing fast, friendly, and comprehensive solutions to keep your global connectivity seamless and stress-free. Your connection is our priority.
               </p>
             </motion.div>
             

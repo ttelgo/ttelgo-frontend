@@ -279,8 +279,8 @@ const MyeSIM = () => {
               </h1>
               
               {/* Tagline */}
-              <p className="text-lg text-gray-700 mb-8 leading-relaxed font-medium">
-                TTelGo (Your) eSIM: Travel smart, connect instantly – no physical SIM, no limits.
+              <p className="text-lg text-gray-700 mb-8 leading-relaxed font-medium text-justify">
+                TTelGo eSIM: Travel smart, connect instantly – no physical SIM, no limits. Manage all your eSIM profiles in one place, activate new plans on the go, monitor your data usage in real-time, and switch between countries effortlessly. Experience the freedom of digital connectivity with instant activation, secure QR codes, and seamless global coverage across 190+ countries. Your world, connected – anytime, anywhere.
               </p>
             </motion.div>
             

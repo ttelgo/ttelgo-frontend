@@ -82,8 +82,8 @@ const About = () => {
               </h1>
               
               {/* Description */}
-              <p className="text-lg text-gray-700 mb-8 leading-relaxed font-medium">
-                TTelGo powered by TikTel Ltd. UK - a telecom innovator driving digital transformation across global connectivity.
+              <p className="text-lg text-gray-700 mb-8 leading-relaxed font-medium text-justify">
+                TTelGo powered by TikTel Ltd. UK - a leading telecom innovator driving digital transformation across global connectivity. With a commitment to cutting-edge technology and customer-centric solutions, TikTel Ltd. has established itself as a trusted partner for seamless international communication. Our UK-based operations combine regulatory excellence with innovative eSIM technology, delivering reliable, secure, and instant connectivity solutions to travelers, businesses, and digital nomads worldwide. Experience the future of telecommunications, where borders disappear and connectivity knows no limits.
               </p>
             </motion.div>
             

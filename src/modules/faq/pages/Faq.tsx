@@ -52,7 +52,7 @@ const Faq = () => {
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-4">
               Frequently Asked Questions
             </h1>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto text-justify">
               Find answers to common questions about eSIM, TTelGo services, and more
             </p>
           </motion.div>

@@ -168,7 +168,7 @@ const Contact = () => {
               </h1>
               
               {/* Description */}
-              <p className="text-lg text-gray-700 mb-8 leading-relaxed font-medium">
+              <p className="text-lg text-gray-700 mb-8 leading-relaxed font-medium text-justify">
                 Have a question or need assistance? We're here to help! Reach out to our team and we'll get back to you as soon as possible.
               </p>
             </motion.div>
